@@ -301,16 +301,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','SF Pro Display'
   <div class="sheet">
     <div class="sheet-handle"></div>
     <div class="sheet-hdr"><span class="sheet-title">充值到公共账本</span><button class="btn btn-ghost btn-sm" onclick="closeTopupModal()">取消</button></div>
+    <div class="fg"><label class="fl">充值到账户</label><div id="topup-wallets" class="pills" style="flex-wrap:wrap;gap:7px"></div></div>
     <div class="fg"><label class="fl">充值人</label><div id="topup-members" class="pills" style="flex-wrap:wrap;gap:7px"></div></div>
-    <div class="fg"><label class="fl">币种</label>
-      <select class="fi fi-sel" id="topup-cur" onchange="updateTopupHint()">
-        <option value="CNY">CNY 人民币</option><option value="JPY">JPY 日元</option><option value="USD">USD 美元</option>
-        <option value="EUR">EUR 欧元</option><option value="HKD">HKD 港元</option><option value="TWD">TWD 台币</option>
-        <option value="KRW">KRW 韩元</option><option value="THB">THB 泰铢</option><option value="SGD">SGD 新加坡元</option>
-        <option value="GBP">GBP 英镑</option>
-      </select>
-    </div>
-    <div class="fg"><label class="fl" id="topup-amt-lbl">金额（CNY）</label><input class="fi" id="topup-amount" type="number" inputmode="decimal" placeholder="0.00" oninput="updateTopupHint()"/><div id="topup-hint" style="font-size:12px;color:var(--text3);margin-top:4px"></div></div>
+    <div class="fg"><label class="fl" id="topup-amt-lbl">金额</label><input class="fi" id="topup-amount" type="number" inputmode="decimal" placeholder="0.00" oninput="updateTopupHint()"/><div id="topup-hint" style="font-size:12px;color:var(--text3);margin-top:4px"></div></div>
     <div class="fg"><label class="fl">日期</label><input class="fi" id="topup-date" type="date"/></div>
     <div class="fg"><label class="fl">备注（选填）</label><input class="fi" id="topup-notes" placeholder="如：旅行启动资金"/></div>
     <div style="padding:0 16px 16px;display:flex;gap:10px"><button class="btn btn-ghost btn-block" onclick="closeTopupModal()">取消</button><button class="btn btn-primary btn-block" onclick="saveTopup()">确认充值</button></div>
@@ -1284,92 +1277,107 @@ function renderMyAssets(me){
   el('asset-list').innerHTML='<div class="sec">账户（点击查看明细）</div>'+ws.map(w=>walletCard(w,spentByCNY,me.id)).join('');
 }
 function renderSharedAssets(me){
-  // 公共账户 = is_shared===true 或 member_id===null 的 wallet
-  const sharedWallets=D.wallets.filter(w=>w.is_shared||(!w.member_id&&!w.is_shared===false));
-  // 计算公共账户余额（充值 - 消费）
-  const sharedSpent=computeSharedWalletSpent();
-  // 各成员充值合计
-  const topups=D.transfers||[];
-  const topupByMem={};
-  topups.filter(t=>t.transfer_type==='topup').forEach(t=>{
-    topupByMem[t.from_member_id]=(topupByMem[t.from_member_id]||0)+parseFloat(t.amount||0);
-  });
-  // 总余额
-  let totalTopup=Object.values(topupByMem).reduce((a,b)=>a+b,0);
-  let totalSpent=sharedWallets.reduce((s,w)=>{
-    const code=w.currency_code||'CNY';
-    const sp=sharedSpent[w.id]||0;
-    return s+sp;
-  },0);
-  const totalBal=totalTopup-totalSpent;
-  // 汇总卡
-  // 按币种分组充值
-  const topupByCur={};
-  topups.filter(t=>t.transfer_type==='topup').forEach(t=>{
-    const c=t.currency_code||'CNY';
-    topupByCur[c]=(topupByCur[c]||0)+parseFloat(t.amount||0);
-  });
-  const curSummaryRows=Object.entries(topupByCur).map(([c,a])=>{
-    const r=getRate(null,c)||1;
-    const spentInCur=Object.entries(sharedSpent).reduce((s,[wid,cny])=>{
-      const w=sharedWallets.find(x=>x.id===wid);
-      if(w&&(w.currency_code||'CNY')===c)s+=cny/(getRate(null,c)||1);
-      return s;
-    },0);
-    const bal=a-spentInCur;
-    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
-      <div style="font-size:13px;font-weight:600">${c}</div>
-      <div style="display:flex;gap:16px;font-size:12px">
-        <span style="color:var(--blue)">充 ${c==='CNY'?fmt(a):fmtFx(a,c)}</span>
-        <span style="color:var(--red)">消费 ${c==='CNY'?fmt(sharedSpent[''+(sharedWallets.find(w=>(w.currency_code||'CNY')===c)?.id)]||0):fmtFx(spentInCur,c)}</span>
-        <span style="font-weight:700;color:${bal>=0?'var(--green)':'var(--red)'}">余 ${c==='CNY'?fmt(bal):fmtFx(bal,c)}</span>
-      </div>
+  const sharedWallets=D.wallets.filter(w=>w.is_shared||(!w.member_id&&!!w.id));
+  const balMap=computeSharedWalletBal();
+  const topups=(D.transfers||[]).filter(t=>t.transfer_type==='topup');
+  if(!sharedWallets.length){
+    el('asset-summary').innerHTML='';
+    el('asset-list').innerHTML=`<div style="text-align:center;padding:40px 24px">
+      <div style="font-size:40px;margin-bottom:12px">💰</div>
+      <div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px">还没有公共账户</div>
+      <div style="font-size:13px;color:var(--text3);margin-bottom:18px">创建公共账户，大家一起充值，消费从里面扣</div>
+      <button class="btn btn-primary" onclick="openAddWallet(true)">＋ 创建公共账户</button>
     </div>`;
-  }).join('');
-  el('asset-summary').innerHTML=`<div class="card" style="margin:10px 18px">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-      <div style="font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.5px">公共账本余额</div>
-      <button class="btn btn-ghost btn-sm" style="border:1px solid rgba(0,122,255,.25)" onclick="openAddWallet(true)">＋ 建账户</button>
-    </div>
-    ${Object.keys(topupByCur).length?curSummaryRows:'<div style="font-size:13px;color:var(--text3);text-align:center;padding:12px 0">暂无充值记录</div>'}
-    <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:flex;gap:8px">
-      <div style="flex:1;background:#F2F2F7;border-radius:10px;padding:10px;text-align:center"><div style="font-size:11px;color:var(--text3)">总充值(CNY)</div><div style="font-size:15px;font-weight:700;color:var(--blue);margin-top:3px">${fmt(totalTopup)}</div></div>
-      <div style="flex:1;background:#F2F2F7;border-radius:10px;padding:10px;text-align:center"><div style="font-size:11px;color:var(--text3)">总消费(CNY)</div><div style="font-size:15px;font-weight:700;color:var(--red);margin-top:3px">${fmt(totalSpent)}</div></div>
-    </div>
+    return;
+  }
+  // 顶部简洁按钮
+  el('asset-summary').innerHTML=`<div style="display:flex;justify-content:flex-end;padding:8px 18px 2px">
+    <button class="btn btn-ghost btn-sm" style="border:1px solid rgba(0,122,255,.25)" onclick="openAddWallet(true)">＋ 新建账户</button>
   </div>`;
-  // 成员充值明细（按原币显示）
-  const topupDetailByMem={};
-  topups.filter(t=>t.transfer_type==='topup').forEach(t=>{
-    const mid=t.from_member_id;const c=t.currency_code||'CNY';const a=parseFloat(t.amount||0);
-    if(!topupDetailByMem[mid])topupDetailByMem[mid]={};
-    topupDetailByMem[mid][c]=(topupDetailByMem[mid][c]||0)+a;
+  // 每个公共账户独立卡片 + 充值明细
+  let html='';
+  sharedWallets.forEach(w=>{
+    const b=balMap[w.id]||{topupFx:0,initFx:0,spentFx:0,balFx:0,code:w.currency_code||'CNY',r:1};
+    const code=b.code;const r=b.r;
+    const fmtW=v=>code==='CNY'?fmt(v):fmtFx(v,code);
+    const balCol=b.balFx>=0?'var(--green)':'var(--red)';
+    const pct=b.topupFx+b.initFx>0?Math.min(100,b.spentFx/(b.topupFx+b.initFx)*100):0;
+    const pc=pct>90?'var(--red)':pct>65?'var(--orange)':'var(--green)';
+    // 此账户的充值明细
+    const wTopups=topups.filter(t=>t.to_wallet_id===w.id);
+    const wTopupByMem={};
+    wTopups.forEach(t=>{
+      const mid=t.from_member_id;const a=parseFloat(t.amount||0);
+      wTopupByMem[mid]=(wTopupByMem[mid]||0)+a;
+    });
+    const memTopupRows=D.members.filter(m=>wTopupByMem[m.id]>0).map(m=>{
+      const a=wTopupByMem[m.id];
+      return `<div style="display:flex;align-items:center;gap:8px;padding:5px 0">${memAv(m,'xs')}<span style="flex:1;font-size:13px">${m.name}</span><span style="font-size:13px;font-weight:600;color:var(--blue)">${fmtW(a)}</span></div>`;
+    }).join('');
+    html+=`<div class="card" style="margin:10px 18px">
+      <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:10px">
+        <span style="font-size:32px">${w.icon||'💳'}</span>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:15px;font-weight:700">${w.name}</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:1px">${code !== 'CNY'?code+' · ':''}<span style="color:var(--text3)">公共账户</span></div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-ghost btn-sm" style="padding:5px 10px;font-size:12px;border:1px solid rgba(0,122,255,.25)" onclick="openEditWallet('${w.id}')">编辑</button>
+            <button class="btn btn-ghost btn-sm" style="padding:5px 10px;font-size:12px;color:var(--text3);border:1px solid rgba(60,60,67,.15)" onclick="openWdet('${w.id}')">消费明细</button>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:10px;color:var(--text3)">余额</div>
+            <div style="font-size:24px;font-weight:800;color:${balCol}">${fmtW(b.balFx)}</div>
+            ${code!=='CNY'?`<div style="font-size:11px;color:var(--text3)">≈ ${fmt(b.balFx*r)}</div>`:''}
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-bottom:10px">
+        <div style="flex:1;background:#F2F2F7;border-radius:9px;padding:8px;text-align:center">
+          <div style="font-size:10px;color:var(--text3)">充值</div>
+          <div style="font-size:14px;font-weight:700;color:var(--blue)">${fmtW(b.topupFx+b.initFx)}</div>
+        </div>
+        <div style="flex:1;background:#F2F2F7;border-radius:9px;padding:8px;text-align:center">
+          <div style="font-size:10px;color:var(--text3)">已消费</div>
+          <div style="font-size:14px;font-weight:700;color:var(--red)">${fmtW(b.spentFx)}</div>
+        </div>
+      </div>
+      <div class="prog-w" style="margin-bottom:${memTopupRows?10:0}px"><div class="prog-b" style="width:${pct}%;background:${pc}"></div></div>
+      ${memTopupRows?`<div style="border-top:1px solid var(--border);padding-top:8px"><div style="font-size:11px;color:var(--text3);font-weight:600;margin-bottom:2px">成员充值明细</div>${memTopupRows}</div>`:''}
+    </div>`;
   });
-  const memRows=D.members.map(m=>{
-    const detail=topupDetailByMem[m.id]||{};
-    const lines=Object.entries(detail).map(([c,a])=>c==='CNY'?fmt(a):fmtFx(a,c));
-    const amtStr=lines.length?lines.join(' + '):'未充值';
-    const av=m.icon?`<span style="font-size:20px">${m.icon}</span>`:`<div class="av av-sm" style="background:${m.color}">${m.name[0]}</div>`;
-    return `<div class="row"><div style="width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">${av}</div><div style="flex:1;font-size:15px;font-weight:500">${m.name}${me&&m.id===me.id?' (我)':''}</div><div style="font-size:14px;font-weight:700;color:${lines.length?'var(--blue)':'var(--text3)'}">${amtStr}</div></div>`;
-  }).join('');
-  // 公共账户卡片
-  const walletRows=sharedWallets.length?
-    '<div class="sec">公共账户</div>'+sharedWallets.map(w=>{
-      const sp=sharedSpent[w.id]||0;
-      const init=parseFloat(w.initial_amount||0);
-      return walletCard(w,sharedSpent,null);
-    }).join(''):
-    '<div style="padding:12px 22px;font-size:13px;color:var(--text3)">还没有公共账户，点「建账户」创建</div>';
-  el('asset-list').innerHTML=`<div class="sec">成员充值</div><div class="card-list" style="margin:0 18px 10px">${memRows}</div>${walletRows}`;
+  el('asset-list').innerHTML=html;
 }
 function computeSharedWalletSpent(){
   const spent={};
   D.expenses.forEach(e=>{
     if(e.wallet_id){
       const w=D.wallets.find(x=>x.id===e.wallet_id);
-      if(w&&(w.is_shared||!w.member_id))spent[e.wallet_id]=(spent[e.wallet_id]||0)+toCNY(e);
+      if(w&&(w.is_shared||(!w.member_id&&!!w.id)))spent[e.wallet_id]=(spent[e.wallet_id]||0)+toCNY(e);
     }
   });
   return spent;
+}
+// 计算公共账户余额（充值-消费，按原币）
+function computeSharedWalletBal(){
+  const balMap={};// wid -> {topup, spent, code}
+  const sharedWs=D.wallets.filter(w=>w.is_shared||(!w.member_id&&!!w.id));
+  sharedWs.forEach(w=>{
+    const code=w.currency_code||'CNY';
+    const r=getRate(null,code)||1;
+    // 充值：topup transfers 指向此账户
+    const topupFx=(D.transfers||[]).filter(t=>t.transfer_type==='topup'&&t.to_wallet_id===w.id)
+      .reduce((s,t)=>s+parseFloat(t.amount||0),0);
+    // 初始金额也算
+    const initFx=parseFloat(w.initial_amount||0);
+    // 消费（转为原币）
+    const spentCNY=D.expenses.filter(e=>e.wallet_id===w.id).reduce((s,e)=>s+toCNY(e),0);
+    const spentFx=code==='CNY'?spentCNY:spentCNY/r;
+    const balFx=initFx+topupFx-spentFx;
+    balMap[w.id]={topupFx,initFx,spentFx,balFx,code,r};
+  });
+  return balMap;
 }
 function computeWalletSpent(mid){
   const spent={};
@@ -1411,12 +1419,15 @@ function openWdet(wid){
   wdetId=wid;const w=D.wallets.find(x=>x.id===wid);if(!w)return;
   const mem=D.members.find(m=>m.id===w.member_id);const code=w.currency_code||'CNY';const r=getRate(mem?.id,code)||1;
   el('wdet-title').textContent=`${w.icon} ${w.name}`;
-  const spentByCNY=computeWalletSpent(mem?.id);
+  const isShared=w.is_shared||(!w.member_id&&!!w.id);
+  const spentByCNY=isShared?computeSharedWalletSpent():computeWalletSpent(mem?.id);
   const wExps=D.expenses.filter(e=>e.wallet_id===wid);
-  const wTrs=(D.transfers||[]).filter(t=>t.from_wallet_id===wid||t.to_wallet_id===wid);
+  const wTrs=(D.transfers||[]).filter(t=>(t.from_wallet_id===wid||t.to_wallet_id===wid)||t.to_wallet_id===wid);
   const init=parseFloat(w.initial_amount||0);
   const spCNY=spentByCNY[wid]||0;const spFx=code==='CNY'?spCNY:spCNY/r;
-  const balFx=init-spFx;const balCNY=balFx*r;
+  // 公共账户：余额 = 初始 + 充值 - 消费
+  const topupInFx=isShared?(D.transfers||[]).filter(t=>t.transfer_type==='topup'&&t.to_wallet_id===wid).reduce((s,t)=>s+parseFloat(t.amount||0),0):0;
+  const balFx=init+topupInFx-spFx;const balCNY=balFx*r;
   const f=v=>code!=='CNY'?fmtFx(v,code):fmt(v);
   el('wdet-body').innerHTML=`
     <div style="padding:0 16px 4px">
@@ -1431,7 +1442,8 @@ function openWdet(wid){
       const orig=e.currency_code&&e.currency_code!=='CNY';
       return `<div class="row row-tap" onclick="closeWdet();setTimeout(()=>openExpDet('${e.id}'),150)"><span style="font-size:20px">${cat?cat.icon:'💰'}</span><div style="flex:1"><div style="font-size:14px;font-weight:500">${e.title}</div><div style="font-size:11px;color:var(--text3)">${fmtDate(e.expense_date)}</div></div><div style="text-align:right"><div style="font-weight:600;color:var(--red)">-${f(fx)}</div>${orig&&e.currency_code!==code?`<div style="font-size:11px;color:var(--text3)">${fmtFx(e.amount,e.currency_code)}</div>`:''}</div></div>`;
     }).join(''):'<div class="empty" style="padding:20px">无消费记录</div>'}</div>
-    ${wTrs.length?`<div class="sec">转账记录</div><div class="card-list">${wTrs.map(t=>{const out=t.from_wallet_id===wid;const ow=D.wallets.find(x=>x.id===(out?t.to_wallet_id:t.from_wallet_id));const cny=trToCNY(t);const fx=code==='CNY'?cny:cny/r;return `<div class="row"><div class="av av-xs" style="background:${out?'var(--red)':'var(--green)'}">${out?'↑':'↓'}</div><div style="flex:1"><div style="font-size:14px">${out?'转出→':'←转入'}${ow?ow.name:'其他'}</div><div style="font-size:11px;color:var(--text3)">${fmtDate(t.transfer_date)}</div></div><div style="font-weight:600;color:${out?'var(--red)':'var(--green)'};">${out?'-':'+'}${f(fx)}</div></div>`;}).join('')}</div>`:''}
+    ${isShared?(()=>{const tps=(D.transfers||[]).filter(t=>t.transfer_type==='topup'&&t.to_wallet_id===wid);return tps.length?`<div class="sec">充值记录</div><div class="card-list">${tps.map(t=>{const m=D.members.find(x=>x.id===t.from_member_id);const a=parseFloat(t.amount||0);return `<div class="row">${memAv(m,'xs')}<div style="flex:1"><div style="font-size:14px;font-weight:500">${m?.name||'?'} 充值</div><div style="font-size:11px;color:var(--text3)">${fmtDate(t.transfer_date)}${t.notes&&t.notes!=='充值'?' · '+t.notes:''}</div></div><div style="font-weight:600;color:var(--blue)">+${f(a)}</div></div>`;}).join('')}</div>`:''})():''}
+  ${wTrs.filter(t=>t.transfer_type!=='topup').length?`<div class="sec">转账记录</div><div class="card-list">${wTrs.filter(t=>t.transfer_type!=='topup').map(t=>{const out=t.from_wallet_id===wid;const ow=D.wallets.find(x=>x.id===(out?t.to_wallet_id:t.from_wallet_id));const cny=trToCNY(t);const fx=code==='CNY'?cny:cny/r;return `<div class="row"><div class="av av-xs" style="background:${out?'var(--red)':'var(--green)'}">${out?'↑':'↓'}</div><div style="flex:1"><div style="font-size:14px">${out?'转出→':'←转入'}${ow?ow.name:'其他'}</div><div style="font-size:11px;color:var(--text3)">${fmtDate(t.transfer_date)}</div></div><div style="font-weight:600;color:${out?'var(--red)':'var(--green)'};">${out?'-':'+'}${f(fx)}</div></div>`;}).join('')}</div>`:''}
     <div style="height:8px"></div>`;
   el('wdet-modal').classList.remove('hidden');
 }
@@ -1495,25 +1507,35 @@ async function saveWallet(){
 // ══════════════════════════════════
 // SHARED TOPUP
 // ══════════════════════════════════
-let _topupMem=null;
+let _topupMem=null,_topupWallet=null;
 function openTopupModal(){
   _topupMem=getMe()?.id||null;
+  _topupWallet=null;
   el('topup-date').value=today();
   el('topup-amount').value='';
   el('topup-notes').value='';
-  el('topup-cur').value='CNY';
   updateTopupHint();
+  renderTopupWallets();
   renderTopupMembers();
   el('topup-modal').classList.remove('hidden');
 }
 function closeTopupModal(){el('topup-modal').classList.add('hidden');}
+function renderTopupWallets(){
+  const sw=D.wallets.filter(w=>w.is_shared||(!w.member_id&&!!w.id));
+  if(!_topupWallet&&sw.length)_topupWallet=sw[0].id;
+  el('topup-wallets').innerHTML=sw.length
+    ?sw.map(w=>`<div class="pill ${_topupWallet===w.id?'sel':''}" onclick="_topupWallet='${w.id}';updateTopupHint();renderTopupWallets()">${w.icon||'💳'} ${w.name} (${w.currency_code||'CNY'})</div>`).join('')
+    :'<div style="font-size:12px;color:var(--text3);padding:4px 0">请先建公共账户</div>';
+  updateTopupHint();
+}
 function renderTopupMembers(){
   el('topup-members').innerHTML=D.members.map(m=>
     `<div class="pill ${_topupMem===m.id?'sel':''}" onclick="_topupMem='${m.id}';renderTopupMembers()">${m.icon||''}${m.name}</div>`
   ).join('');
 }
 function updateTopupHint(){
-  const code=el('topup-cur').value;
+  const w=D.wallets.find(x=>x.id===_topupWallet);
+  const code=w?.currency_code||'CNY';
   el('topup-amt-lbl').textContent=`金额（${code}）`;
   if(code==='CNY'){el('topup-hint').textContent='';return;}
   const r=getRate(_topupMem,code)||1;
@@ -1521,16 +1543,19 @@ function updateTopupHint(){
   el('topup-hint').textContent=amt>0?`≈ ${fmt(amt*r)} 人民币`:`1 ${code} ≈ ${r} CNY`;
 }
 async function saveTopup(){
+  if(!_topupWallet){toast('请选择充值账户');return;}
   if(!_topupMem){toast('请选择充值人');return;}
   const amt=parseFloat(el('topup-amount').value);
   if(!amt||amt<=0){toast('请输入充值金额');return;}
-  const code=el('topup-cur').value;
+  const w=D.wallets.find(x=>x.id===_topupWallet);
+  const code=w?.currency_code||'CNY';
   const r=getRate(_topupMem,code)||1;
   const amtCNY=code==='CNY'?amt:amt*r;
-  const notes=el('topup-notes').value.trim()||'公共账本充值';
+  const notes=el('topup-notes').value.trim()||'充值';
   const {error}=await db.from('transfers').insert({
     trip_id:D.trip.id,transfer_type:'topup',
     from_member_id:_topupMem,to_member_id:null,
+    to_wallet_id:_topupWallet,
     amount:amt,currency_code:code,
     transfer_date:el('topup-date').value,notes
   });

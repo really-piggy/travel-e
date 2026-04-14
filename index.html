@@ -652,6 +652,8 @@ const SYM={CNY:'¥',JPY:'¥',USD:'$',EUR:'€',HKD:'HK$',TWD:'NT$',KRW:'₩',THB
 // STATE
 // ══════════════════════════════════
 let D={trips:[],trip:null,members:[],currencies:[],categories:[],expenses:[],splits:[],wallets:[],transfers:[]};
+let _saving=false;
+function withSave(fn){return async function(...args){if(_saving)return;_saving=true;try{await fn(...args);}finally{_saving=false;}};}
 let expFilter='paid';
 let todayOnly=false;
 let editId=null;
@@ -944,9 +946,10 @@ function openActOrDet(id){actId=id;const e=D.expenses.find(x=>x.id===id);el('act
 function closeAct(){el('act-modal').classList.add('hidden');}
 function editExp(){closeAct();openExp(actId);}
 async function delExp(){
-  closeAct();if(!confirm('确定删除？'))return;
-  await db.from('expense_splits').delete().eq('expense_id',actId);
-  await db.from('expenses').delete().eq('id',actId);
+  if(!confirm('确定删除此账单？'))return;
+  const id=actId;closeAct();
+  await db.from('expense_splits').delete().eq('expense_id',id);
+  await db.from('expenses').delete().eq('id',id);
   await loadAll();renderAll();toast('已删除');
 }
 function openExpDet(id){
@@ -1079,7 +1082,7 @@ function onCur(){
     else el('et-rate-hint').textContent='';
   }
 }
-async function saveInlineRate(){
+async function saveInlineRate(){if(_saving)return;_saving=true;setTimeout(()=>{_saving=false;},2500);
   const code=el('et-cur').value;const rate=parseFloat(el('et-rate-val').value);
   if(!rate||rate<=0){toast('请输入正确汇率');return;}
   const names={JPY:'日元',USD:'美元',EUR:'欧元',HKD:'港元',TWD:'台币',KRW:'韩元',THB:'泰铢',SGD:'新加坡元',GBP:'英镑'};
@@ -1115,7 +1118,7 @@ function renderSplitRows(){
   el('sm-cus-rows').innerHTML=D.members.map(m=>`<div style="display:flex;align-items:center;gap:10px;padding:5px 16px 5px"><div class="av av-xs" style="background:${m.color}">${m.name[0]}</div><span style="flex:1;font-size:14px;font-weight:500">${m.name}</span><input style="width:86px;padding:8px 10px;border:1.5px solid var(--border);border-radius:9px;font-size:15px;text-align:right;background:#fff" type="number" inputmode="decimal" id="sc-${m.id}" value="${defVal}"/><span style="font-size:13px;color:var(--text3);min-width:16px">${label}</span></div>`).join('');
 }
 function togglePersonalSplit(){eForm.personalSplit=!eForm.personalSplit;el('et-split-tog').classList.toggle('on',eForm.personalSplit);}
-async function saveExp(){
+async function saveExp(){if(_saving)return;_saving=true;setTimeout(()=>{_saving=false;},2500);
   const title=el('et-title').value.trim();if(!title){toast('请填写标题');return;}
   const amount=parseFloat(el('et-amt').value);if(!amount||amount<=0){toast('请填写金额');return;}
   if(!eForm.payer){toast('请选择付款人');return;}
@@ -1532,7 +1535,7 @@ async function delWalletFromEdit(){
   await db.from('wallets').delete().eq('id',_editWalletId);
   closeWalletModal();await loadAll();renderAssets();toast('已删除');
 }
-async function saveWallet(){
+async function saveWallet(){if(_saving)return;_saving=true;setTimeout(()=>{_saving=false;},2500);
   const name=el('wm-name').value.trim();if(!name){toast('请填写名称');return;}
   const me=getMe();if(!me){toast('请先设置本人');return;}
   const code=el('wm-cur').value;const init=parseFloat(el('wm-init').value)||0;
@@ -1591,7 +1594,7 @@ function updateTopupHint(){
   const amt=parseFloat(el('topup-amount').value)||0;
   el('topup-hint').textContent=amt>0?`≈ ${fmt(amt*r)} 人民币（公共汇率 ${r}）`:`1 ${code} ≈ ${r} CNY`;
 }
-async function saveTopup(){
+async function saveTopup(){if(_saving)return;_saving=true;setTimeout(()=>{_saving=false;},2500);
   if(!_topupWallet){toast('请选择充值账户');return;}
   if(!_topupMem){toast('请选择充值人');return;}
   const amt=parseFloat(el('topup-amount').value);
@@ -1775,7 +1778,7 @@ function renderTrWMem(){
 function renderTrWFrom(){const ws=D.wallets.filter(w=>w.member_id===trWMem);el('tr-wfrom').innerHTML=ws.map(w=>`<div class="pill ${trWFrom===w.id?'sel':''}" onclick="trWFrom='${w.id}';renderTrWFrom()">${w.icon} ${w.name}</div>`).join('')||'<span style="font-size:13px;color:var(--text3)">无账户</span>';}
 function renderTrWTo(){const ws=D.wallets.filter(w=>w.member_id===trWMem);el('tr-wto').innerHTML=ws.map(w=>`<div class="pill ${trWTo===w.id?'sel':''}" onclick="trWTo='${w.id}';renderTrWTo()">${w.icon} ${w.name}</div>`).join('')||'<span style="font-size:13px;color:var(--text3)">无账户</span>';}
 function updateTrHint(){const amt=parseFloat(el('tr-amt').value)||0;const code=el('tr-cur').value;if(code==='CNY'||!amt){el('tr-hint').textContent='';return;}const r=getRate(trFrom||trWMem,code)||1;el('tr-hint').textContent=`≈ ${fmt(amt*r)} 人民币`;}
-async function saveTr(){
+async function saveTr(){if(_saving)return;_saving=true;setTimeout(()=>{_saving=false;},2500);
   const amount=parseFloat(el('tr-amt').value);if(!amount||amount<=0){toast('请填写金额');return;}
   const code=el('tr-cur').value;const r=getRate(trFrom||trWMem,code)||1;const cny=code==='CNY'?amount:amount*r;
   const row={trip_id:D.trip.id,transfer_type:trType,from_member_id:trType==='person'?trFrom:null,to_member_id:trType==='person'?trTo:null,from_wallet_id:trType==='person'?trFromWallet:(trType==='wallet'?trWFrom:null),to_wallet_id:trType==='person'?trToWallet:(trType==='wallet'?trWTo:null),wallet_member_id:trType==='wallet'?trWMem:null,amount:cny,currency_code:'CNY',transfer_date:el('tr-date').value,notes:el('tr-notes').value.trim()||null};
@@ -1787,7 +1790,11 @@ async function saveTr(){
   try{const {error}=await db.from('transfers').insert(row);if(error)throw error;closeTr();await loadAll();renderSettle();renderAssets();toast('已记录 ✓');}
   catch(err){toast('保存失败：'+err.message);}
 }
-async function delTr(id){if(!confirm('确定删除？'))return;await db.from('transfers').delete().eq('id',id);await loadAll();renderSettle();renderAssets();toast('已删除');}
+async function delTr(id){
+  if(!confirm('确定删除？'))return;
+  await db.from('transfers').delete().eq('id',id);
+  await loadAll();renderSettle();renderAssets();renderBills();toast('已删除');
+}
 
 // ══════════════════════════════════
 // SETTINGS
@@ -1818,7 +1825,7 @@ function renderMemList(){
     return `<div class="row"><div style="width:40px;height:40px;border-radius:50%;background:${m.icon?'transparent':m.color};display:flex;align-items:center;justify-content:center;flex-shrink:0">${av}</div><div style="flex:1;font-size:15px;font-weight:500;margin-left:4px">${m.name}</div><button class="btn btn-ghost btn-sm" style="color:var(--blue)" onclick="openMemEdit('${m.id}')">编辑</button><button class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="delMember('${m.id}')">删除</button></div>`;
   }).join('')||'<div style="padding:16px;text-align:center;color:var(--text3);font-size:14px">还没有成员</div>';
 }
-async function addMember(){
+async function addMember(){if(_saving)return;_saving=true;setTimeout(()=>{_saving=false;},2500);
   const name=el('nm-name').value.trim();if(!name){toast('请填写名字');return;}
   const col=COLORS[D.members.length%COLORS.length];
   const {data:nm}=await db.from('members').insert({trip_id:D.trip.id,name,color:col}).select().single();
@@ -1869,7 +1876,7 @@ function updateMemEditAv(){
   if(_editMemIcon){avEl.style.background='#F3F4F6';avEl.textContent=_editMemIcon;}
   else{avEl.style.background=_editMemColor||'var(--blue)';avEl.textContent=el('mem-edit-name').value?.[0]||'?';}
 }
-async function saveMemEdit(){
+async function saveMemEdit(){if(_saving)return;_saving=true;setTimeout(()=>{_saving=false;},2500);
   const name=el('mem-edit-name').value.trim();if(!name){toast('请填写名字');return;}
   if(!_editMemId){toast('出错了，请重新打开编辑');return;}
   // Step 1: 先保存 name + color（不带 icon，100% 成功）
@@ -1910,7 +1917,7 @@ function renderRatesList(){
 function openRateModal(){el('rm-code').value='JPY';el('rm-rate').value='';updateRateLbl();el('rate-modal').classList.remove('hidden');}
 function closeRateModal(){el('rate-modal').classList.add('hidden');}
 function updateRateLbl(){el('rm-lbl').textContent=`1 ${el('rm-code').value} = ? CNY`;}
-async function saveRate(){
+async function saveRate(){if(_saving)return;_saving=true;setTimeout(()=>{_saving=false;},2500);
   const code=el('rm-code').value;const rate=parseFloat(el('rm-rate').value);if(!rate||rate<=0){toast('请填写正确汇率');return;}
   const names={JPY:'日元',USD:'美元',EUR:'欧元',HKD:'港元',TWD:'台币',KRW:'韩元',THB:'泰铢',SGD:'新加坡元',GBP:'英镑'};
   const ex=D.currencies.find(c=>(rateMem===null?!c.member_id:c.member_id===rateMem)&&c.currency_code===code);

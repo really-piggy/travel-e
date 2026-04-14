@@ -60,24 +60,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Helvetica Neue'
 .av-lg{width:44px;height:44px;font-size:18px}.av-md{width:36px;height:36px;font-size:15px}
 .av-sm{width:28px;height:28px;font-size:12px}.av-xs{width:22px;height:22px;font-size:10px}
 .sec-title{font-size:13px;font-weight:600;color:var(--gray);padding:12px 16px 5px;letter-spacing:.3px;text-transform:uppercase}
-.sum-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px 4px}
-.sum-card{background:var(--card);border-radius:12px;padding:14px}
-.sum-lbl{font-size:11px;color:var(--gray);margin-bottom:3px;font-weight:500}
-.sum-val{font-size:22px;font-weight:700;letter-spacing:-.5px}
-.sum-sub{font-size:11px;color:var(--gray);margin-top:2px}
-.exp-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
-.exp-info{flex:1;min-width:0}
-.exp-title{font-size:15px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.exp-meta{font-size:11px;color:var(--gray);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.exp-amt{text-align:right;flex-shrink:0}
-.exp-amt-main{font-size:16px;font-weight:600}
-.exp-amt-sub{font-size:10px;color:var(--gray);margin-top:1px}
-.badge{display:inline-block;padding:2px 6px;border-radius:8px;font-size:10px;font-weight:600;margin-left:4px}
-.bg-shared{background:#EBF4FF;color:var(--blue)}.bg-personal{background:#F0FFF4;color:var(--green)}.bg-split{background:#FFF8E1;color:var(--orange)}
-.date-hdr{font-size:13px;font-weight:600;color:var(--gray);padding:10px 16px 4px;display:flex;justify-content:space-between}
-.prog-wrap{height:4px;background:var(--border);border-radius:2px;margin-top:5px;overflow:hidden}
-.prog-bar{height:100%;border-radius:2px;transition:width .3s}
-.stats-tab-bar{display:flex;overflow-x:auto;gap:0;padding:0;margin:8px 16px;background:var(--card);border-radius:10px;scrollbar-width:none}
+.stats-tab-bar{display:flex;overflow-x:auto;gap:0;margin:8px 16px;background:var(--card);border-radius:10px;scrollbar-width:none}
 .stats-tab-bar::-webkit-scrollbar{display:none}
 .stats-tab{flex:1;padding:9px 4px;text-align:center;font-size:12px;font-weight:500;color:var(--gray);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;min-width:70px}
 .stats-tab.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:600}
@@ -85,7 +68,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Helvetica Neue'
 .wallet-card:active{opacity:.85}
 .empty{text-align:center;padding:40px 20px;color:var(--gray)}
 .empty-icon{font-size:44px;margin-bottom:10px}
-#toast{position:fixed;top:calc(16px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);background:rgba(28,28,30,.85);color:#fff;padding:9px 18px;border-radius:20px;font-size:14px;z-index:500;white-space:nowrap;display:none;backdrop-filter:blur(10px)}
+#toast{position:fixed;top:calc(16px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);background:rgba(28,28,30,.88);color:#fff;padding:9px 18px;border-radius:20px;font-size:14px;z-index:500;white-space:nowrap;display:none;backdrop-filter:blur(10px)}
 #loading{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:600;flex-direction:column;gap:10px}
 .spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -93,6 +76,29 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Helvetica Neue'
 .back-page{display:none}.back-page.active{display:block}
 .text-red{color:var(--red)}.text-blue{color:var(--blue)}.text-green{color:var(--green)}.text-gray{color:var(--gray)}.text-orange{color:var(--orange)}
 .me-badge{background:#EBF4FF;color:var(--blue);font-size:10px;padding:1px 6px;border-radius:8px;font-weight:600;margin-left:4px}
+.prog-wrap{height:4px;background:var(--border);border-radius:2px;margin-top:5px;overflow:hidden}
+.prog-bar{height:100%;border-radius:2px;transition:width .3s}
+.date-hdr{font-size:13px;font-weight:600;color:var(--gray);padding:10px 16px 4px;display:flex;justify-content:space-between}
+.exp-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+/* Onboarding banner */
+.onboard-banner{background:linear-gradient(135deg,#007AFF,#5AC8FA);color:#fff;margin:8px 16px;border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer}
+.onboard-banner:active{opacity:.85}
+/* Split preview strip */
+.split-preview{background:#F0F7FF;border-radius:10px;padding:10px 12px;margin-top:8px;font-size:13px;color:#1C1C1E;line-height:1.6}
+/* Inline rate setup */
+.rate-inline-card{background:#FFF8E1;border:1px solid var(--orange);border-radius:10px;padding:12px;margin-top:6px}
+/* Today-first toggle */
+.view-toggle{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--gray)}
+/* Stats summary bar */
+.stats-highlight{display:flex;gap:10px;padding:0 16px 8px;overflow-x:auto;scrollbar-width:none}
+.stats-highlight::-webkit-scrollbar{display:none}
+.sh-card{background:var(--card);border-radius:12px;padding:12px 14px;flex-shrink:0;min-width:120px}
+.sh-label{font-size:11px;color:var(--gray);margin-bottom:3px}
+.sh-val{font-size:18px;font-weight:700}
+.sh-sub{font-size:11px;color:var(--gray);margin-top:2px}
+/* Quick settle button */
+.settle-quick-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;font-size:12px;font-weight:600;border:1.5px solid var(--green);color:var(--green);background:#F0FFF4;cursor:pointer;margin-left:8px}
+.settle-quick-btn:active{opacity:.7}
 </style>
 </head>
 <body>
@@ -107,6 +113,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Helvetica Neue'
     <p style="color:var(--gray);font-size:15px">先创建你的第一个行程</p>
   </div>
   <div class="form-group"><label class="form-label">行程名称</label><input class="form-input" id="setup-trip-name" placeholder="例：日本旅行 2025"/></div>
+  <div class="form-group"><label class="form-label">出发日期（用于计算旅行天数）</label><input class="form-input" id="setup-trip-start" type="date"/></div>
   <div class="sec-title">成员（第一位默认为「我」，可在设置中更改）</div>
   <div id="setup-members-list"></div>
   <div style="padding:0 16px 20px"><button class="btn btn-ghost btn-sm" onclick="addSetupMember()">+ 添加成员</button></div>
@@ -128,28 +135,59 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Helvetica Neue'
           </div>
         </div>
         <div style="text-align:right;flex-shrink:0;margin-left:8px">
-          <div style="font-size:11px;color:var(--gray)">今日 · 我的</div>
+          <div style="font-size:11px;color:var(--gray)" id="home-day-label">今日</div>
           <div id="home-today-amt" style="font-size:17px;font-weight:700;color:var(--blue)">¥0.00</div>
         </div>
       </div>
     </div>
-    <div style="height:8px"></div>
+    <!-- Onboarding banner (shown when me not set) -->
+    <div id="onboard-banner" class="onboard-banner hidden" onclick="switchTab('settings',document.querySelector('.tab-item:last-child'));showSubSettings('me')">
+      <div style="font-size:28px">👤</div>
+      <div><div style="font-weight:700;font-size:15px">先告诉我，你是谁？</div><div style="font-size:13px;opacity:.88;margin-top:2px">设置本人后，账单以你的视角展示 →</div></div>
+    </div>
     <!-- My total card -->
     <div class="card" style="padding:16px">
-      <div style="font-size:12px;color:var(--gray);margin-bottom:4px">我的旅行总支出</div>
-      <div id="home-my-total" style="font-size:32px;font-weight:700;color:var(--blue);letter-spacing:-.5px">¥0.00</div>
-      <div style="display:flex;gap:16px;margin-top:10px">
-        <div><div style="font-size:11px;color:var(--gray)">共同（我的份）</div><div id="home-my-shared" style="font-size:15px;font-weight:600">¥0</div></div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div style="font-size:12px;color:var(--gray);margin-bottom:2px">我的旅行总支出</div>
+          <div id="home-my-total" style="font-size:32px;font-weight:700;color:var(--blue);letter-spacing:-.5px">¥0.00</div>
+          <div id="home-trip-days" style="font-size:12px;color:var(--gray);margin-top:3px"></div>
+        </div>
+        <div style="text-align:right">
+          <div id="home-my-balance-wrap">
+            <div style="font-size:11px;color:var(--gray)">我欠/被欠</div>
+            <div id="home-my-balance" style="font-size:17px;font-weight:700">¥0</div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:0;margin-top:12px;border-top:1px solid var(--border);padding-top:10px">
+        <div style="flex:1;text-align:center">
+          <div style="font-size:11px;color:var(--gray)">共同（我的份）</div>
+          <div id="home-my-shared" style="font-size:15px;font-weight:600;margin-top:2px">¥0</div>
+        </div>
         <div style="width:1px;background:var(--border)"></div>
-        <div><div style="font-size:11px;color:var(--gray)">我的个人</div><div id="home-my-personal" style="font-size:15px;font-weight:600">¥0</div></div>
+        <div style="flex:1;text-align:center">
+          <div style="font-size:11px;color:var(--gray)">我的个人</div>
+          <div id="home-my-personal" style="font-size:15px;font-weight:600;margin-top:2px">¥0</div>
+        </div>
         <div style="width:1px;background:var(--border)"></div>
-        <div><div style="font-size:11px;color:var(--gray)">我欠/被欠</div><div id="home-my-balance" style="font-size:15px;font-weight:600">¥0</div></div>
+        <div style="flex:1;text-align:center">
+          <div style="font-size:11px;color:var(--gray)">日均支出</div>
+          <div id="home-daily-avg" style="font-size:15px;font-weight:600;margin-top:2px">¥0</div>
+        </div>
       </div>
     </div>
-    <div class="segment">
-      <button class="seg-btn active" onclick="setFilter('mine',this)">我的相关</button>
-      <button class="seg-btn" onclick="setFilter('shared',this)">所有共同</button>
-      <button class="seg-btn" onclick="setFilter('all',this)">全部</button>
+    <!-- Filter -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:0 16px;margin-bottom:2px">
+      <div style="display:flex;gap:8px">
+        <div id="filter-mine" class="pill sel" onclick="setFilter('mine',this)" style="font-size:12px;padding:5px 10px">我的相关</div>
+        <div id="filter-shared" class="pill" onclick="setFilter('shared',this)" style="font-size:12px;padding:5px 10px">共同</div>
+        <div id="filter-all" class="pill" onclick="setFilter('all',this)" style="font-size:12px;padding:5px 10px">全部</div>
+      </div>
+      <div class="view-toggle" id="today-toggle" onclick="toggleTodayOnly()">
+        <div class="toggle" id="today-toggle-sw" style="width:34px;height:20px"><div class="toggle-knob" style="width:16px;height:16px;top:2px;left:2px"></div></div>
+        <span>仅今日</span>
+      </div>
     </div>
     <div id="expenses-list"></div>
     <button id="fab" onclick="openAddExpense()">＋</button>
@@ -164,6 +202,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Helvetica Neue'
       <div class="stats-tab" onclick="switchStatsTab('my-share',this)">我的分摊</div>
       <div class="stats-tab" onclick="switchStatsTab('my-personal',this)">我的个人</div>
     </div>
+    <div id="stats-highlight-bar"></div>
     <div id="stats-dim-panel"></div>
   </div>
 
@@ -184,9 +223,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Helvetica Neue'
   <div id="page-settle" class="page">
     <div class="header"><div class="header-row"><h1>结算</h1><button class="btn btn-primary btn-sm" onclick="openTransferModal()">＋ 转账</button></div></div>
     <div style="height:8px"></div>
-    <div class="sec-title">各人余额（含已转账）</div>
+    <div class="sec-title">各人余额</div>
     <div id="settle-balance" class="card-list"></div>
-    <div class="sec-title">建议转账方案</div>
+    <div class="sec-title">建议转账</div>
     <div id="settle-txns" class="card-list"></div>
     <div class="sec-title">转账记录</div>
     <div id="settle-transfers" class="card-list"></div>
@@ -233,7 +272,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Helvetica Neue'
       <div class="header"><div class="header-row"><button class="btn btn-ghost btn-sm" onclick="showSubSettings(null)">‹ 返回</button><h1 style="font-size:17px">行程管理</h1><div style="width:60px"></div></div></div>
       <div style="height:8px"></div>
       <div id="trips-list" class="card-list"></div>
-      <div style="padding:16px"><div class="form-label">新建行程</div><div style="display:flex;gap:8px"><input class="form-input" id="new-trip-name" placeholder="行程名称" style="flex:1"/><button class="btn btn-primary" onclick="addTrip()">创建</button></div></div>
+      <div style="padding:16px">
+        <div class="form-label">新建行程</div>
+        <div style="display:flex;gap:8px;margin-bottom:8px"><input class="form-input" id="new-trip-name" placeholder="行程名称" style="flex:1"/></div>
+        <div style="display:flex;gap:8px"><input class="form-input" id="new-trip-start" type="date" style="flex:1" placeholder="出发日期（可选）"/><button class="btn btn-primary" onclick="addTrip()">创建</button></div>
+      </div>
     </div>
     <!-- Sub: 成员 -->
     <div id="settings-members" class="hidden back-page">
@@ -285,28 +328,42 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Helvetica Neue'
       <span class="modal-title" id="expense-modal-title">新增账单</span>
       <button class="btn btn-primary btn-sm" onclick="saveExpense()">保存</button>
     </div>
+    <!-- Account type -->
     <div class="segment">
-      <button class="seg-btn active" id="seg-shared" onclick="setAccountType('shared',this)">共同支出</button>
-      <button class="seg-btn" id="seg-personal" onclick="setAccountType('personal',this)">个人支出</button>
+      <button class="seg-btn active" id="seg-shared" onclick="setAccountType('shared',this)">👥 共同支出</button>
+      <button class="seg-btn" id="seg-personal" onclick="setAccountType('personal',this)">🙋 个人支出</button>
     </div>
-    <div class="form-group"><label class="form-label">标题</label><input class="form-input" id="exp-title" placeholder="这笔钱花在哪了？"/></div>
+    <!-- Core fields -->
+    <div class="form-group"><label class="form-label">标题 *</label><input class="form-input" id="exp-title" placeholder="这笔钱花在哪了？"/></div>
     <div class="form-group">
-      <label class="form-label">金额</label>
+      <label class="form-label">金额 *</label>
       <div style="display:flex;gap:8px">
-        <input class="form-input" id="exp-amount" type="number" inputmode="decimal" placeholder="0.00" style="flex:2" oninput="updateAmountHint()"/>
-        <select class="form-input form-select" id="exp-currency" style="flex:1" onchange="updateAmountHint()"></select>
+        <input class="form-input" id="exp-amount" type="number" inputmode="decimal" placeholder="0.00" style="flex:2" oninput="onAmountInput()"/>
+        <select class="form-input form-select" id="exp-currency" style="flex:1" onchange="onCurrencyChange()"></select>
+      </div>
+      <!-- Inline rate setup (shown when no rate for chosen currency) -->
+      <div id="exp-rate-setup" class="rate-inline-card hidden">
+        <div style="font-size:13px;font-weight:600;color:var(--orange);margin-bottom:6px">⚠️ 还没设置汇率，先填一下</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span id="exp-rate-setup-label" style="font-size:13px;color:var(--gray);white-space:nowrap">1 JPY =</span>
+          <input class="form-input" id="exp-inline-rate" type="number" inputmode="decimal" placeholder="0.0485" style="flex:1;padding:8px 10px;font-size:15px"/>
+          <span style="font-size:13px;color:var(--gray);white-space:nowrap">CNY</span>
+          <button class="btn btn-primary btn-sm" onclick="saveInlineRate()">保存</button>
+        </div>
       </div>
       <div id="exp-rate-hint" style="font-size:12px;color:var(--gray);margin-top:4px"></div>
     </div>
-    <div class="form-group"><label class="form-label">付款人</label><div id="payer-pills" class="pill-row"></div></div>
-    <div class="form-group"><label class="form-label">付款资产（可选）</label><div id="wallet-pills" class="pill-row"></div></div>
     <div class="form-group"><label class="form-label">分类</label><div id="category-pills" class="pill-row"></div></div>
-    <div class="form-group"><label class="form-label">支付方式</label><div id="payment-btns" class="pill-row"></div></div>
-    <div class="form-group"><label class="form-label">日期</label><input class="form-input" id="exp-date" type="date"/></div>
+    <div class="form-group"><label class="form-label">付款人</label><div id="payer-pills" class="pill-row"></div></div>
+    <!-- Split preview (shared mode) -->
+    <div id="split-preview-wrap" class="form-group hidden">
+      <div class="split-preview" id="split-preview-text"></div>
+    </div>
+    <!-- Personal split section -->
     <div id="split-section" class="hidden">
       <div class="form-group">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-          <label class="form-label" style="margin:0">需要分摊给大家？</label>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+          <label class="form-label" style="margin:0">分摊给大家？</label>
           <div class="toggle" id="split-toggle" onclick="toggleSplit()"><div class="toggle-knob"></div></div>
         </div>
         <div id="split-detail" class="hidden">
@@ -319,12 +376,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Helvetica Neue'
         </div>
       </div>
     </div>
-    <div class="form-group"><label class="form-label">备注</label><textarea class="form-input form-textarea" id="exp-notes" placeholder="可选..."></textarea></div>
+    <!-- Advanced fields (collapsed) -->
+    <div style="padding:0 16px;margin-bottom:10px">
+      <div id="adv-toggle-row" onclick="toggleAdvanced()" style="display:flex;align-items:center;gap:6px;cursor:pointer;color:var(--blue);font-size:13px;font-weight:500">
+        <span id="adv-arrow">▾</span> 更多选项（资产 / 支付方式 / 备注）
+      </div>
+      <div id="adv-section" class="hidden" style="margin-top:10px">
+        <div style="margin-bottom:10px"><div class="form-label">付款资产（可选）</div><div id="wallet-pills" class="pill-row"></div></div>
+        <div style="margin-bottom:10px"><div class="form-label">支付方式</div><div id="payment-btns" class="pill-row"></div></div>
+        <div><div class="form-label">日期</div><input class="form-input" id="exp-date" type="date"/></div>
+        <div style="margin-top:10px"><div class="form-label">备注</div><textarea class="form-input form-textarea" id="exp-notes" placeholder="可选..."></textarea></div>
+      </div>
+    </div>
     <div style="height:8px"></div>
   </div>
 </div>
 
-<!-- ════ Action Menu Modal ════ -->
+<!-- ════ Action Menu ════ -->
 <div id="action-modal" class="modal-overlay hidden">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
@@ -361,11 +429,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Helvetica Neue'
 <div id="wallet-modal" class="modal-overlay hidden">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
-    <div class="modal-header"><span class="modal-title" id="wallet-modal-title">添加资产</span><button class="btn btn-ghost btn-sm" onclick="closeWalletModal()">取消</button></div>
-    <div class="form-group"><label class="form-label">名称（如：现金、建行卡）</label><input class="form-input" id="new-wallet-name" placeholder="资产名称"/></div>
+    <div class="modal-header"><span class="modal-title">添加资产</span><button class="btn btn-ghost btn-sm" onclick="closeWalletModal()">取消</button></div>
+    <div class="form-group"><label class="form-label">名称</label><input class="form-input" id="new-wallet-name" placeholder="如：日元现金 / 建行卡"/></div>
     <div class="form-group"><label class="form-label">图标</label><div id="wallet-icon-picker" class="pill-row"></div></div>
-    <div class="form-group">
-      <label class="form-label">币种</label>
+    <div class="form-group"><label class="form-label">币种</label>
       <select class="form-input form-select" id="new-wallet-currency" onchange="updateWalletCurrencyHint()">
         <option value="CNY">CNY 人民币</option><option value="JPY">JPY 日元</option><option value="USD">USD 美元</option>
         <option value="EUR">EUR 欧元</option><option value="HKD">HKD 港元</option><option value="TWD">TWD 台币</option>
@@ -374,7 +441,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Helvetica Neue'
     </div>
     <div class="form-group">
       <label class="form-label" id="wallet-init-label">初始金额</label>
-      <input class="form-input" id="new-wallet-init" type="number" inputmode="decimal" placeholder="0.00"/>
+      <input class="form-input" id="new-wallet-init" type="number" inputmode="decimal" placeholder="0.00" oninput="updateWalletCurrencyHint()"/>
       <div id="wallet-cny-hint" style="font-size:12px;color:var(--gray);margin-top:4px"></div>
     </div>
     <div style="padding:0 16px 16px;display:flex;gap:10px">
@@ -432,7 +499,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Helvetica Neue'
       <div id="transfer-hint" style="font-size:12px;color:var(--gray);margin-top:4px"></div>
     </div>
     <div class="form-group"><label class="form-label">日期</label><input class="form-input" id="transfer-date" type="date"/></div>
-    <div class="form-group"><label class="form-label">备注（可选）</label><input class="form-input" id="transfer-notes" placeholder="如：还款、取现、外币兑换等"/></div>
+    <div class="form-group"><label class="form-label">备注（可选）</label><input class="form-input" id="transfer-notes" placeholder="如：还款、取现等"/></div>
     <div style="height:8px"></div>
   </div>
 </div>
@@ -460,7 +527,13 @@ const DEFAULT_CATS=[{name:'餐饮',icon:'🍜'},{name:'交通',icon:'🚇'},{nam
 const CAT_ICONS=['🍜','🚇','🏨','🛍️','🎡','🎭','💊','💰','☕','🍺','🚕','⛽','📸','🎁','🏖️','💈'];
 const WALLET_ICONS=['💵','💴','💶','💷','💳','🏦','👜','🧧','💰','🪙'];
 const PM_ICONS=['💵','💳','📱','💴','🏦','💸','🪙','💰'];
-const CURRENCIES_LIST=[{code:'CNY',name:'人民币',sym:'¥'},{code:'JPY',name:'日元',sym:'¥'},{code:'USD',name:'美元',sym:'$'},{code:'EUR',name:'欧元',sym:'€'},{code:'HKD',name:'港元',sym:'HK$'},{code:'TWD',name:'台币',sym:'NT$'},{code:'KRW',name:'韩元',sym:'₩'},{code:'THB',name:'泰铢',sym:'฿'},{code:'SGD',name:'新加坡元',sym:'S$'},{code:'GBP',name:'英镑',sym:'£'}];
+const CURRENCIES_LIST=[
+  {code:'CNY',name:'人民币',sym:'¥'},{code:'JPY',name:'日元',sym:'¥'},
+  {code:'USD',name:'美元',sym:'$'},{code:'EUR',name:'欧元',sym:'€'},
+  {code:'HKD',name:'港元',sym:'HK$'},{code:'TWD',name:'台币',sym:'NT$'},
+  {code:'KRW',name:'韩元',sym:'₩'},{code:'THB',name:'泰铢',sym:'฿'},
+  {code:'SGD',name:'新加坡元',sym:'S$'},{code:'GBP',name:'英镑',sym:'£'}
+];
 const CUR_SYM={CNY:'¥',JPY:'¥',USD:'$',EUR:'€',HKD:'HK$',TWD:'NT$',KRW:'₩',THB:'฿',SGD:'S$',GBP:'£'};
 
 // ══════════════════════════════════════════════════════
@@ -468,8 +541,10 @@ const CUR_SYM={CNY:'¥',JPY:'¥',USD:'$',EUR:'€',HKD:'HK$',TWD:'NT$',KRW:'₩'
 // ══════════════════════════════════════════════════════
 let state={trips:[],trip:null,members:[],currencies:[],categories:[],expenses:[],splits:[],wallets:[],transfers:[]};
 let expFilter='mine';
+let todayOnly=false;
 let currentEditExpenseId=null;
 let actionExpenseId=null;
+let advExpanded=false;
 let expForm={accountType:'shared',payerId:null,categoryId:null,paymentMethod:'cash',walletId:null,needsSplit:false,splitMode:'equal'};
 let selectedCurrencyMemberId=null;
 let selectedCatIcon='💰';
@@ -478,6 +553,7 @@ let selectedPmIcon='💳';
 let currentWalletDetailId=null;
 let setupMemberCount=3;
 let currentStatsTab='shared-total';
+let statsSubTab='daily';
 let transferForm={type:'person',fromMemberId:null,toMemberId:null,walletMemberId:null,fromWalletId:null,toWalletId:null};
 
 const DEFAULT_PM=[{value:'cash',label:'现金',icon:'💵'},{value:'card',label:'刷卡',icon:'💳'},{value:'mobile',label:'移动支付',icon:'📱'}];
@@ -485,25 +561,28 @@ function loadPM(){try{const s=localStorage.getItem('travel_pms');return s?JSON.p
 function savePM(list){localStorage.setItem('travel_pms',JSON.stringify(list));}
 let paymentMethods=loadPM();
 
-// meMemberId: which member is "me"
 function getMeId(){return localStorage.getItem('me_member_id_'+((state.trip&&state.trip.id)||''));}
 function setMeId(id){localStorage.setItem('me_member_id_'+state.trip.id,id);}
-function getMe(){return state.members.find(m=>m.id===getMeId())||state.members[0]||null;}
+function getMe(){return state.members.find(m=>m.id===getMeId())||null;}
 
 // ══════════════════════════════════════════════════════
 // Helpers
 // ══════════════════════════════════════════════════════
 function today(){return new Date().toISOString().split('T')[0];}
-function fmt(n,dec=2){n=parseFloat(n)||0;if(Math.abs(n)>=10000)return '¥'+(n/10000).toFixed(2)+'万';return '¥'+n.toFixed(dec);}
+function fmt(n,dec=2){n=parseFloat(n)||0;if(Math.abs(n)>=10000)return '¥'+(n/10000).toFixed(1)+'万';return '¥'+n.toFixed(dec);}
 function fmtFx(amount,code){const sym=CUR_SYM[code]||code+' ';return sym+parseFloat(amount).toLocaleString(undefined,{maximumFractionDigits:code==='KRW'||code==='JPY'?0:2});}
-function fmtDate(d){if(!d)return '';const dt=new Date(d+'T00:00:00');return `${dt.getMonth()+1}月${dt.getDate()}日`;}
+function fmtDate(d){if(!d)return '';const dt=new Date(d+'T00:00:00');const diffs=Math.floor((new Date(today())-new Date(d+'T00:00:00'))/(86400000));if(diffs===0)return '今天';if(diffs===1)return '昨天';return `${dt.getMonth()+1}月${dt.getDate()}日`;}
+function daysBetween(a,b){return Math.max(1,Math.round((new Date(b)-new Date(a))/(86400000))+1);}
 function getRate(memberId,code){
   if(!code||code==='CNY')return 1;
   const c=state.currencies.find(c=>c.member_id===memberId&&c.currency_code===code);
   if(c)return parseFloat(c.exchange_rate);
-  // fallback: any member's rate for that code
   const any=state.currencies.find(c=>c.currency_code===code);
   return any?parseFloat(any.exchange_rate):1;
+}
+function hasRate(memberId,code){
+  if(!code||code==='CNY')return true;
+  return !!state.currencies.find(c=>c.member_id===memberId&&c.currency_code===code);
 }
 function toCNY(e){
   if(e.amount_cny!=null)return parseFloat(e.amount_cny);
@@ -513,7 +592,6 @@ function transferToCNY(t){
   if(!t.currency_code||t.currency_code==='CNY')return parseFloat(t.amount);
   return parseFloat(t.amount)*getRate(t.from_member_id||t.wallet_member_id,t.currency_code);
 }
-// My split amount for an expense
 function myShareOf(e){
   const me=getMe();if(!me)return 0;
   const splits=state.splits.filter(s=>s.expense_id===e.id);
@@ -527,6 +605,10 @@ function myShareOf(e){
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';setTimeout(()=>t.style.display='none',2200);}
 function el(id){return document.getElementById(id);}
 function groupBy(arr,fn){const m={};arr.forEach(x=>{const k=fn(x);if(!m[k])m[k]=[];m[k].push(x);});return m;}
+function tripDays(){
+  if(!state.trip||!state.trip.start_date)return null;
+  return daysBetween(state.trip.start_date,today());
+}
 
 // ══════════════════════════════════════════════════════
 // Init
@@ -556,13 +638,8 @@ async function loadAll(){
     sb.from('wallets').select('*').eq('trip_id',tid),
     sb.from('transfers').select('*').eq('trip_id',tid).order('transfer_date',{ascending:false}),
   ]);
-  state.members=m.data||[];
-  state.currencies=c.data||[];
-  state.categories=cat.data||[];
-  state.expenses=e.data||[];
-  state.splits=s.data||[];
-  state.wallets=w.data||[];
-  state.transfers=tr.data||[];
+  state.members=m.data||[];state.currencies=c.data||[];state.categories=cat.data||[];
+  state.expenses=e.data||[];state.splits=s.data||[];state.wallets=w.data||[];state.transfers=tr.data||[];
 }
 function renderAll(){renderHome();renderStats();renderSettle();renderAssets();renderSettingsMain();}
 function subscribeRealtime(){
@@ -578,43 +655,36 @@ function subscribeRealtime(){
 // ══════════════════════════════════════════════════════
 // Setup
 // ══════════════════════════════════════════════════════
-function showSetup(){el('setup-screen').classList.remove('hidden');renderSetupMembers();}
+function showSetup(){el('setup-screen').classList.remove('hidden');renderSetupMembers();el('setup-trip-start').value=today();}
 function renderSetupMembers(){
   const list=el('setup-members-list');list.innerHTML='';
   for(let i=0;i<setupMemberCount;i++){
     const color=MEMBER_COLORS[i%MEMBER_COLORS.length];
-    list.innerHTML+=`<div style="padding:0 16px;margin-bottom:10px;display:flex;align-items:center;gap:8px">
-      <div class="av av-md" style="background:${color}">${i+1}</div>
-      <input class="form-input" id="sm-${i}" placeholder="${i===0?'我的名字':'成员 '+(i+1)+' 的名字'}" style="flex:1"/>
-      ${i>0?`<button class="btn btn-ghost btn-sm text-red" onclick="removeSetupMember(${i})">删除</button>`:''}
-    </div>`;
+    list.innerHTML+=`<div style="padding:0 16px;margin-bottom:10px;display:flex;align-items:center;gap:8px"><div class="av av-md" style="background:${color}">${i===0?'我':(i+1)}</div><input class="form-input" id="sm-${i}" placeholder="${i===0?'我的名字（必填）':'成员 '+(i+1)}" style="flex:1"/>${i>0?`<button class="btn btn-ghost btn-sm text-red" onclick="removeSetupMember(${i})">×</button>`:''}</div>`;
   }
 }
 function addSetupMember(){setupMemberCount++;renderSetupMembers();}
 function removeSetupMember(i){setupMemberCount--;renderSetupMembers();}
 async function createTrip(){
-  const name=el('setup-trip-name').value.trim();
-  if(!name){showToast('请填写行程名称');return;}
+  const name=el('setup-trip-name').value.trim();if(!name){showToast('请填写行程名称');return;}
+  const startDate=el('setup-trip-start').value||today();
   const names=[];
   for(let i=0;i<setupMemberCount;i++){const v=el(`sm-${i}`).value.trim();if(v)names.push(v);}
-  if(!names.length){showToast('至少添加一位成员');return;}
+  if(!names.length){showToast('至少填写你自己的名字');return;}
   try{
-    const {data:trip,error:te}=await sb.from('trips').insert({name,base_currency:'CNY'}).select().single();
+    const {data:trip,error:te}=await sb.from('trips').insert({name,base_currency:'CNY',start_date:startDate}).select().single();
     if(te)throw te;
     state.trip=trip;
     const mRows=names.map((n,i)=>({trip_id:trip.id,name:n,color:MEMBER_COLORS[i%MEMBER_COLORS.length]}));
-    const {data:mems,error:me}=await sb.from('members').insert(mRows).select();
-    if(me)throw me;
+    const {data:mems,error:me}=await sb.from('members').insert(mRows).select();if(me)throw me;
     await sb.from('categories').insert(DEFAULT_CATS.map(c=>({trip_id:trip.id,...c})));
     await sb.from('currencies').insert(mems.map(m=>({trip_id:trip.id,member_id:m.id,currency_code:'CNY',currency_name:'人民币',exchange_rate:1})));
     await sb.from('wallets').insert(mems.map(m=>({trip_id:trip.id,member_id:m.id,name:'现金',icon:'💵',currency_code:'CNY',initial_amount:0})));
-    // First member is "me" by default
     localStorage.setItem('me_member_id_'+trip.id,mems[0].id);
     localStorage.setItem('last_trip_id',trip.id);
     state.trips=[trip];
     await loadAll();
-    el('setup-screen').classList.add('hidden');
-    el('app').classList.remove('hidden');
+    el('setup-screen').classList.add('hidden');el('app').classList.remove('hidden');
     renderAll();subscribeRealtime();
   }catch(e){showToast('创建失败：'+e.message);}
 }
@@ -625,23 +695,24 @@ async function createTrip(){
 async function switchTrip(tripId){
   const t=state.trips.find(x=>x.id===tripId);if(!t)return;
   state.trip=t;localStorage.setItem('last_trip_id',tripId);
-  await loadAll();renderAll();closeTripPicker();showToast('已切换到：'+t.name);
+  await loadAll();renderAll();closeTripPicker();showToast('已切换：'+t.name);
 }
 function openTripPicker(){
-  el('trip-picker-list').innerHTML=state.trips.map(t=>`<div class="card-item card-item-tap" onclick="switchTrip('${t.id}');closeTripPicker()"><div style="font-size:22px">✈️</div><div style="flex:1"><div style="font-size:15px;font-weight:500">${t.name}</div></div>${t.id===state.trip.id?'<div style="color:var(--blue);font-size:18px">✓</div>':''}</div>`).join('');
+  el('trip-picker-list').innerHTML=state.trips.map(t=>`<div class="card-item card-item-tap" onclick="switchTrip('${t.id}')"><div style="font-size:22px">✈️</div><div style="flex:1"><div style="font-size:15px;font-weight:500">${t.name}</div>${t.start_date?`<div style="font-size:12px;color:var(--gray)">${t.start_date} 出发</div>`:''}</div>${t.id===state.trip.id?'<div style="color:var(--blue);font-size:18px">✓</div>':''}</div>`).join('');
   el('trip-picker-modal').classList.remove('hidden');
 }
 function closeTripPicker(){el('trip-picker-modal').classList.add('hidden');}
 async function addTrip(){
   const name=el('new-trip-name').value.trim();if(!name){showToast('请填写行程名称');return;}
-  const {data:trip,error}=await sb.from('trips').insert({name,base_currency:'CNY'}).select().single();
+  const startDate=el('new-trip-start').value||today();
+  const {data:trip,error}=await sb.from('trips').insert({name,base_currency:'CNY',start_date:startDate}).select().single();
   if(error){showToast('创建失败');return;}
   el('new-trip-name').value='';
   const {data:trips}=await sb.from('trips').select('*').order('created_at',{ascending:false});
   state.trips=trips||[];renderTripsList();renderSettingsMain();showToast('行程已创建');
 }
 function renderTripsList(){
-  el('trips-list').innerHTML=state.trips.map(t=>`<div class="card-item"><div style="font-size:22px">✈️</div><div style="flex:1"><div style="font-size:15px;font-weight:500">${t.name}</div><div style="font-size:12px;color:var(--gray)">${t.id===state.trip.id?'当前行程':''}</div></div></div>`).join('');
+  el('trips-list').innerHTML=state.trips.map(t=>`<div class="card-item"><div style="font-size:22px">✈️</div><div style="flex:1"><div style="font-size:15px;font-weight:500">${t.name}</div><div style="font-size:12px;color:var(--gray)">${t.id===state.trip.id?'当前行程':''}${t.start_date?' · '+t.start_date:''}</div></div></div>`).join('');
 }
 
 // ══════════════════════════════════════════════════════
@@ -650,8 +721,7 @@ function renderTripsList(){
 function switchTab(name,btn){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab-item').forEach(t=>t.classList.remove('active'));
-  el('page-'+name).classList.add('active');
-  btn.classList.add('active');
+  el('page-'+name).classList.add('active');btn.classList.add('active');
   el('fab').style.display=name==='home'?'flex':'none';
   if(name==='stats')renderStats();
   if(name==='settle')renderSettle();
@@ -662,27 +732,41 @@ function switchTab(name,btn){
 // ══════════════════════════════════════════════════════
 // Home
 // ══════════════════════════════════════════════════════
+function toggleTodayOnly(){
+  todayOnly=!todayOnly;
+  el('today-toggle-sw').classList.toggle('on',todayOnly);
+  el('today-toggle-sw').querySelector('.toggle-knob').style.left=todayOnly?'16px':'2px';
+  renderHome();
+}
 function setFilter(f,btn){
   expFilter=f;
-  document.querySelectorAll('#page-home .segment .seg-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
+  ['mine','shared','all'].forEach(x=>el('filter-'+x).classList.remove('sel'));
+  el('filter-'+f).classList.add('sel');
   renderHome();
 }
 function renderHome(){
   if(!state.trip)return;
   const me=getMe();
   el('home-trip-name').textContent=state.trip.name;
-  // Compute my totals
+  // Onboarding banner
+  el('onboard-banner').classList.toggle('hidden',!!getMeId());
+  // Trip days
+  const days=tripDays();
+  if(days){
+    el('home-day-label').textContent=`第 ${days} 天 · 今日`;
+    el('home-trip-days').textContent=`旅行第 ${days} 天`;
+  }
+  // My totals
   let mySharedShare=0,myPersonal=0;
   state.expenses.forEach(e=>{
-    if(e.account_type==='shared'){
-      mySharedShare+=myShareOf(e);
-    }else if(me&&e.paid_by===me.id){
-      myPersonal+=toCNY(e);
-    }
+    if(e.account_type==='shared')mySharedShare+=myShareOf(e);
+    else if(me&&e.paid_by===me.id)myPersonal+=toCNY(e);
   });
   const myTotal=mySharedShare+myPersonal;
-  // My balance (what I paid - what I owe)
+  // Daily avg
+  let dailyAvg=0;
+  if(days&&days>0)dailyAvg=myTotal/days;
+  // My balance
   let myBalance=0;
   if(me){
     state.expenses.forEach(e=>{
@@ -697,42 +781,41 @@ function renderHome(){
       if(t.to_member_id===me.id)myBalance+=transferToCNY(t);
     });
   }
+  // Today my
   const todayAmt=computeTodayMy();
   el('home-today-amt').textContent=fmt(todayAmt);
   el('home-my-total').textContent=fmt(myTotal);
   el('home-my-shared').textContent=fmt(mySharedShare);
   el('home-my-personal').textContent=fmt(myPersonal);
+  el('home-daily-avg').textContent=days?fmt(dailyAvg):'¥-';
   const balColor=myBalance>0.01?'var(--green)':myBalance<-0.01?'var(--red)':'var(--gray)';
-  el('home-my-balance').textContent=(myBalance>0.01?'+':'')+fmt(myBalance);
+  el('home-my-balance').textContent=(myBalance>0.01?'+ ':'') + fmt(myBalance);
   el('home-my-balance').style.color=balColor;
   // Filter expenses
   let filtered;
+  const td=today();
   if(expFilter==='mine'){
-    // Show: shared expenses (I have a share) + my personal
     filtered=state.expenses.filter(e=>{
       if(e.account_type==='shared')return true;
       if(me&&e.paid_by===me.id)return true;
-      // personal of others with split to me
-      const mySplit=state.splits.find(s=>s.expense_id===e.id&&me&&s.member_id===me.id);
-      return !!mySplit;
+      return !!(me&&state.splits.find(s=>s.expense_id===e.id&&s.member_id===me.id));
     });
   }else if(expFilter==='shared'){
     filtered=state.expenses.filter(e=>e.account_type==='shared');
   }else{
     filtered=state.expenses;
   }
+  if(todayOnly)filtered=filtered.filter(e=>e.expense_date===td);
   const groups=groupBy(filtered,e=>e.expense_date);
   const dates=Object.keys(groups).sort((a,b)=>b.localeCompare(a));
   const list=el('expenses-list');
-  if(!dates.length){list.innerHTML='<div class="empty"><div class="empty-icon">📝</div><div>还没有账单，点 ＋ 开始记录</div></div>';return;}
+  if(!dates.length){list.innerHTML='<div class="empty"><div class="empty-icon">📝</div><div>'+(todayOnly?'今天还没有账单':'暂无账单，点 ＋ 记录第一笔')+'</div></div>';return;}
   list.innerHTML=dates.map(d=>{
     const dayTotal=groups[d].reduce((s,e)=>{
-      if(expFilter==='mine'||expFilter==='all'){
-        if(me&&e.account_type==='shared')return s+myShareOf(e);
-        if(me&&e.paid_by===me.id&&e.account_type==='personal')return s+toCNY(e);
-        return s;
-      }
-      return s+toCNY(e);
+      if(me&&e.account_type==='shared')return s+myShareOf(e);
+      if(me&&e.paid_by===me.id&&e.account_type==='personal')return s+toCNY(e);
+      if(expFilter==='shared'||expFilter==='all')return s+toCNY(e);
+      return s;
     },0);
     return `<div class="date-hdr"><span>${fmtDate(d)}</span><span>${fmt(dayTotal)}</span></div><div class="card-list">${groups[d].map(e=>renderExpRow(e,me)).join('')}</div>`;
   }).join('');
@@ -755,21 +838,23 @@ function renderExpRow(e,me){
   if(e.account_type==='shared'){
     const myShare=myShareOf(e);
     displayAmt=fmt(myShare);
-    subAmt=`<div class="exp-amt-sub">共 ${e.currency_code!=='CNY'?fmtFx(e.amount,e.currency_code)+' / ':''} ${fmt(cny)}</div>`;
+    subAmt=`<div style="font-size:10px;color:var(--gray);margin-top:1px">共 ${e.currency_code&&e.currency_code!=='CNY'?fmtFx(e.amount,e.currency_code)+' / ':''}${fmt(cny)}</div>`;
   }else{
     displayAmt=e.currency_code&&e.currency_code!=='CNY'?fmtFx(e.amount,e.currency_code):fmt(cny);
-    if(e.currency_code&&e.currency_code!=='CNY')subAmt=`<div class="exp-amt-sub">${fmt(cny)}</div>`;
+    if(e.currency_code&&e.currency_code!=='CNY')subAmt=`<div style="font-size:10px;color:var(--gray);margin-top:1px">${fmt(cny)}</div>`;
   }
-  const badge=e.account_type==='shared'?'<span class="badge bg-shared">共同</span>':e.needs_split?'<span class="badge bg-split">分摊</span>':'<span class="badge bg-personal">个人</span>';
+  const badgeHtml=e.account_type==='shared'?`<span style="background:#EBF4FF;color:var(--blue);font-size:10px;padding:1px 5px;border-radius:6px;margin-left:3px">共同</span>`:e.needs_split?`<span style="background:#FFF8E1;color:var(--orange);font-size:10px;padding:1px 5px;border-radius:6px;margin-left:3px">分摊</span>`:`<span style="background:#F0FFF4;color:var(--green);font-size:10px;padding:1px 5px;border-radius:6px;margin-left:3px">个人</span>`;
   const bg=e.account_type==='shared'?'#EBF4FF':'#F0FFF4';
-  const payerLabel=payer?(isMe?'<span style="color:var(--blue)">我</span>':payer.name):'';
+  const payerLabel=payer?(isMe?`<span style="color:var(--blue)">我</span>`:payer.name):'';
   return `<div class="card-item card-item-tap" onclick="openActionMenu('${e.id}')">
     <div class="exp-icon" style="background:${bg}">${cat?cat.icon:'💰'}</div>
-    <div class="exp-info">
-      <div class="exp-title">${e.title}</div>
-      <div class="exp-meta">${payerLabel?payerLabel+' · ':''}${cat?cat.name+' · ':''}${pm.icon}${badge}</div>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:15px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${e.title}</div>
+      <div style="font-size:11px;color:var(--gray);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${payerLabel?payerLabel+' · ':''}${cat?cat.name+' · ':''}${pm.icon}${badgeHtml}</div>
     </div>
-    <div class="exp-amt"><div class="exp-amt-main">${displayAmt}</div>${subAmt}</div>
+    <div style="text-align:right;flex-shrink:0">
+      <div style="font-size:16px;font-weight:600">${displayAmt}</div>${subAmt}
+    </div>
   </div>`;
 }
 
@@ -802,6 +887,8 @@ function openAddExpense(editId=null){
     walletId:e?e.wallet_id:null,
     needsSplit:e?e.needs_split:false,splitMode:'equal'
   };
+  advExpanded=false;
+  el('adv-arrow').textContent='▾';el('adv-section').classList.add('hidden');
   el('exp-title').value=e?e.title:'';
   el('exp-amount').value=e?e.amount:'';
   el('exp-date').value=e?e.expense_date:today();
@@ -809,19 +896,27 @@ function openAddExpense(editId=null){
   el('seg-shared').classList.toggle('active',expForm.accountType==='shared');
   el('seg-personal').classList.toggle('active',expForm.accountType==='personal');
   el('split-section').classList.toggle('hidden',expForm.accountType!=='personal');
+  el('split-preview-wrap').classList.toggle('hidden',expForm.accountType!=='shared');
   el('split-toggle').classList.toggle('on',expForm.needsSplit);
   el('split-detail').classList.toggle('hidden',!expForm.needsSplit);
-  el('exp-currency').innerHTML=CURRENCIES_LIST.map(c=>`<option value="${c.code}">${c.code}</option>`).join('');
+  el('exp-currency').innerHTML=CURRENCIES_LIST.map(c=>`<option value="${c.code}"${(!e&&c.code==='CNY')||e?.currency_code===c.code?' selected':''}>${c.code}</option>`).join('');
   if(e)el('exp-currency').value=e.currency_code||'CNY';
   renderPayerPills();renderWalletPills();renderCategoryPills();renderPaymentBtns();
-  updateAmountHint();renderSplitRows();
+  onCurrencyChange();renderSplitRows();updateSplitPreview();
   el('expense-modal').classList.remove('hidden');
-  el('exp-title').focus();
+  setTimeout(()=>el('exp-title').focus(),100);
+}
+function toggleAdvanced(){
+  advExpanded=!advExpanded;
+  el('adv-arrow').textContent=advExpanded?'▴':'▾';
+  el('adv-section').classList.toggle('hidden',!advExpanded);
+  if(advExpanded){renderWalletPills();renderPaymentBtns();}
 }
 function renderPayerPills(){
-  el('payer-pills').innerHTML=state.members.map(m=>{const isMe=getMe()&&m.id===getMe().id;return `<div class="pill ${expForm.payerId===m.id?'sel':''}" onclick="selectPayer('${m.id}')"><div class="av av-xs" style="background:${m.color}">${m.name[0]}</div>${m.name}${isMe?'<span class="me-badge">我</span>':''}</div>`;}).join('');
+  const me=getMe();
+  el('payer-pills').innerHTML=state.members.map(m=>{const isMe=me&&m.id===me.id;return `<div class="pill ${expForm.payerId===m.id?'sel':''}" onclick="selectPayer('${m.id}')"><div class="av av-xs" style="background:${m.color}">${m.name[0]}</div>${m.name}${isMe?'<span class="me-badge">我</span>':''}</div>`;}).join('');
 }
-function selectPayer(id){expForm.payerId=id;expForm.walletId=null;renderPayerPills();renderWalletPills();updateAmountHint();}
+function selectPayer(id){expForm.payerId=id;expForm.walletId=null;renderPayerPills();renderWalletPills();onCurrencyChange();updateSplitPreview();}
 function renderWalletPills(){
   const myWallets=state.wallets.filter(w=>w.member_id===expForm.payerId);
   if(!myWallets.length){el('wallet-pills').innerHTML='<span style="font-size:13px;color:var(--gray)">无资产（在资产页添加）</span>';return;}
@@ -838,17 +933,54 @@ function renderPaymentBtns(){
 function selectPM(v){expForm.paymentMethod=v;renderPaymentBtns();}
 function setAccountType(type,btn){
   expForm.accountType=type;
-  document.querySelectorAll('#expense-modal>.modal-sheet>.segment .seg-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
+  el('seg-shared').classList.toggle('active',type==='shared');el('seg-personal').classList.toggle('active',type==='personal');
   el('split-section').classList.toggle('hidden',type!=='personal');
+  el('split-preview-wrap').classList.toggle('hidden',type!=='shared');
+  updateSplitPreview();
 }
-function updateAmountHint(){
+// Split preview: "A 付款，每人 ¥XX（B C 各 ¥XX）"
+function updateSplitPreview(){
+  if(expForm.accountType!=='shared'){return;}
   const amt=parseFloat(el('exp-amount').value)||0;
-  const code=el('exp-currency').value;
-  if(code==='CNY'){el('exp-rate-hint').textContent='';return;}
+  const code=el('exp-currency').value||'CNY';
   const rate=getRate(expForm.payerId,code);
-  el('exp-rate-hint').textContent=`≈ ${fmt(amt*rate)} (汇率 ${rate})`;
-  renderSplitRows();
+  const cny=amt*rate;
+  const payer=state.members.find(m=>m.id===expForm.payerId);
+  const per=state.members.length>0?cny/state.members.length:0;
+  if(!amt||!payer){el('split-preview-text').textContent='填写金额后显示分摊预览';return;}
+  const others=state.members.filter(m=>m.id!==expForm.payerId);
+  const me=getMe();
+  const payerLabel=payer&&me&&payer.id===me.id?'我':payer?.name||'?';
+  el('split-preview-text').innerHTML=`<b>${payerLabel}</b> 付款 ${cny>0?fmt(cny):''}，共 ${state.members.length} 人均摊，<b>每人 ${fmt(per)}</b><br><span style="color:var(--gray)">${others.map(m=>m.name).join('、')} 各欠 ${fmt(per)}</span>`;
+}
+function onAmountInput(){onCurrencyChange();updateSplitPreview();renderSplitRows();}
+function onCurrencyChange(){
+  const code=el('exp-currency').value;
+  const payerId=expForm.payerId;
+  // Check if rate exists
+  if(code&&code!=='CNY'&&!hasRate(payerId,code)){
+    el('exp-rate-setup').classList.remove('hidden');
+    el('exp-rate-setup-label').textContent=`1 ${code} =`;
+    el('exp-rate-hint').textContent='';
+  }else{
+    el('exp-rate-setup').classList.add('hidden');
+    const amt=parseFloat(el('exp-amount').value)||0;
+    if(code&&code!=='CNY'&&amt>0){
+      const rate=getRate(payerId,code);
+      el('exp-rate-hint').textContent=`≈ ${fmt(amt*rate)} (汇率 ${rate})`;
+    }else{el('exp-rate-hint').textContent='';}
+  }
+}
+async function saveInlineRate(){
+  const code=el('exp-currency').value;
+  const rate=parseFloat(el('exp-inline-rate').value);
+  if(!rate||rate<=0){showToast('请输入正确汇率');return;}
+  const names={JPY:'日元',USD:'美元',EUR:'欧元',HKD:'港元',TWD:'台币',KRW:'韩元',THB:'泰铢',SGD:'新加坡元',GBP:'英镑'};
+  const payerId=expForm.payerId;
+  const existing=state.currencies.find(c=>c.member_id===payerId&&c.currency_code===code);
+  if(existing)await sb.from('currencies').update({exchange_rate:rate}).eq('id',existing.id);
+  else await sb.from('currencies').insert({trip_id:state.trip.id,member_id:payerId,currency_code:code,currency_name:names[code]||code,exchange_rate:rate});
+  await loadAll();onCurrencyChange();updateSplitPreview();showToast('汇率已保存 ✓');
 }
 function toggleSplit(){expForm.needsSplit=!expForm.needsSplit;el('split-toggle').classList.toggle('on',expForm.needsSplit);el('split-detail').classList.toggle('hidden',!expForm.needsSplit);renderSplitRows();}
 function setSplitMode(mode,btn){
@@ -864,7 +996,7 @@ function renderSplitRows(){
   const cny=amt*rate;
   const per=state.members.length>0?cny/state.members.length:0;
   el('split-equal-hint').textContent=`每人 ${fmt(per)} 元`;
-  el('split-custom-rows').innerHTML=state.members.map(m=>`<div class="split-row" style="display:flex;align-items:center;gap:10px;padding:5px 16px"><div class="av av-xs" style="background:${m.color}">${m.name[0]}</div><span style="flex:1;font-size:14px">${m.name}</span><input style="width:90px;padding:8px;border:1px solid var(--border);border-radius:8px;font-size:15px;text-align:right" type="number" inputmode="decimal" id="split-${m.id}" value="${per.toFixed(2)}"/><span style="font-size:13px;color:var(--gray)">元</span></div>`).join('');
+  el('split-custom-rows').innerHTML=state.members.map(m=>`<div style="display:flex;align-items:center;gap:10px;padding:5px 16px"><div class="av av-xs" style="background:${m.color}">${m.name[0]}</div><span style="flex:1;font-size:14px">${m.name}</span><input style="width:90px;padding:8px;border:1px solid var(--border);border-radius:8px;font-size:15px;text-align:right" type="number" inputmode="decimal" id="split-${m.id}" value="${per.toFixed(2)}"/><span style="font-size:13px;color:var(--gray)">元</span></div>`).join('');
 }
 function closeExpenseModal(){el('expense-modal').classList.add('hidden');}
 async function saveExpense(){
@@ -878,8 +1010,7 @@ async function saveExpense(){
   try{
     let expId;
     if(currentEditExpenseId){
-      await sb.from('expenses').update(row).eq('id',currentEditExpenseId);
-      expId=currentEditExpenseId;
+      await sb.from('expenses').update(row).eq('id',currentEditExpenseId);expId=currentEditExpenseId;
       await sb.from('expense_splits').delete().eq('expense_id',expId);
     }else{
       const {data,error}=await sb.from('expenses').insert(row).select().single();if(error)throw error;expId=data.id;
@@ -902,12 +1033,11 @@ async function saveExpense(){
 }
 
 // ══════════════════════════════════════════════════════
-// Stats — 3 Dimensions
+// Stats
 // ══════════════════════════════════════════════════════
 function switchStatsTab(name,btn){
-  currentStatsTab=name;
-  document.querySelectorAll('.stats-tab').forEach(t=>t.classList.remove('active'));
-  btn.classList.add('active');
+  currentStatsTab=name;statsSubTab='daily';
+  document.querySelectorAll('.stats-tab').forEach(t=>t.classList.remove('active'));btn.classList.add('active');
   renderStatsPanel();
 }
 function renderStats(){if(!state.trip)return;renderStatsPanel();}
@@ -917,39 +1047,50 @@ function renderStatsPanel(){
   else if(currentStatsTab==='my-share')renderStatsMyShare(me);
   else if(currentStatsTab==='my-personal')renderStatsMyPersonal(me);
 }
-function statsCharts(expenses,getTotalFn,color){
-  if(!expenses.length)return '<div class="empty"><div class="empty-icon">📊</div><div>暂无数据</div></div>';
+function statsCharts(expenses,getTotalFn,color,extraHighlight){
+  if(!expenses.length)return '<div id="stats-highlight-bar"></div><div class="empty"><div class="empty-icon">📊</div><div>暂无数据</div></div>';
   const grandTotal=expenses.reduce((s,e)=>s+getTotalFn(e),0);
-  // Summary card
-  let html=`<div class="card" style="text-align:center;padding:16px"><div style="font-size:12px;color:var(--gray);margin-bottom:4px">合计</div><div style="font-size:34px;font-weight:700;color:${color};letter-spacing:-.5px">${fmt(grandTotal)}</div><div style="font-size:12px;color:var(--gray);margin-top:4px">${expenses.length} 笔</div></div>`;
-  // Sub tabs for daily / category
-  html+=`<div style="display:flex;gap:0;margin:4px 16px 8px;background:var(--card);border-radius:10px;overflow:hidden"><div id="sc-tab-daily" class="stats-tab active" onclick="toggleStatsSub('daily')" style="flex:1">每日</div><div id="sc-tab-cat" class="stats-tab" onclick="toggleStatsSub('cat')" style="flex:1">分类</div></div>`;
+  const days=tripDays();
+  const dailyAvg=days&&days>0?grandTotal/days:0;
+  // Highlight bar
+  const highlights=[
+    {label:'合计',val:fmt(grandTotal),sub:expenses.length+' 笔',color},
+    days?{label:`日均 (${days}天)`,val:fmt(dailyAvg),sub:'',color}:null,
+    ...( extraHighlight||[])
+  ].filter(Boolean);
+  const highlightHtml=`<div class="stats-highlight">${highlights.map(h=>`<div class="sh-card"><div class="sh-label">${h.label}</div><div class="sh-val" style="color:${h.color}">${h.val}</div>${h.sub?`<div class="sh-sub">${h.sub}</div>`:''}</div>`).join('')}</div>`;
+  // Sub tabs
+  const subTabHtml=`<div style="display:flex;gap:0;margin:4px 16px 8px;background:var(--card);border-radius:10px;overflow:hidden"><div id="sc-tab-daily" class="stats-tab ${statsSubTab==='daily'?'active':''}" onclick="toggleStatsSub('daily')" style="flex:1">每日</div><div id="sc-tab-cat" class="stats-tab ${statsSubTab==='cat'?'active':''}" onclick="toggleStatsSub('cat')" style="flex:1">分类</div></div>`;
   // Daily
   const byDay=groupBy(expenses,e=>e.expense_date);
-  const days=Object.keys(byDay).sort((a,b)=>b.localeCompare(a));
-  html+=`<div id="sc-panel-daily"><div class="card-list">${days.map(d=>{const amt=byDay[d].reduce((s,e)=>s+getTotalFn(e),0);const pct=grandTotal>0?amt/grandTotal*100:0;return `<div class="card-item"><div style="flex:1"><div style="display:flex;justify-content:space-between;margin-bottom:2px"><span style="font-size:14px;font-weight:600">${fmtDate(d)}</span><span style="font-size:15px;font-weight:700">${fmt(amt)}</span></div><div style="font-size:11px;color:var(--gray);margin-bottom:3px">${byDay[d].length} 笔 · ${pct.toFixed(1)}%</div><div class="prog-wrap"><div class="prog-bar" style="width:${pct}%;background:${color}"></div></div></div></div>`;}).join('')}</div></div>`;
-  // By Category
+  const ds=Object.keys(byDay).sort((a,b)=>b.localeCompare(a));
+  const dailyHtml=`<div id="sc-panel-daily" ${statsSubTab!=='daily'?'class="hidden"':''}><div class="card-list">${ds.map(d=>{const amt=byDay[d].reduce((s,e)=>s+getTotalFn(e),0);const pct=grandTotal>0?amt/grandTotal*100:0;return `<div class="card-item"><div style="flex:1"><div style="display:flex;justify-content:space-between;margin-bottom:2px"><span style="font-size:14px;font-weight:600">${fmtDate(d)}</span><span style="font-size:15px;font-weight:700">${fmt(amt)}</span></div><div style="font-size:11px;color:var(--gray);margin-bottom:3px">${byDay[d].length} 笔 · ${pct.toFixed(1)}%</div><div class="prog-wrap"><div class="prog-bar" style="width:${pct}%;background:${color}"></div></div></div></div>`;}).join('')}</div></div>`;
+  // Category
   const byCat=groupBy(expenses,e=>e.category_id||'__none');
-  const catSorted=Object.entries(byCat).map(([k,v])=>({cat:state.categories.find(c=>c.id===k),amt:v.reduce((s,e)=>s+getTotalFn(e),0),count:v.length})).sort((a,b)=>b.amt-a.amt);
-  html+=`<div id="sc-panel-cat" class="hidden"><div class="card-list">${catSorted.map(({cat,amt,count})=>{const pct=grandTotal>0?amt/grandTotal*100:0;return `<div class="card-item"><div style="font-size:24px;width:36px">${cat?cat.icon:'💰'}</div><div style="flex:1"><div style="display:flex;justify-content:space-between;margin-bottom:2px"><span style="font-size:14px;font-weight:500">${cat?cat.name:'未分类'}</span><span style="font-size:14px;font-weight:600">${fmt(amt)}</span></div><div style="font-size:11px;color:var(--gray);margin-bottom:3px">${count} 笔 · ${pct.toFixed(1)}%</div><div class="prog-wrap"><div class="prog-bar" style="width:${pct}%;background:${color}"></div></div></div></div>`;}).join('')}</div></div>`;
-  return html;
+  const catS=Object.entries(byCat).map(([k,v])=>({cat:state.categories.find(c=>c.id===k),amt:v.reduce((s,e)=>s+getTotalFn(e),0),count:v.length})).sort((a,b)=>b.amt-a.amt);
+  const catHtml=`<div id="sc-panel-cat" ${statsSubTab!=='cat'?'class="hidden"':''}><div class="card-list">${catS.map(({cat,amt,count})=>{const pct=grandTotal>0?amt/grandTotal*100:0;return `<div class="card-item"><div style="font-size:24px;width:36px">${cat?cat.icon:'💰'}</div><div style="flex:1"><div style="display:flex;justify-content:space-between;margin-bottom:2px"><span style="font-size:14px;font-weight:500">${cat?cat.name:'未分类'}</span><span style="font-size:14px;font-weight:600">${fmt(amt)}</span></div><div style="font-size:11px;color:var(--gray);margin-bottom:3px">${count} 笔 · ${pct.toFixed(1)}%</div><div class="prog-wrap"><div class="prog-bar" style="width:${pct}%;background:${color}"></div></div></div></div>`;}).join('')}</div></div>`;
+  return highlightHtml+subTabHtml+dailyHtml+catHtml;
 }
-let statsSubTab='daily';
 function toggleStatsSub(tab){
   statsSubTab=tab;
-  const dp=el('sc-panel-daily'),cp=el('sc-panel-cat');
-  if(!dp||!cp)return;
+  const dp=el('sc-panel-daily'),cp=el('sc-panel-cat');if(!dp||!cp)return;
   dp.classList.toggle('hidden',tab!=='daily');cp.classList.toggle('hidden',tab!=='cat');
-  el('sc-tab-daily').classList.toggle('active',tab==='daily');
-  el('sc-tab-cat').classList.toggle('active',tab==='cat');
+  el('sc-tab-daily')?.classList.toggle('active',tab==='daily');el('sc-tab-cat')?.classList.toggle('active',tab==='cat');
 }
 function renderStatsSharedTotal(){
   const shared=state.expenses.filter(e=>e.account_type==='shared');
-  el('stats-dim-panel').innerHTML=statsCharts(shared,e=>toCNY(e),'var(--blue)');
+  const grandTotal=shared.reduce((s,e)=>s+toCNY(e),0);
+  const perPerson=state.members.length>0?grandTotal/state.members.length:0;
+  const extra=[{label:'人均分摊',val:fmt(perPerson),sub:'理论应付',color:'var(--orange)'}];
+  el('stats-dim-panel').innerHTML=statsCharts(shared,e=>toCNY(e),'var(--blue)',extra);
 }
 function renderStatsMyShare(me){
   const shared=state.expenses.filter(e=>e.account_type==='shared');
-  el('stats-dim-panel').innerHTML=statsCharts(shared,e=>myShareOf(e),'var(--orange)');
+  const grandTotal=shared.reduce((s,e)=>s+toCNY(e),0);
+  const myTotal=shared.reduce((s,e)=>s+myShareOf(e),0);
+  const pct=grandTotal>0?myTotal/grandTotal*100:0;
+  const extra=[{label:'占共同总',val:pct.toFixed(1)+'%',sub:'',color:'var(--orange)'}];
+  el('stats-dim-panel').innerHTML=statsCharts(shared,e=>myShareOf(e),'var(--orange)',extra);
 }
 function renderStatsMyPersonal(me){
   if(!me){el('stats-dim-panel').innerHTML='<div class="empty"><div>请先在设置中设置本人</div></div>';return;}
@@ -958,14 +1099,12 @@ function renderStatsMyPersonal(me){
 }
 
 // ══════════════════════════════════════════════════════
-// Assets Page
+// Assets
 // ══════════════════════════════════════════════════════
 function renderAssets(){
   if(!state.trip)return;
   const me=getMe();
-  // Only show my wallets
   const myWallets=me?state.wallets.filter(w=>w.member_id===me.id):[];
-  // Compute spent per wallet
   const spentByWallet={};
   state.expenses.forEach(e=>{
     if(me&&e.paid_by===me.id&&e.wallet_id){
@@ -973,35 +1112,27 @@ function renderAssets(){
       spentByWallet[e.wallet_id]+=toCNY(e);
     }
   });
-  // Wallet transfers
   (state.transfers||[]).filter(t=>t.transfer_type==='wallet'&&me&&t.wallet_member_id===me.id).forEach(t=>{
     const amt=transferToCNY(t);
     if(t.from_wallet_id){if(!spentByWallet[t.from_wallet_id])spentByWallet[t.from_wallet_id]=0;spentByWallet[t.from_wallet_id]+=amt;}
     if(t.to_wallet_id){if(!spentByWallet[t.to_wallet_id])spentByWallet[t.to_wallet_id]=0;spentByWallet[t.to_wallet_id]-=amt;}
   });
-  // Total in CNY
-  const totalInitCNY=myWallets.reduce((s,w)=>{
-    const r=getRate(me?.id,w.currency_code||'CNY');
-    return s+parseFloat(w.initial_amount||0)*r;
-  },0);
+  const totalInitCNY=myWallets.reduce((s,w)=>s+parseFloat(w.initial_amount||0)*getRate(me?.id,w.currency_code||'CNY'),0);
   const totalSpentCNY=Object.values(spentByWallet).reduce((s,v)=>s+v,0);
-  const totalBalCNY=myWallets.reduce((s,w)=>{
-    const r=getRate(me?.id,w.currency_code||'CNY');
-    const init=parseFloat(w.initial_amount||0)*r;
-    const spent=spentByWallet[w.id]||0;
-    return s+init-spent;
-  },0);
+  const totalBalCNY=myWallets.reduce((s,w)=>{const r=getRate(me?.id,w.currency_code||'CNY');return s+(parseFloat(w.initial_amount||0)*r-(spentByWallet[w.id]||0));},0);
   el('assets-summary').innerHTML=`<div class="card" style="padding:16px">
-    <div style="font-size:12px;color:var(--gray);margin-bottom:4px">我的资产总览</div>
+    <div style="font-size:12px;color:var(--gray);margin-bottom:2px">我的资产总览</div>
     <div style="font-size:32px;font-weight:700;color:${totalBalCNY>=0?'var(--green)':'var(--red)'};letter-spacing:-.5px">${fmt(totalBalCNY)}</div>
     <div style="display:flex;gap:16px;margin-top:10px">
       <div><div style="font-size:11px;color:var(--gray)">初始总额</div><div style="font-size:14px;font-weight:600">${fmt(totalInitCNY)}</div></div>
       <div style="width:1px;background:var(--border)"></div>
       <div><div style="font-size:11px;color:var(--gray)">已消费</div><div style="font-size:14px;font-weight:600;color:var(--red)">${fmt(totalSpentCNY)}</div></div>
+      <div style="width:1px;background:var(--border)"></div>
+      <div><div style="font-size:11px;color:var(--gray)">剩余</div><div style="font-size:14px;font-weight:600;color:${totalBalCNY>=0?'var(--green)':'var(--red)'}">${fmt(totalBalCNY)}</div></div>
     </div>
-    <div style="font-size:11px;color:var(--gray);margin-top:8px">点击各资产卡片查看消费明细</div>
+    <div style="font-size:11px;color:var(--gray);margin-top:8px">点击资产卡片查看明细</div>
   </div>`;
-  if(!me){el('assets-list').innerHTML='<div class="empty"><div>请在设置中设置本人</div></div>';return;}
+  if(!me){el('assets-list').innerHTML='<div class="empty"><div>请先设置本人</div></div>';return;}
   if(!myWallets.length){el('assets-list').innerHTML='<div class="empty"><div class="empty-icon">👛</div><div>还没有资产，点右上角添加</div></div>';return;}
   el('assets-list').innerHTML=myWallets.map(w=>{
     const code=w.currency_code||'CNY';
@@ -1013,21 +1144,18 @@ function renderAssets(){
     const balCNY=balFx*rate;
     const pct=initAmt>0?Math.min(100,spentFx/initAmt*100):0;
     const barColor=pct>90?'var(--red)':pct>70?'var(--orange)':'var(--green)';
-    const balStr=code==='CNY'?fmt(balCNY):fmtFx(balFx,code);
-    const initStr=code==='CNY'?fmt(initAmt):fmtFx(initAmt,code);
-    const spentStr=code==='CNY'?fmt(spentCNY):fmtFx(spentFx,code);
+    const balStr=code!=='CNY'?fmtFx(balFx,code):fmt(balCNY);
+    const initStr=code!=='CNY'?fmtFx(initAmt,code):fmt(initAmt);
+    const spentStr=code!=='CNY'?fmtFx(spentFx,code):fmt(spentCNY);
     return `<div class="wallet-card" onclick="openWalletDetail('${w.id}')">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-        <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:26px">${w.icon}</span>
-          <div>
-            <div style="font-size:15px;font-weight:600">${w.name}</div>
-            <div style="font-size:11px;color:var(--gray)">${code!=='CNY'?code+' · ':''} 初始 ${initStr}</div>
-          </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:28px">${w.icon}</span>
+          <div><div style="font-size:15px;font-weight:600">${w.name}</div><div style="font-size:11px;color:var(--gray)">${code!=='CNY'?code+' · ':''} 初始 ${initStr}</div></div>
         </div>
         <div style="text-align:right">
           <div style="font-size:11px;color:var(--gray)">剩余</div>
-          <div style="font-size:20px;font-weight:700;color:${balCNY>=0?'var(--green)':'var(--red)'}">${balStr}</div>
+          <div style="font-size:22px;font-weight:700;color:${balCNY>=0?'var(--green)':'var(--red)'}">${balStr}</div>
           ${code!=='CNY'?`<div style="font-size:11px;color:var(--gray)">≈ ${fmt(balCNY)}</div>`:''}
         </div>
       </div>
@@ -1039,48 +1167,36 @@ function renderAssets(){
 function openWalletDetail(walletId){
   currentWalletDetailId=walletId;
   const w=state.wallets.find(x=>x.id===walletId);if(!w)return;
-  const me=getMe();
-  const code=w.currency_code||'CNY';
-  const rate=getRate(me?.id,code);
+  const me=getMe();const code=w.currency_code||'CNY';const rate=getRate(me?.id,code);
   el('wallet-detail-title').textContent=`${w.icon} ${w.name}`;
-  // Find all expenses linked to this wallet
   const wExps=state.expenses.filter(e=>e.wallet_id===walletId);
-  // Wallet transfers involving this wallet
   const wTransfers=(state.transfers||[]).filter(t=>t.from_wallet_id===walletId||t.to_wallet_id===walletId);
   const initAmt=parseFloat(w.initial_amount||0);
-  const spentFxFromExp=wExps.reduce((s,e)=>{
-    const cny=toCNY(e);return s+(code==='CNY'?cny:(rate>0?cny/rate:0));
-  },0);
-  const netTransferFx=wTransfers.reduce((s,t)=>{
-    const cny=transferToCNY(t);const fx=code==='CNY'?cny:(rate>0?cny/rate:0);
-    return s+(t.from_wallet_id===walletId?fx:0)-(t.to_wallet_id===walletId?fx:0);
-  },0);
+  const spentFxFromExp=wExps.reduce((s,e)=>{const cny=toCNY(e);return s+(code==='CNY'?cny:(rate>0?cny/rate:0));},0);
+  const netTransferFx=wTransfers.reduce((s,t)=>{const cny=transferToCNY(t);const fx=code==='CNY'?cny:(rate>0?cny/rate:0);return s+(t.from_wallet_id===walletId?fx:0)-(t.to_wallet_id===walletId?fx:0);},0);
   const balFx=initAmt-spentFxFromExp-netTransferFx;
   el('wallet-detail-content').innerHTML=`
     <div style="padding:0 16px 12px">
       <div style="display:flex;justify-content:space-between;margin-bottom:12px">
-        <div><div style="font-size:12px;color:var(--gray)">初始</div><div style="font-size:20px;font-weight:600">${code==='CNY'?fmt(initAmt):fmtFx(initAmt,code)}</div></div>
-        <div style="text-align:right"><div style="font-size:12px;color:var(--gray)">剩余</div><div style="font-size:22px;font-weight:700;color:${balFx>=0?'var(--green)':'var(--red)'}">${code==='CNY'?fmt(balFx):fmtFx(balFx,code)}</div></div>
+        <div><div style="font-size:12px;color:var(--gray)">初始</div><div style="font-size:20px;font-weight:600">${code!=='CNY'?fmtFx(initAmt,code):fmt(initAmt)}</div></div>
+        <div style="text-align:right"><div style="font-size:12px;color:var(--gray)">剩余</div><div style="font-size:22px;font-weight:700;color:${balFx>=0?'var(--green)':'var(--red)'}">${code!=='CNY'?fmtFx(balFx,code):fmt(balFx)}</div></div>
       </div>
     </div>
     <div class="sec-title">消费明细（${wExps.length} 笔）</div>
-    <div class="card-list">${wExps.length?wExps.map(e=>{const cat=state.categories.find(c=>c.id===e.category_id);const cny=toCNY(e);const fx=code==='CNY'?cny:(rate>0?cny/rate:0);return `<div class="card-item"><div style="font-size:20px">${cat?cat.icon:'💰'}</div><div style="flex:1"><div style="font-size:14px">${e.title}</div><div style="font-size:11px;color:var(--gray)">${fmtDate(e.expense_date)}</div></div><div style="font-weight:600;font-size:14px">${code==='CNY'?fmt(cny):fmtFx(fx,code)}</div></div>`;}).join(''):'<div style="padding:12px 16px;color:var(--gray);font-size:13px">无消费记录</div>'}</div>
-    ${wTransfers.length?`<div class="sec-title">转账记录</div><div class="card-list">${wTransfers.map(t=>{const from=t.from_wallet_id===walletId;const otherWId=from?t.to_wallet_id:t.from_wallet_id;const otherW=state.wallets.find(x=>x.id===otherWId);const cny=transferToCNY(t);const fx=code==='CNY'?cny:(rate>0?cny/rate:0);return `<div class="card-item"><div style="font-size:20px">${from?'↑ 转出':'↓ 转入'}</div><div style="flex:1"><div style="font-size:14px">${from?'转出到':'从'}${otherW?otherW.icon+otherW.name:'其他账户'}</div><div style="font-size:11px;color:var(--gray)">${fmtDate(t.transfer_date)}</div></div><div style="font-weight:600;font-size:14px;color:${from?'var(--red)':'var(--green)'}">  ${from?'-':'+'}${code==='CNY'?fmt(cny):fmtFx(fx,code)}</div></div>`;}).join('')}</div>`:''
-    }
+    <div class="card-list">${wExps.length?wExps.map(e=>{const cat=state.categories.find(c=>c.id===e.category_id);const cny=toCNY(e);const fx=code==='CNY'?cny:(rate>0?cny/rate:0);return `<div class="card-item"><div style="font-size:20px">${cat?cat.icon:'💰'}</div><div style="flex:1"><div style="font-size:14px">${e.title}</div><div style="font-size:11px;color:var(--gray)">${fmtDate(e.expense_date)}</div></div><div style="font-weight:600;font-size:14px;color:var(--red)">-${code!=='CNY'?fmtFx(fx,code):fmt(cny)}</div></div>`;}).join(''):'<div style="padding:12px 16px;color:var(--gray);font-size:13px">无消费记录</div>'}</div>
+    ${wTransfers.length?`<div class="sec-title">转账记录</div><div class="card-list">${wTransfers.map(t=>{const from=t.from_wallet_id===walletId;const ow=state.wallets.find(x=>x.id===(from?t.to_wallet_id:t.from_wallet_id));const cny=transferToCNY(t);const fx=code==='CNY'?cny:(rate>0?cny/rate:0);return `<div class="card-item"><div style="font-size:20px">${from?'↑':'↓'}</div><div style="flex:1"><div style="font-size:14px">${from?'转出到':'从'}${ow?ow.icon+ow.name:'其他'}</div><div style="font-size:11px;color:var(--gray)">${fmtDate(t.transfer_date)}</div></div><div style="font-weight:600;font-size:14px;color:${from?'var(--red)':'var(--green)'}"> ${from?'-':'+'}${code!=='CNY'?fmtFx(fx,code):fmt(cny)}</div></div>`;}).join('')}</div>`:''}
     <div style="height:8px"></div>`;
   el('wallet-detail-modal').classList.remove('hidden');
 }
 function closeWalletDetailModal(){el('wallet-detail-modal').classList.add('hidden');currentWalletDetailId=null;}
 async function deleteCurrentWallet(){
-  if(!currentWalletDetailId)return;
-  if(!confirm('确定删除这个资产？'))return;
+  if(!currentWalletDetailId||!confirm('确定删除？'))return;
   await sb.from('wallets').delete().eq('id',currentWalletDetailId);
   closeWalletDetailModal();await loadAll();renderAssets();showToast('已删除');
 }
 function openAddWallet(){
-  renderWalletIconPicker();
-  el('new-wallet-name').value='';el('new-wallet-init').value='';
-  el('new-wallet-currency').value='CNY';updateWalletCurrencyHint();
+  selectedWalletIcon='💵';renderWalletIconPicker();
+  el('new-wallet-name').value='';el('new-wallet-init').value='';el('new-wallet-currency').value='CNY';updateWalletCurrencyHint();
   el('wallet-modal').classList.remove('hidden');
 }
 function closeWalletModal(){el('wallet-modal').classList.add('hidden');}
@@ -1090,9 +1206,8 @@ function updateWalletCurrencyHint(){
   if(code==='CNY'){el('wallet-cny-hint').textContent='';return;}
   const me=getMe();const rate=getRate(me?.id,code);
   const amt=parseFloat(el('new-wallet-init').value)||0;
-  el('wallet-cny-hint').textContent=amt>0?`≈ ${fmt(amt*rate)}（汇率 ${rate}）`:`汇率：1 ${code} = ${rate} CNY`;
+  el('wallet-cny-hint').textContent=amt>0?`≈ ${fmt(amt*rate)} 人民币`:`汇率：1 ${code} = ${rate} CNY`;
 }
-el('new-wallet-init')&&el('new-wallet-init').addEventListener('input',updateWalletCurrencyHint);
 function renderWalletIconPicker(){
   el('wallet-icon-picker').innerHTML=WALLET_ICONS.map(ic=>`<div class="pill ${selectedWalletIcon===ic?'sel':''}" onclick="selectedWalletIcon='${ic}';renderWalletIconPicker()">${ic}</div>`).join('');
 }
@@ -1110,17 +1225,15 @@ async function saveWallet(){
 // ══════════════════════════════════════════════════════
 function renderSettle(){
   if(!state.trip)return;
-  const balance={};
-  state.members.forEach(m=>{balance[m.id]=0;});
+  const balance={};state.members.forEach(m=>{balance[m.id]=0;});
   state.expenses.forEach(e=>{
     const cny=toCNY(e);
-    const expSplits=state.splits.filter(s=>s.expense_id===e.id);
-    if(expSplits.length>0){
+    const splits=state.splits.filter(s=>s.expense_id===e.id);
+    if(splits.length>0){
       if(e.paid_by&&balance[e.paid_by]!==undefined)balance[e.paid_by]+=cny;
-      expSplits.forEach(s=>{if(balance[s.member_id]!==undefined)balance[s.member_id]-=parseFloat(s.split_amount);});
+      splits.forEach(s=>{if(balance[s.member_id]!==undefined)balance[s.member_id]-=parseFloat(s.split_amount);});
     }
   });
-  // Person-to-person transfers affect balance
   (state.transfers||[]).filter(t=>t.transfer_type==='person').forEach(t=>{
     const cny=transferToCNY(t);
     if(t.from_member_id&&balance[t.from_member_id]!==undefined)balance[t.from_member_id]-=cny;
@@ -1128,29 +1241,32 @@ function renderSettle(){
   });
   const me=getMe();
   el('settle-balance').innerHTML=state.members.map(m=>{
-    const b=balance[m.id]||0;
-    const isMe=me&&m.id===me.id;
+    const b=balance[m.id]||0;const isMe=me&&m.id===me.id;
     const color=b>0.01?'var(--green)':b<-0.01?'var(--red)':'var(--gray)';
-    const sign=b>0.01?'+':'';
-    const label=b>0.01?`应收 ${fmt(b)}`:`应付 ${fmt(-b)}`;
-    return `<div class="card-item"><div class="av av-md" style="background:${m.color}">${m.name[0]}</div><div style="flex:1"><div style="font-size:15px;font-weight:500">${m.name}${isMe?'<span class="me-badge">我</span>':''}</div><div style="font-size:12px;color:var(--gray)">${Math.abs(b)<0.01?'已结清':label}</div></div><div style="font-size:16px;font-weight:700;color:${color}">${sign}${fmt(b)}</div></div>`;
+    const sign=b>0.01?'+':'';const label=b>0.01?`被欠 ${fmt(b)}`:`欠 ${fmt(-b)}`;
+    return `<div class="card-item"><div class="av av-md" style="background:${m.color}">${m.name[0]}</div><div style="flex:1"><div style="font-size:15px;font-weight:500">${m.name}${isMe?'<span class="me-badge">我</span>':''}</div><div style="font-size:12px;color:${color}">${Math.abs(b)<0.01?'✓ 已结清':label}</div></div><div style="font-size:16px;font-weight:700;color:${color}">${sign}${fmt(b)}</div></div>`;
   }).join('');
   const txns=computeSettlement(balance);
-  el('settle-txns').innerHTML=txns.length?txns.map(t=>{const from=state.members.find(m=>m.id===t.from);const to=state.members.find(m=>m.id===t.to);return `<div class="card-item"><div class="av av-sm" style="background:${from?.color}">${from?.name[0]}</div><div style="flex:1;font-size:14px"><b>${from?.name}</b><span style="color:var(--gray)"> → </span><b>${to?.name}</b></div><div style="font-size:16px;font-weight:700;color:var(--blue)">${fmt(t.amount)}</div><div class="av av-sm" style="background:${to?.color};margin-left:6px">${to?.name[0]}</div></div>`;}).join(''):'<div class="empty"><div class="empty-icon">🎉</div><div>大家已经结清了！</div></div>';
-  // Transfer history
+  el('settle-txns').innerHTML=txns.length?txns.map(t=>{
+    const from=state.members.find(m=>m.id===t.from);const to=state.members.find(m=>m.id===t.to);
+    const isMyAction=me&&(t.from===me.id||t.to===me.id);
+    return `<div class="card-item ${isMyAction?'':''}">
+      <div class="av av-sm" style="background:${from?.color}">${from?.name[0]}</div>
+      <div style="flex:1;font-size:14px"><b>${from?.name}</b><span style="color:var(--gray)"> → </span><b>${to?.name}</b></div>
+      <div style="font-size:16px;font-weight:700;color:var(--blue)">${fmt(t.amount)}</div>
+      <div class="av av-sm" style="background:${to?.color};margin-left:6px">${to?.name[0]}</div>
+      <button class="settle-quick-btn" onclick="quickSettle('${t.from}','${t.to}',${t.amount})">✓ 已转</button>
+    </div>`;
+  }).join(''):'<div class="empty"><div class="empty-icon">🎉</div><div>大家已经结清了！</div></div>';
   const allT=state.transfers||[];
   el('settle-transfers').innerHTML=allT.length?allT.map(t=>{
-    const amt=transferToCNY(t);
-    const code=t.currency_code||'CNY';
-    const amtStr=code==='CNY'?fmt(t.amount):fmtFx(t.amount,code)+(code!=='CNY'?` ≈ ${fmt(amt)}`:'');
+    const amt=t.amount;const code=t.currency_code||'CNY';
+    const amtStr=code==='CNY'?fmt(amt):fmtFx(amt,code)+(code!=='CNY'?` ≈ ${fmt(transferToCNY(t))}`:'');
     if(t.transfer_type==='person'){
-      const from=state.members.find(m=>m.id===t.from_member_id);
-      const to=state.members.find(m=>m.id===t.to_member_id);
+      const from=state.members.find(m=>m.id===t.from_member_id);const to=state.members.find(m=>m.id===t.to_member_id);
       return `<div class="card-item"><div class="av av-sm" style="background:${from?.color}">${from?.name?.[0]||'?'}</div><div style="flex:1"><div style="font-size:14px"><b>${from?.name||'?'}</b> → <b>${to?.name||'?'}</b></div><div style="font-size:11px;color:var(--gray)">${fmtDate(t.transfer_date)}${t.notes?' · '+t.notes:''}</div></div><div style="font-size:14px;font-weight:600;color:var(--blue)">${amtStr}</div><button class="btn btn-ghost btn-sm text-red" style="padding:4px;margin-left:2px" onclick="deleteTransfer('${t.id}')">×</button></div>`;
     }else{
-      const fw=state.wallets.find(w=>w.id===t.from_wallet_id);
-      const tw=state.wallets.find(w=>w.id===t.to_wallet_id);
-      const mem=state.members.find(m=>m.id===t.wallet_member_id);
+      const fw=state.wallets.find(w=>w.id===t.from_wallet_id);const tw=state.wallets.find(w=>w.id===t.to_wallet_id);const mem=state.members.find(m=>m.id===t.wallet_member_id);
       return `<div class="card-item"><div class="av av-sm" style="background:${mem?.color||'#8E8E93'}">${mem?.name?.[0]||'?'}</div><div style="flex:1"><div style="font-size:14px">${fw?.icon||''}${fw?.name||'?'} → ${tw?.icon||''}${tw?.name||'?'}</div><div style="font-size:11px;color:var(--gray)">${fmtDate(t.transfer_date)} · 账户互转${t.notes?' · '+t.notes:''}</div></div><div style="font-size:14px;font-weight:600;color:var(--orange)">${amtStr}</div><button class="btn btn-ghost btn-sm text-red" style="padding:4px;margin-left:2px" onclick="deleteTransfer('${t.id}')">×</button></div>`;
     }
   }).join(''):'<div class="empty"><div class="empty-icon">📋</div><div>还没有转账记录</div></div>';
@@ -1168,6 +1284,13 @@ function computeSettlement(balance){
     if(pos[i].amt<0.01)i++;if(neg[j].amt<0.01)j++;
   }
   return txns;
+}
+// Quick settle: click "已转" on suggestion
+async function quickSettle(fromId,toId,amount){
+  const row={trip_id:state.trip.id,transfer_type:'person',from_member_id:fromId,to_member_id:toId,amount:amount,currency_code:'CNY',transfer_date:today(),notes:'结算转账'};
+  const {error}=await sb.from('transfers').insert(row);
+  if(error){showToast('记录失败：'+error.message);return;}
+  await loadAll();renderSettle();renderAssets();renderHome();showToast('已记录转账 ✓');
 }
 
 // ══════════════════════════════════════════════════════
@@ -1189,8 +1312,8 @@ function setTransferType(type,btn){
   el('transfer-person-section').classList.toggle('hidden',type!=='person');el('transfer-wallet-section').classList.toggle('hidden',type!=='wallet');
   if(type==='wallet')renderTransferWalletMemberPills();
 }
-function renderTransferFromPills(){el('transfer-from-pills').innerHTML=state.members.map(m=>{const isMe=getMe()&&m.id===getMe().id;return `<div class="pill ${transferForm.fromMemberId===m.id?'sel':''}" onclick="transferForm.fromMemberId='${m.id}';renderTransferFromPills()"><div class="av av-xs" style="background:${m.color}">${m.name[0]}</div>${m.name}${isMe?'<span class="me-badge">我</span>':''}</div>`;}).join('');}
-function renderTransferToPills(){el('transfer-to-pills').innerHTML=state.members.map(m=>{const isMe=getMe()&&m.id===getMe().id;return `<div class="pill ${transferForm.toMemberId===m.id?'sel':''}" onclick="transferForm.toMemberId='${m.id}';renderTransferToPills()"><div class="av av-xs" style="background:${m.color}">${m.name[0]}</div>${m.name}${isMe?'<span class="me-badge">我</span>':''}</div>`;}).join('');}
+function renderTransferFromPills(){const me=getMe();el('transfer-from-pills').innerHTML=state.members.map(m=>{const isMe=me&&m.id===me.id;return `<div class="pill ${transferForm.fromMemberId===m.id?'sel':''}" onclick="transferForm.fromMemberId='${m.id}';renderTransferFromPills()"><div class="av av-xs" style="background:${m.color}">${m.name[0]}</div>${m.name}${isMe?'<span class="me-badge">我</span>':''}</div>`;}).join('');}
+function renderTransferToPills(){const me=getMe();el('transfer-to-pills').innerHTML=state.members.map(m=>{const isMe=me&&m.id===me.id;return `<div class="pill ${transferForm.toMemberId===m.id?'sel':''}" onclick="transferForm.toMemberId='${m.id}';renderTransferToPills()"><div class="av av-xs" style="background:${m.color}">${m.name[0]}</div>${m.name}${isMe?'<span class="me-badge">我</span>':''}</div>`;}).join('');}
 function renderTransferWalletMemberPills(){
   if(!transferForm.walletMemberId&&state.members.length)transferForm.walletMemberId=state.members[0].id;
   el('transfer-wallet-member-pills').innerHTML=state.members.map(m=>`<div class="pill ${transferForm.walletMemberId===m.id?'sel':''}" onclick="transferForm.walletMemberId='${m.id}';transferForm.fromWalletId=null;transferForm.toWalletId=null;renderTransferWalletMemberPills()"><div class="av av-xs" style="background:${m.color}">${m.name[0]}</div>${m.name}</div>`).join('');
@@ -1199,12 +1322,10 @@ function renderTransferWalletMemberPills(){
 function renderTransferWalletFromPills(){const ws=state.wallets.filter(w=>w.member_id===transferForm.walletMemberId);el('transfer-wallet-from-pills').innerHTML=ws.map(w=>`<div class="pill ${transferForm.fromWalletId===w.id?'sel':''}" onclick="transferForm.fromWalletId='${w.id}';renderTransferWalletFromPills()">${w.icon} ${w.name}${w.currency_code&&w.currency_code!=='CNY'?' ('+w.currency_code+')':''}</div>`).join('')||'<span style="color:var(--gray);font-size:13px">无资产</span>';}
 function renderTransferWalletToPills(){const ws=state.wallets.filter(w=>w.member_id===transferForm.walletMemberId);el('transfer-wallet-to-pills').innerHTML=ws.map(w=>`<div class="pill ${transferForm.toWalletId===w.id?'sel':''}" onclick="transferForm.toWalletId='${w.id}';renderTransferWalletToPills()">${w.icon} ${w.name}${w.currency_code&&w.currency_code!=='CNY'?' ('+w.currency_code+')':''}</div>`).join('')||'<span style="color:var(--gray);font-size:13px">无资产</span>';}
 function updateTransferHint(){
-  const amt=parseFloat(el('transfer-amount').value)||0;
-  const code=el('transfer-currency').value;
+  const amt=parseFloat(el('transfer-amount').value)||0;const code=el('transfer-currency').value;
   if(code==='CNY'||!amt){el('transfer-hint').textContent='';return;}
-  const refMemberId=transferForm.fromMemberId||transferForm.walletMemberId;
-  const rate=getRate(refMemberId,code);
-  el('transfer-hint').textContent=`≈ ${fmt(amt*rate)}`;
+  const r=getRate(transferForm.fromMemberId||transferForm.walletMemberId,code);
+  el('transfer-hint').textContent=`≈ ${fmt(amt*r)}`;
 }
 async function saveTransfer(){
   const amount=parseFloat(el('transfer-amount').value);if(!amount||amount<=0){showToast('请填写正确金额');return;}
@@ -1215,10 +1336,10 @@ async function saveTransfer(){
   const row={trip_id:state.trip.id,transfer_type:transferForm.type,from_member_id:transferForm.type==='person'?transferForm.fromMemberId:null,to_member_id:transferForm.type==='person'?transferForm.toMemberId:null,from_wallet_id:transferForm.type==='wallet'?transferForm.fromWalletId:null,to_wallet_id:transferForm.type==='wallet'?transferForm.toWalletId:null,wallet_member_id:transferForm.type==='wallet'?transferForm.walletMemberId:null,amount:code==='CNY'?amount:amtCNY,currency_code:code,transfer_date:el('transfer-date').value,notes:el('transfer-notes').value.trim()||null};
   if(row.transfer_type==='person'&&!row.from_member_id){showToast('请选择付款人');return;}
   if(row.transfer_type==='person'&&!row.to_member_id){showToast('请选择收款人');return;}
-  if(row.transfer_type==='person'&&row.from_member_id===row.to_member_id){showToast('转出和转入不能是同一人');return;}
+  if(row.transfer_type==='person'&&row.from_member_id===row.to_member_id){showToast('不能转给自己');return;}
   if(row.transfer_type==='wallet'&&(!row.from_wallet_id||!row.to_wallet_id)){showToast('请选择转出和转入账户');return;}
   if(row.transfer_type==='wallet'&&row.from_wallet_id===row.to_wallet_id){showToast('账户不能相同');return;}
-  try{const {error}=await sb.from('transfers').insert(row);if(error)throw error;closeTransferModal();await loadAll();renderSettle();renderAssets();showToast('转账已记录 ✓');}
+  try{const {error}=await sb.from('transfers').insert(row);if(error)throw error;closeTransferModal();await loadAll();renderSettle();renderAssets();showToast('已记录 ✓');}
   catch(e){showToast('保存失败：'+e.message);}
 }
 async function deleteTransfer(id){
@@ -1236,15 +1357,14 @@ function renderSettingsMain(){
   el('categories-sub').textContent=state.categories.length+' 个分类';
   el('payments-sub').textContent=paymentMethods.length+' 种方式';
   el('trips-sub').textContent=state.trips.length+' 个行程';
-  const me=getMe();
-  el('me-sub').textContent=me?('当前：'+me.name):'未设置';
+  const me=getMe();el('me-sub').textContent=me?'当前：'+me.name:'⚠️ 未设置（点此设置）';
+  el('me-sub').style.color=me?'var(--gray)':'var(--orange)';
 }
 function showSubSettings(section){
   el('settings-main').classList.toggle('hidden',!!section);
   document.querySelectorAll('.back-page').forEach(p=>{p.classList.add('hidden');p.classList.remove('active');});
   if(section){
-    const p=el('settings-'+section);if(!p)return;
-    p.classList.remove('hidden');p.classList.add('active');
+    const p=el('settings-'+section);if(!p)return;p.classList.remove('hidden');p.classList.add('active');
     if(section==='me')renderMeSelector();
     if(section==='trips')renderTripsList();
     if(section==='members')renderMembersList();
@@ -1253,11 +1373,9 @@ function showSubSettings(section){
     if(section==='payments')renderPaymentsList();
   }
 }
-// Me selector
 function renderMeSelector(){
   el('me-member-list').innerHTML=state.members.map(m=>{const isCur=getMeId()===m.id;return `<div class="card-item card-item-tap" onclick="setMeId('${m.id}');renderMeSelector();renderSettingsMain();renderAll()"><div class="av av-md" style="background:${m.color}">${m.name[0]}</div><div style="flex:1;font-size:15px;font-weight:500">${m.name}</div>${isCur?'<div style="color:var(--blue);font-size:20px">✓</div>':''}</div>`;}).join('');
 }
-// Members
 function renderMembersList(){
   el('members-list').innerHTML=state.members.map(m=>`<div class="card-item"><div class="av av-md" style="background:${m.color}">${m.name[0]}</div><div style="flex:1;font-size:15px;font-weight:500">${m.name}</div></div>`).join('');
 }
@@ -1271,7 +1389,6 @@ async function addMember(){
   }
   el('new-member-name').value='';await loadAll();renderMembersList();renderSettingsMain();showToast('已添加');
 }
-// Currencies
 function renderCurrencyMemberPills(){
   if(!selectedCurrencyMemberId&&state.members.length)selectedCurrencyMemberId=state.members[0].id;
   el('currency-member-pills').innerHTML=state.members.map(m=>`<div class="pill ${selectedCurrencyMemberId===m.id?'sel':''}" onclick="selectedCurrencyMemberId='${m.id}';renderCurrencyMemberPills();renderCurrenciesList()"><div class="av av-xs" style="background:${m.color}">${m.name[0]}</div>${m.name}</div>`).join('');
@@ -1291,33 +1408,26 @@ async function saveCurrency(){
   else await sb.from('currencies').insert({trip_id:state.trip.id,member_id:selectedCurrencyMemberId,currency_code:code,currency_name:names[code]||code,exchange_rate:rate});
   closeCurrencyModal();await loadAll();renderCurrenciesList();showToast('已保存');
 }
-async function deleteCurrency(id){await sb.from('currencies').delete().eq('id',id);await loadAll();renderCurrenciesList();showToast('已删除');}
-// Categories
+async function deleteCurrency(id){await sb.from('currencies').delete().eq('id',id);await loadAll();renderCurrenciesList();}
 function renderCategoriesList(){
   el('categories-list').innerHTML=state.categories.map(c=>`<div class="card-item"><div style="font-size:24px">${c.icon}</div><div style="flex:1;font-size:15px;font-weight:500">${c.name}</div><button class="btn btn-ghost btn-sm text-red" onclick="deleteCategory('${c.id}')">删除</button></div>`).join('');
   el('cat-icon-picker').innerHTML=CAT_ICONS.map(ic=>`<div class="pill ${selectedCatIcon===ic?'sel':''}" onclick="selectedCatIcon='${ic}';renderCategoriesList()">${ic}</div>`).join('');
 }
-async function addCategory(){const name=el('new-cat-name').value.trim();if(!name)return;await sb.from('categories').insert({trip_id:state.trip.id,name,icon:selectedCatIcon});el('new-cat-name').value='';await loadAll();renderCategoriesList();renderSettingsMain();showToast('已添加');}
-async function deleteCategory(id){await sb.from('categories').delete().eq('id',id);await loadAll();renderCategoriesList();renderSettingsMain();showToast('已删除');}
-// Payments
+async function addCategory(){const name=el('new-cat-name').value.trim();if(!name)return;await sb.from('categories').insert({trip_id:state.trip.id,name,icon:selectedCatIcon});el('new-cat-name').value='';await loadAll();renderCategoriesList();renderSettingsMain();}
+async function deleteCategory(id){await sb.from('categories').delete().eq('id',id);await loadAll();renderCategoriesList();renderSettingsMain();}
 function renderPaymentsList(){
   el('payments-list').innerHTML=paymentMethods.map((pm,i)=>`<div class="card-item"><div style="font-size:24px">${pm.icon}</div><div style="flex:1;font-size:15px;font-weight:500">${pm.label}</div>${i>=3?`<button class="btn btn-ghost btn-sm text-red" onclick="deletePM(${i})">删除</button>`:''}</div>`).join('');
   el('pm-icon-picker').innerHTML=PM_ICONS.map(ic=>`<div class="pill ${selectedPmIcon===ic?'sel':''}" onclick="selectedPmIcon='${ic}';renderPaymentsList()">${ic}</div>`).join('');
 }
-async function addPaymentMethod(){const label=el('new-pm-label').value.trim();if(!label){showToast('请填写名称');return;}paymentMethods.push({value:'pm_'+Date.now(),label,icon:selectedPmIcon});savePM(paymentMethods);el('new-pm-label').value='';renderPaymentsList();renderSettingsMain();showToast('已添加');}
-function deletePM(i){if(paymentMethods.length<=1){showToast('至少保留一种');return;}paymentMethods.splice(i,1);savePM(paymentMethods);renderPaymentsList();renderSettingsMain();showToast('已删除');}
+async function addPaymentMethod(){const label=el('new-pm-label').value.trim();if(!label){showToast('请填写名称');return;}paymentMethods.push({value:'pm_'+Date.now(),label,icon:selectedPmIcon});savePM(paymentMethods);el('new-pm-label').value='';renderPaymentsList();renderSettingsMain();}
+function deletePM(i){if(paymentMethods.length<=1){showToast('至少保留一种');return;}paymentMethods.splice(i,1);savePM(paymentMethods);renderPaymentsList();renderSettingsMain();}
 async function clearAllExpenses(){if(!confirm('确定清除当前行程所有账单？不可恢复！'))return;await sb.from('expense_splits').delete().neq('id','00000000-0000-0000-0000-000000000000');await sb.from('expenses').delete().eq('trip_id',state.trip.id);await loadAll();renderAll();showToast('已清除');}
 
 // ══════════════════════════════════════════════════════
-// Wallet currency_code column migration helper
+// Boot
 // ══════════════════════════════════════════════════════
-// The wallets table needs currency_code column. Add it via SQL if not done:
-// ALTER TABLE wallets ADD COLUMN IF NOT EXISTS currency_code TEXT DEFAULT 'CNY';
-// ALTER TABLE transfers ADD COLUMN IF NOT EXISTS currency_code TEXT DEFAULT 'CNY';
-
-// ══════════════════════════════════════════════════════
-// Start
-// ══════════════════════════════════════════════════════
+// Trips need start_date column:
+// ALTER TABLE trips ADD COLUMN IF NOT EXISTS start_date DATE;
 init();
 </script>
 </body>

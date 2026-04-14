@@ -1513,7 +1513,8 @@ function renderSettle(){
     const f=D.members.find(m=>m.id===t.from),t2=D.members.find(m=>m.id===t.to);
     return `<div class="row"><div class="av av-sm" style="background:${f?.color}">${f?.name[0]}</div><div style="flex:1;font-size:14px;font-weight:500"><b>${f?.name}</b><span style="color:var(--text3)"> 转 </span><b>${t2?.name}</b></div><div style="font-size:15px;font-weight:700;color:var(--blue)">${fmt(t.amount)}</div><div class="av av-sm" style="background:${t2?.color};margin:0 6px">${t2?.name[0]}</div><button class="settle-tag" onclick="quickSettle('${t.from}','${t.to}',${t.amount})">✓ 已转</button></div>`;
   }).join(''):'<div class="empty" style="padding:22px"><div class="empty-ico">🎉</div><div style="font-weight:500">大家已结清！</div></div>';
-  el('settle-log').innerHTML=(D.transfers||[]).length?(D.transfers||[]).map(t=>{
+  const settleTransfers=(D.transfers||[]).filter(t=>t.transfer_type!=='topup');
+  el('settle-log').innerHTML=settleTransfers.length?settleTransfers.map(t=>{
     const amt=parseFloat(t.amount);const code=t.currency_code||'CNY';
     const dispAmt=settleCur==='ORIG'&&code!=='CNY'?fmtFx(amt,code):fmt(trToCNY(t));
     const cnyHint=settleCur==='ORIG'&&code!=='CNY'?`<div style="font-size:11px;color:var(--text3)">≈${fmt(trToCNY(t))}</div>`:'';
@@ -1661,12 +1662,13 @@ function updateMemEditAv(){
 async function saveMemEdit(){
   const name=el('mem-edit-name').value.trim();if(!name){toast('请填写名字');return;}
   if(!_editMemId){toast('出错了，请重新打开编辑');return;}
-  // 先尝试带 icon 字段保存
-  const {error:e1}=await db.from('members').update({name,color:_editMemColor,icon:_editMemIcon||null}).eq('id',_editMemId);
-  if(e1){
-    // icon 列不存在，退回不带 icon 的版本
-    const {error:e2}=await db.from('members').update({name,color:_editMemColor}).eq('id',_editMemId);
-    if(e2){toast('保存失败：'+e2.message);return;}
+  // Step 1: 先保存 name + color（不带 icon，100% 成功）
+  const {error:e1}=await db.from('members').update({name,color:_editMemColor}).eq('id',_editMemId);
+  if(e1){toast('保存失败：'+e1.message);return;}
+  // Step 2: 单独尝试保存 icon（列不存在也不影响第一步）
+  if(_editMemIcon!==undefined){
+    await db.from('members').update({icon:_editMemIcon||null}).eq('id',_editMemId);
+    // 忽略 icon 列不存在的报错
   }
   await loadAll();renderMemList();renderSetMain();renderAll();closeMemEdit();toast('已保存');
 }

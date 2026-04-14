@@ -1,1158 +1,954 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>旅行记账</title>
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="旅行记账" />
-  <link rel="manifest" href="manifest.json" />
-  <script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; background: #F2F2F7; color: #1C1C1E; min-height: 100vh; }
-    :root {
-      --blue: #007AFF; --green: #34C759; --red: #FF3B30; --orange: #FF9500;
-      --purple: #AF52DE; --pink: #FF2D55; --teal: #5AC8FA; --yellow: #FFCC00;
-      --gray: #8E8E93; --bg: #F2F2F7; --card: #FFFFFF; --border: #E5E5EA;
-    }
-    .safe-top { padding-top: env(safe-area-inset-top); }
-    .safe-bottom { padding-bottom: calc(env(safe-area-inset-bottom) + 60px); }
-
-    /* Tab Bar */
-    .tab-bar {
-      position: fixed; bottom: 0; left: 0; right: 0; height: calc(60px + env(safe-area-inset-bottom));
-      background: rgba(255,255,255,0.92); backdrop-filter: blur(20px);
-      border-top: 1px solid var(--border); display: flex; align-items: flex-start;
-      padding-top: 8px; z-index: 100;
-    }
-    .tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; padding: 2px 0; }
-    .tab-icon { font-size: 22px; line-height: 1; }
-    .tab-label { font-size: 10px; color: var(--gray); }
-    .tab-item.active .tab-label { color: var(--blue); }
-    .tab-item.active .tab-icon { filter: none; }
-
-    /* Header */
-    .header {
-      background: rgba(255,255,255,0.92); backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--border); padding: 12px 16px;
-      position: sticky; top: 0; z-index: 50;
-    }
-    .header h1 { font-size: 20px; font-weight: 700; }
-    .header-row { display: flex; justify-content: space-between; align-items: center; }
-
-    /* Cards */
-    .card { background: var(--card); border-radius: 12px; padding: 16px; margin: 8px 16px; }
-    .card-list { background: var(--card); border-radius: 12px; margin: 8px 16px; overflow: hidden; }
-    .card-item { padding: 14px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
-    .card-item:last-child { border-bottom: none; }
-
-    /* Buttons */
-    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 10px 20px; border-radius: 10px; font-size: 15px; font-weight: 600; border: none; cursor: pointer; transition: opacity 0.15s; }
-    .btn:active { opacity: 0.7; }
-    .btn-primary { background: var(--blue); color: white; }
-    .btn-danger { background: var(--red); color: white; }
-    .btn-ghost { background: transparent; color: var(--blue); }
-    .btn-sm { padding: 7px 14px; font-size: 13px; border-radius: 8px; }
-    .btn-block { width: 100%; }
-    .btn-icon { width: 36px; height: 36px; padding: 0; border-radius: 50%; }
-
-    /* FAB */
-    .fab {
-      position: fixed; right: 20px; bottom: calc(72px + env(safe-area-inset-bottom));
-      width: 54px; height: 54px; border-radius: 27px; background: var(--blue);
-      color: white; font-size: 26px; display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 4px 16px rgba(0,122,255,0.4); cursor: pointer; border: none; z-index: 90;
-      transition: transform 0.15s;
-    }
-    .fab:active { transform: scale(0.93); }
-
-    /* Modal */
-    .modal-overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200;
-      display: flex; align-items: flex-end; justify-content: center;
-      animation: fadeIn 0.2s ease;
-    }
-    .modal {
-      background: var(--bg); border-radius: 20px 20px 0 0; width: 100%; max-height: 92vh;
-      overflow-y: auto; padding-bottom: env(safe-area-inset-bottom);
-      animation: slideUp 0.25s ease;
-    }
-    .modal-full {
-      background: var(--bg); border-radius: 20px 20px 0 0; width: 100%; height: 92vh;
-      overflow-y: auto; padding-bottom: env(safe-area-inset-bottom);
-      animation: slideUp 0.25s ease;
-    }
-    .modal-handle { width: 36px; height: 4px; background: #C7C7CC; border-radius: 2px; margin: 10px auto 6px; }
-    .modal-header { padding: 8px 16px 12px; display: flex; align-items: center; justify-content: space-between; }
-    .modal-title { font-size: 17px; font-weight: 700; }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-
-    /* Form */
-    .form-group { margin: 0 16px 12px; }
-    .form-label { font-size: 13px; color: var(--gray); margin-bottom: 6px; display: block; }
-    .form-input {
-      width: 100%; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border);
-      font-size: 16px; background: var(--card); color: #1C1C1E; outline: none;
-      -webkit-appearance: none;
-    }
-    .form-input:focus { border-color: var(--blue); }
-    .form-select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238E8E93' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
-    .form-textarea { min-height: 80px; resize: none; }
-
-    /* Segment */
-    .segment { display: flex; background: #E9E9EB; border-radius: 9px; padding: 2px; margin: 0 16px 12px; }
-    .segment-btn { flex: 1; padding: 7px; border-radius: 7px; border: none; background: transparent; font-size: 13px; font-weight: 500; color: var(--gray); cursor: pointer; transition: all 0.15s; }
-    .segment-btn.active { background: white; color: #1C1C1E; font-weight: 600; box-shadow: 0 1px 4px rgba(0,0,0,0.12); }
-
-    /* Tags */
-    .tag-row { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 16px 12px; }
-    .tag { padding: 7px 14px; border-radius: 20px; border: 1.5px solid var(--border); font-size: 14px; cursor: pointer; background: white; transition: all 0.15s; }
-    .tag.selected { border-color: var(--blue); background: #EBF4FF; color: var(--blue); font-weight: 600; }
-
-    /* Summary Cards */
-    .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 16px; margin-bottom: 12px; }
-    .summary-card { background: var(--card); border-radius: 12px; padding: 14px; }
-    .summary-label { font-size: 12px; color: var(--gray); margin-bottom: 4px; }
-    .summary-value { font-size: 20px; font-weight: 700; }
-    .summary-sub { font-size: 11px; color: var(--gray); margin-top: 2px; }
-
-    /* Expense Item */
-    .expense-item { padding: 12px 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
-    .expense-item:last-child { border-bottom: none; }
-    .expense-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
-    .expense-info { flex: 1; min-width: 0; }
-    .expense-title { font-size: 15px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .expense-meta { font-size: 12px; color: var(--gray); margin-top: 2px; }
-    .expense-amount { text-align: right; flex-shrink: 0; }
-    .expense-amount-main { font-size: 16px; font-weight: 600; }
-    .expense-amount-sub { font-size: 11px; color: var(--gray); margin-top: 1px; }
-
-    /* Badge */
-    .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
-    .badge-shared { background: #EBF4FF; color: var(--blue); }
-    .badge-personal { background: #F0FFF4; color: var(--green); }
-    .badge-split { background: #FFF8E1; color: var(--orange); }
-
-    /* Member Avatar */
-    .avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: white; flex-shrink: 0; }
-    .avatar-sm { width: 24px; height: 24px; font-size: 11px; }
-
-    /* Settlement */
-    .settlement-row { display: flex; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1px solid var(--border); }
-    .settlement-row:last-child { border-bottom: none; }
-    .arrow { color: var(--gray); font-size: 18px; }
-
-    /* Empty */
-    .empty { text-align: center; padding: 48px 20px; color: var(--gray); }
-    .empty-icon { font-size: 48px; margin-bottom: 12px; }
-    .empty-text { font-size: 15px; }
-
-    /* Section Title */
-    .section-title { font-size: 13px; font-weight: 600; color: var(--gray); padding: 16px 16px 8px; text-transform: uppercase; letter-spacing: 0.5px; }
-
-    /* Date Group */
-    .date-header { font-size: 13px; font-weight: 600; color: var(--gray); padding: 10px 16px 4px; }
-
-    /* Split editor */
-    .split-row { display: flex; align-items: center; gap: 10px; padding: 8px 16px; }
-    .split-name { flex: 1; font-size: 15px; }
-    .split-input { width: 80px; padding: 8px; border: 1px solid var(--border); border-radius: 8px; font-size: 15px; text-align: right; }
-
-    /* Pill selector */
-    .pill-row { display: flex; gap: 8px; overflow-x: auto; padding: 0 16px 12px; scrollbar-width: none; }
-    .pill-row::-webkit-scrollbar { display: none; }
-    .pill { padding: 7px 16px; border-radius: 20px; border: 1.5px solid var(--border); font-size: 14px; white-space: nowrap; cursor: pointer; background: white; flex-shrink: 0; }
-    .pill.selected { border-color: var(--blue); background: #EBF4FF; color: var(--blue); font-weight: 600; }
-
-    /* Loading */
-    .loading { display: flex; align-items: center; justify-content: center; min-height: 200px; }
-    .spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.8s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* Toast */
-    .toast { position: fixed; top: calc(20px + env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; padding: 10px 20px; border-radius: 20px; font-size: 14px; z-index: 300; white-space: nowrap; animation: fadeIn 0.2s ease; }
-
-    .text-red { color: var(--red); }
-    .text-green { color: var(--green); }
-    .text-blue { color: var(--blue); }
-    .text-gray { color: var(--gray); }
-    .fw-700 { font-weight: 700; }
-    .mt-8 { margin-top: 8px; }
-    .divider { height: 1px; background: var(--border); margin: 0 16px; }
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>旅行记账</title>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<meta name="apple-mobile-web-app-title" content="旅行记账"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;background:#F2F2F7;color:#1C1C1E;min-height:100vh}
+:root{--blue:#007AFF;--green:#34C759;--red:#FF3B30;--orange:#FF9500;--gray:#8E8E93;--bg:#F2F2F7;--card:#fff;--border:#E5E5EA}
+.hidden{display:none!important}
+/* Tab */
+#tab-bar{position:fixed;bottom:0;left:0;right:0;height:calc(60px + env(safe-area-inset-bottom));background:rgba(255,255,255,.95);backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;align-items:flex-start;padding-top:8px;z-index:100}
+.tab-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:2px 0}
+.tab-icon{font-size:22px;line-height:1}
+.tab-label{font-size:10px;color:var(--gray)}
+.tab-item.active .tab-label{color:var(--blue)}
+/* Header */
+.header{background:rgba(255,255,255,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:calc(env(safe-area-inset-top) + 12px) 16px 12px;position:sticky;top:0;z-index:50}
+.header-row{display:flex;justify-content:space-between;align-items:center}
+.header h1{font-size:20px;font-weight:700}
+/* Content */
+.page{display:none;padding-bottom:calc(env(safe-area-inset-bottom) + 70px)}
+.page.active{display:block}
+/* Card */
+.card{background:var(--card);border-radius:12px;padding:16px;margin:8px 16px}
+.card-list{background:var(--card);border-radius:12px;margin:8px 16px;overflow:hidden}
+.card-item{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;cursor:pointer}
+.card-item:last-child{border-bottom:none}
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 20px;border-radius:10px;font-size:15px;font-weight:600;border:none;cursor:pointer;transition:opacity .15s}
+.btn:active{opacity:.7}
+.btn-primary{background:var(--blue);color:#fff}
+.btn-danger{background:var(--red);color:#fff}
+.btn-ghost{background:transparent;color:var(--blue)}
+.btn-sm{padding:7px 14px;font-size:13px;border-radius:8px}
+.btn-block{width:100%}
+/* FAB */
+#fab{position:fixed;right:20px;bottom:calc(72px + env(safe-area-inset-bottom));width:54px;height:54px;border-radius:27px;background:var(--blue);color:#fff;font-size:28px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,122,255,.4);cursor:pointer;border:none;z-index:90;transition:transform .15s;line-height:1}
+#fab:active{transform:scale(.93)}
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;display:flex;align-items:flex-end;justify-content:center}
+.modal-sheet{background:var(--bg);border-radius:20px 20px 0 0;width:100%;max-height:92vh;overflow-y:auto;padding-bottom:calc(env(safe-area-inset-bottom) + 8px)}
+.modal-handle{width:36px;height:4px;background:#C7C7CC;border-radius:2px;margin:10px auto 6px}
+.modal-header{padding:6px 16px 12px;display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-size:17px;font-weight:700}
+/* Form */
+.form-group{margin:0 16px 12px}
+.form-label{font-size:13px;color:var(--gray);margin-bottom:6px;display:block}
+.form-input{width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--border);font-size:16px;background:var(--card);color:#1C1C1E;outline:none;-webkit-appearance:none}
+.form-input:focus{border-color:var(--blue)}
+.form-select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238E8E93' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;appearance:none}
+.form-textarea{min-height:72px;resize:none}
+/* Segment */
+.segment{display:flex;background:#E9E9EB;border-radius:9px;padding:2px;margin:0 16px 12px}
+.seg-btn{flex:1;padding:7px;border-radius:7px;border:none;background:transparent;font-size:13px;font-weight:500;color:var(--gray);cursor:pointer;transition:all .15s}
+.seg-btn.active{background:#fff;color:#1C1C1E;font-weight:600;box-shadow:0 1px 4px rgba(0,0,0,.12)}
+/* Pills */
+.pill-row{display:flex;flex-wrap:wrap;gap:8px;padding:0 16px 12px}
+.pill{padding:7px 14px;border-radius:20px;border:1.5px solid var(--border);font-size:14px;cursor:pointer;background:#fff;transition:all .15s;display:inline-flex;align-items:center;gap:6px}
+.pill.sel{border-color:var(--blue);background:#EBF4FF;color:var(--blue);font-weight:600}
+/* Summary */
+.summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px;margin-bottom:12px}
+.summary-card{background:var(--card);border-radius:12px;padding:14px}
+.sum-label{font-size:12px;color:var(--gray);margin-bottom:4px}
+.sum-value{font-size:20px;font-weight:700}
+.sum-sub{font-size:11px;color:var(--gray);margin-top:2px}
+/* Expense row */
+.exp-row{padding:12px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);cursor:pointer}
+.exp-row:last-child{border-bottom:none}
+.exp-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.exp-info{flex:1;min-width:0}
+.exp-title{font-size:15px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.exp-meta{font-size:12px;color:var(--gray);margin-top:2px}
+.exp-amt{text-align:right;flex-shrink:0}
+.exp-amt-main{font-size:16px;font-weight:600}
+.exp-amt-sub{font-size:11px;color:var(--gray);margin-top:1px}
+/* Badge */
+.badge{display:inline-block;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600;margin-left:4px}
+.badge-s{background:#EBF4FF;color:var(--blue)}
+.badge-p{background:#F0FFF4;color:var(--green)}
+.badge-sp{background:#FFF8E1;color:var(--orange)}
+/* Avatar */
+.av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;flex-shrink:0}
+.av-sm{width:24px;height:24px;font-size:11px}
+/* Toggle */
+.toggle-wrap{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.toggle{width:44px;height:26px;border-radius:13px;background:#E5E5EA;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0}
+.toggle.on{background:var(--blue)}
+.toggle-knob{width:22px;height:22px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:left .2s;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.toggle.on .toggle-knob{left:20px}
+/* Split */
+.split-row{display:flex;align-items:center;gap:10px;padding:6px 0}
+.split-input{width:80px;padding:8px;border:1px solid var(--border);border-radius:8px;font-size:15px;text-align:right}
+/* Section title */
+.sec-title{font-size:13px;font-weight:600;color:var(--gray);padding:14px 16px 6px;letter-spacing:.3px}
+/* Date header */
+.date-hdr{font-size:13px;font-weight:600;color:var(--gray);padding:10px 16px 4px}
+/* Progress bar */
+.prog-wrap{height:4px;background:var(--border);border-radius:2px;margin-top:6px;overflow:hidden}
+.prog-bar{height:100%;border-radius:2px}
+/* Settlement */
+.settle-row{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--border)}
+.settle-row:last-child{border-bottom:none}
+/* Empty */
+.empty{text-align:center;padding:48px 20px;color:var(--gray)}
+.empty-icon{font-size:48px;margin-bottom:12px}
+/* Toast */
+#toast{position:fixed;top:calc(20px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);background:rgba(0,0,0,.8);color:#fff;padding:10px 20px;border-radius:20px;font-size:14px;z-index:400;white-space:nowrap;display:none}
+/* Loading */
+#loading{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:500;flex-direction:column;gap:12px}
+.spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* Setup */
+#setup-screen{position:fixed;inset:0;background:var(--bg);overflow-y:auto;z-index:300;padding-bottom:40px}
+.setup-hero{padding:calc(env(safe-area-inset-top)+40px) 16px 20px;text-align:center}
+/* Back nav */
+.back-page{display:none}
+.back-page.active{display:block}
+.text-red{color:var(--red)}
+.text-blue{color:var(--blue)}
+.text-green{color:var(--green)}
+.text-gray{color:var(--gray)}
+</style>
 </head>
 <body>
-<div id="root"></div>
-<script type="text/babel">
-const { useState, useEffect, useCallback, useRef, useMemo } = React;
 
-// ─── Supabase Config ───────────────────────────────────────────────────────────
+<!-- Loading -->
+<div id="loading"><div class="spinner"></div><div style="color:var(--gray);font-size:14px">加载中...</div></div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- Setup Screen -->
+<div id="setup-screen" class="hidden">
+  <div class="setup-hero">
+    <div style="font-size:64px;margin-bottom:12px">✈️</div>
+    <h1 style="font-size:26px;font-weight:700;margin-bottom:8px">欢迎使用旅行记账</h1>
+    <p style="color:var(--gray);font-size:15px">先创建你的行程吧</p>
+  </div>
+  <div class="form-group">
+    <label class="form-label">行程名称</label>
+    <input class="form-input" id="setup-trip-name" placeholder="例：日本旅行 2025"/>
+  </div>
+  <div class="sec-title">成员</div>
+  <div id="setup-members-list"></div>
+  <div style="padding:0 16px 20px">
+    <button class="btn btn-ghost btn-sm" onclick="addSetupMember()">+ 添加成员</button>
+  </div>
+  <div style="padding:0 16px">
+    <button class="btn btn-primary btn-block" onclick="createTrip()">开始记账 🚀</button>
+  </div>
+</div>
+
+<!-- Main App -->
+<div id="app" class="hidden">
+  <!-- Pages -->
+  <!-- HOME -->
+  <div id="page-home" class="page active">
+    <div class="header">
+      <div class="header-row">
+        <div>
+          <div style="font-size:12px;color:var(--gray)">当前行程</div>
+          <h1 id="home-trip-name">-</h1>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:12px;color:var(--gray)">今日合计</div>
+          <div id="home-today-amt" style="font-size:18px;font-weight:700;color:var(--blue)">¥0.00</div>
+        </div>
+      </div>
+    </div>
+    <div style="height:12px"></div>
+    <div class="summary-grid">
+      <div class="summary-card"><div class="sum-label">总支出</div><div class="sum-value" id="stat-total">¥0</div><div class="sum-sub" id="stat-count">0 笔账单</div></div>
+      <div class="summary-card"><div class="sum-label">共同支出</div><div class="sum-value text-blue" id="stat-shared">¥0</div><div class="sum-sub" id="stat-shared-count">0 笔</div></div>
+    </div>
+    <div class="segment">
+      <button class="seg-btn active" onclick="setFilter('all',this)">全部</button>
+      <button class="seg-btn" onclick="setFilter('shared',this)">共同</button>
+      <button class="seg-btn" onclick="setFilter('personal',this)">个人</button>
+    </div>
+    <div id="expenses-list"></div>
+    <button id="fab" onclick="openAddExpense()">＋</button>
+  </div>
+
+  <!-- STATS -->
+  <div id="page-stats" class="page">
+    <div class="header"><div class="header-row"><h1>统计</h1></div></div>
+    <div style="height:12px"></div>
+    <div class="card" style="text-align:center;padding:20px">
+      <div style="font-size:13px;color:var(--gray);margin-bottom:6px">旅行总支出</div>
+      <div id="stats-total" style="font-size:36px;font-weight:700;color:var(--blue)">¥0.00</div>
+      <div style="display:flex;justify-content:center;gap:20px;margin-top:12px">
+        <div><div style="font-size:12px;color:var(--gray)">共同</div><div id="stats-shared" style="font-size:16px;font-weight:600">¥0</div></div>
+        <div style="width:1px;background:var(--border)"></div>
+        <div><div style="font-size:12px;color:var(--gray)">个人</div><div id="stats-personal" style="font-size:16px;font-weight:600">¥0</div></div>
+      </div>
+    </div>
+    <div class="sec-title">每日花费</div>
+    <div id="stats-daily" class="card-list"></div>
+    <div class="sec-title">成员付款额</div>
+    <div id="stats-member" class="card-list"></div>
+  </div>
+
+  <!-- SETTLE -->
+  <div id="page-settle" class="page">
+    <div class="header"><div class="header-row"><h1>结算</h1></div></div>
+    <div style="height:12px"></div>
+    <div class="sec-title">各人余额</div>
+    <div id="settle-balance" class="card-list"></div>
+    <div class="sec-title">转账方案</div>
+    <div id="settle-txns" class="card-list"></div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div id="page-settings" class="page">
+    <!-- Main settings list -->
+    <div id="settings-main">
+      <div class="header"><div class="header-row"><h1>设置</h1></div></div>
+      <div style="height:12px"></div>
+      <div class="card" style="padding:12px 16px">
+        <div style="font-size:13px;color:var(--gray)">当前行程</div>
+        <div id="settings-trip-name" style="font-size:17px;font-weight:600;margin-top:2px">-</div>
+      </div>
+      <div class="sec-title">管理</div>
+      <div class="card-list">
+        <div class="card-item" onclick="showSubSettings('members')"><div style="font-size:24px">👥</div><div style="flex:1"><div style="font-size:15px;font-weight:500">成员管理</div><div id="members-sub" style="font-size:12px;color:var(--gray)">-</div></div><div style="color:var(--gray);font-size:20px">›</div></div>
+        <div class="card-item" onclick="showSubSettings('currencies')"><div style="font-size:24px">💱</div><div style="flex:1"><div style="font-size:15px;font-weight:500">汇率设置</div><div style="font-size:12px;color:var(--gray)">每人购汇汇率</div></div><div style="color:var(--gray);font-size:20px">›</div></div>
+        <div class="card-item" onclick="showSubSettings('categories')"><div style="font-size:24px">🏷️</div><div style="flex:1"><div style="font-size:15px;font-weight:500">消费分类</div><div id="categories-sub" style="font-size:12px;color:var(--gray)">-</div></div><div style="color:var(--gray);font-size:20px">›</div></div>
+      </div>
+      <div class="sec-title">危险操作</div>
+      <div class="card-list">
+        <div class="card-item text-red" onclick="clearAllExpenses()"><div style="font-size:24px">🗑️</div><div style="flex:1;font-size:15px;font-weight:500">清除所有账单</div></div>
+      </div>
+    </div>
+    <!-- Sub: Members -->
+    <div id="settings-members" class="hidden back-page">
+      <div class="header"><div class="header-row"><button class="btn btn-ghost btn-sm" onclick="showSubSettings(null)">‹ 返回</button><h1 style="font-size:17px">成员管理</h1><div style="width:60px"></div></div></div>
+      <div style="height:12px"></div>
+      <div id="members-list" class="card-list"></div>
+      <div style="padding:16px;display:flex;gap:8px">
+        <input class="form-input" id="new-member-name" placeholder="新成员名字" style="flex:1"/>
+        <button class="btn btn-primary" onclick="addMember()">添加</button>
+      </div>
+    </div>
+    <!-- Sub: Currencies -->
+    <div id="settings-currencies" class="hidden back-page">
+      <div class="header"><div class="header-row"><button class="btn btn-ghost btn-sm" onclick="showSubSettings(null)">‹ 返回</button><h1 style="font-size:17px">汇率设置</h1><button class="btn btn-primary btn-sm" onclick="openAddCurrency()">+ 添加</button></div></div>
+      <div style="height:12px"></div>
+      <div id="currency-member-pills" class="pill-row"></div>
+      <div class="sec-title">购汇汇率（1 外币 = ? 人民币）</div>
+      <div id="currencies-list" class="card-list"></div>
+    </div>
+    <!-- Sub: Categories -->
+    <div id="settings-categories" class="hidden back-page">
+      <div class="header"><div class="header-row"><button class="btn btn-ghost btn-sm" onclick="showSubSettings(null)">‹ 返回</button><h1 style="font-size:17px">消费分类</h1><div style="width:60px"></div></div></div>
+      <div style="height:12px"></div>
+      <div id="categories-list" class="card-list"></div>
+      <div style="padding:16px">
+        <div class="form-label">图标</div>
+        <div id="cat-icon-picker" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px"></div>
+        <div style="display:flex;gap:8px">
+          <input class="form-input" id="new-cat-name" placeholder="分类名称" style="flex:1"/>
+          <button class="btn btn-primary" onclick="addCategory()">添加</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab Bar -->
+  <div id="tab-bar">
+    <div class="tab-item active" onclick="switchTab('home',this)"><span class="tab-icon">📋</span><span class="tab-label">账单</span></div>
+    <div class="tab-item" onclick="switchTab('stats',this)"><span class="tab-icon">📊</span><span class="tab-label">统计</span></div>
+    <div class="tab-item" onclick="switchTab('settle',this)"><span class="tab-icon">💸</span><span class="tab-label">结算</span></div>
+    <div class="tab-item" onclick="switchTab('settings',this)"><span class="tab-icon">⚙️</span><span class="tab-label">设置</span></div>
+  </div>
+</div>
+
+<!-- Add Expense Modal -->
+<div id="expense-modal" class="modal-overlay hidden">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <button class="btn btn-ghost btn-sm" onclick="closeExpenseModal()">取消</button>
+      <span class="modal-title" id="expense-modal-title">新增账单</span>
+      <button class="btn btn-primary btn-sm" onclick="saveExpense()">保存</button>
+    </div>
+    <div class="segment">
+      <button class="seg-btn active" id="seg-shared" onclick="setAccountType('shared',this)">共同支出</button>
+      <button class="seg-btn" id="seg-personal" onclick="setAccountType('personal',this)">个人支出</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">标题</label>
+      <input class="form-input" id="exp-title" placeholder="这笔钱花在哪了？"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">金额</label>
+      <div style="display:flex;gap:8px">
+        <input class="form-input" id="exp-amount" type="number" inputmode="decimal" placeholder="0.00" style="flex:2" oninput="updateAmountHint()"/>
+        <select class="form-input form-select" id="exp-currency" style="flex:1" onchange="updateAmountHint()"></select>
+      </div>
+      <div id="exp-rate-hint" style="font-size:12px;color:var(--gray);margin-top:4px"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">付款人</label>
+      <div id="payer-pills" class="pill-row" style="padding:0"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">分类</label>
+      <div id="category-pills" class="pill-row" style="padding:0;flex-wrap:wrap"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">支付方式</label>
+      <div style="display:flex;gap:8px" id="payment-btns"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">日期</label>
+      <input class="form-input" id="exp-date" type="date"/>
+    </div>
+    <!-- Split section (personal only) -->
+    <div id="split-section" class="hidden">
+      <div class="form-group">
+        <div class="toggle-wrap">
+          <label class="form-label" style="margin:0">需要分摊给大家？</label>
+          <div class="toggle" id="split-toggle" onclick="toggleSplit()"><div class="toggle-knob"></div></div>
+        </div>
+        <div id="split-detail" class="hidden">
+          <div class="segment" style="margin:8px 0 8px">
+            <button class="seg-btn active" id="seg-equal" onclick="setSplitMode('equal',this)">平均分摊</button>
+            <button class="seg-btn" id="seg-custom" onclick="setSplitMode('custom',this)">自定义</button>
+          </div>
+          <div id="split-equal-hint" style="font-size:13px;color:var(--gray);padding:0 16px 8px"></div>
+          <div id="split-custom-rows" class="hidden"></div>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">备注（可选）</label>
+      <textarea class="form-input form-textarea" id="exp-notes" placeholder="添加备注..."></textarea>
+    </div>
+    <div style="height:8px"></div>
+  </div>
+</div>
+
+<!-- Action Menu Modal -->
+<div id="action-modal" class="modal-overlay hidden">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-header"><span class="modal-title" id="action-modal-title"></span></div>
+    <div style="padding:0 16px 16px;display:flex;flex-direction:column;gap:10px">
+      <button class="btn btn-primary btn-block" onclick="editExpenseFromMenu()">✏️ 编辑</button>
+      <button class="btn btn-danger btn-block" onclick="deleteExpenseFromMenu()">🗑️ 删除</button>
+      <button class="btn btn-ghost btn-block" onclick="closeActionModal()">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Currency Modal -->
+<div id="currency-modal" class="modal-overlay hidden">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-header"><span class="modal-title">添加/更新汇率</span><button class="btn btn-ghost btn-sm" onclick="closeCurrencyModal()">取消</button></div>
+    <div class="form-group">
+      <label class="form-label">币种</label>
+      <select class="form-input form-select" id="new-currency-code">
+        <option value="JPY">JPY 日元</option>
+        <option value="USD">USD 美元</option>
+        <option value="EUR">EUR 欧元</option>
+        <option value="HKD">HKD 港元</option>
+        <option value="TWD">TWD 台币</option>
+        <option value="KRW">KRW 韩元</option>
+        <option value="THB">THB 泰铢</option>
+        <option value="SGD">SGD 新加坡元</option>
+        <option value="GBP">GBP 英镑</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label" id="currency-rate-label">购汇汇率（1 JPY = ? CNY）</label>
+      <input class="form-input" id="new-currency-rate" type="number" inputmode="decimal" placeholder="例：0.0485"/>
+    </div>
+    <div style="padding:0 16px 16px;display:flex;gap:10px">
+      <button class="btn btn-ghost btn-block" onclick="closeCurrencyModal()">取消</button>
+      <button class="btn btn-primary btn-block" onclick="saveCurrency()">保存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── Config ───────────────────────────────────────────────────────
 const SUPABASE_URL = 'https://tpydbzrlstlesfczoeqw.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRweWRienJsc3RsZXNmY3pvZXF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMDUyODEsImV4cCI6MjA5MTY4MTI4MX0.kpI0VcJzOGaggR6jNQuNMrSpMFs66DqiDsVRfgvrTjQ';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-// ─── Constants ─────────────────────────────────────────────────────────────────
-const DEFAULT_CATEGORIES = [
-  { name: '餐饮', icon: '🍜' }, { name: '交通', icon: '🚇' },
-  { name: '住宿', icon: '🏨' }, { name: '购物', icon: '🛍️' },
-  { name: '景点', icon: '🎡' }, { name: '娱乐', icon: '🎭' },
-  { name: '医疗', icon: '💊' }, { name: '其他', icon: '💰' },
-];
 const MEMBER_COLORS = ['#007AFF','#34C759','#FF9500','#FF2D55','#AF52DE','#5AC8FA','#FF3B30','#FFCC00'];
-const CURRENCIES = [
-  { code: 'CNY', name: '人民币', symbol: '¥' },
-  { code: 'JPY', name: '日元', symbol: '¥' },
-  { code: 'USD', name: '美元', symbol: '$' },
-  { code: 'EUR', name: '欧元', symbol: '€' },
-  { code: 'HKD', name: '港元', symbol: 'HK$' },
-  { code: 'TWD', name: '台币', symbol: 'NT$' },
-  { code: 'KRW', name: '韩元', symbol: '₩' },
-  { code: 'THB', name: '泰铢', symbol: '฿' },
-  { code: 'SGD', name: '新加坡元', symbol: 'S$' },
-  { code: 'GBP', name: '英镑', symbol: '£' },
-];
-const PAYMENT_METHODS = [
-  { value: 'cash', label: '现金', icon: '💵' },
-  { value: 'card', label: '刷卡', icon: '💳' },
-  { value: 'mobile', label: '移动支付', icon: '📱' },
-];
+const DEFAULT_CATS = [{name:'餐饮',icon:'🍜'},{name:'交通',icon:'🚇'},{name:'住宿',icon:'🏨'},{name:'购物',icon:'🛍️'},{name:'景点',icon:'🎡'},{name:'娱乐',icon:'🎭'},{name:'医疗',icon:'💊'},{name:'其他',icon:'💰'}];
+const PAYMENT_METHODS = [{value:'cash',label:'现金',icon:'💵'},{value:'card',label:'刷卡',icon:'💳'},{value:'mobile',label:'移动支付',icon:'📱'}];
+const CAT_ICONS = ['🍜','🚇','🏨','🛍️','🎡','🎭','💊','💰','☕','🍺','🚕','⛽','📸','🎁','🏖️','💈'];
+const CURRENCIES_LIST = [{code:'CNY',name:'人民币',sym:'¥'},{code:'JPY',name:'日元',sym:'¥'},{code:'USD',name:'美元',sym:'$'},{code:'EUR',name:'欧元',sym:'€'},{code:'HKD',name:'港元',sym:'HK$'},{code:'TWD',name:'台币',sym:'NT$'},{code:'KRW',name:'韩元',sym:'₩'},{code:'THB',name:'泰铢',sym:'฿'},{code:'SGD',name:'新加坡元',sym:'S$'},{code:'GBP',name:'英镑',sym:'£'}];
 
-// ─── Utilities ─────────────────────────────────────────────────────────────────
-function fmt(amount, code = 'CNY') {
-  const c = CURRENCIES.find(x => x.code === code);
-  const sym = c ? c.symbol : code + ' ';
-  if (Math.abs(amount) >= 10000) return sym + (amount/10000).toFixed(2) + '万';
-  return sym + Number(amount).toFixed(2);
-}
-function fmtDate(dateStr) {
-  const d = new Date(dateStr + 'T00:00:00');
-  return `${d.getMonth()+1}月${d.getDate()}日`;
-}
+// ─── State ────────────────────────────────────────────────────────
+let state = { trip:null, members:[], currencies:[], categories:[], expenses:[], splits:[] };
+let expFilter = 'all';
+let currentEditExpenseId = null;
+let actionExpenseId = null;
+let expForm = { accountType:'shared', payerId:null, categoryId:null, paymentMethod:'cash', needsSplit:false, splitMode:'equal' };
+let selectedCurrencyMemberId = null;
+let selectedCatIcon = '💰';
+let setupMemberCount = 3;
+
+// ─── Helpers ─────────────────────────────────────────────────────
 function today() { return new Date().toISOString().split('T')[0]; }
-function groupBy(arr, key) {
-  return arr.reduce((acc, item) => {
-    const k = typeof key === 'function' ? key(item) : item[key];
-    if (!acc[k]) acc[k] = [];
-    acc[k].push(item);
-    return acc;
-  }, {});
+function fmt(n, code='CNY') {
+  const c = CURRENCIES_LIST.find(x=>x.code===code);
+  const sym = c?c.sym:(code+' ');
+  n = parseFloat(n)||0;
+  if(Math.abs(n)>=10000) return sym+(n/10000).toFixed(2)+'万';
+  return sym+n.toFixed(2);
 }
-
-// ─── Toast ─────────────────────────────────────────────────────────────────────
-function Toast({ msg, onDone }) {
-  useEffect(() => { const t = setTimeout(onDone, 2000); return () => clearTimeout(t); }, []);
-  return <div className="toast">{msg}</div>;
+function fmtDate(d) { const dt=new Date(d+'T00:00:00'); return `${dt.getMonth()+1}月${dt.getDate()}日`; }
+function getRate(memberId, code) {
+  if(code==='CNY') return 1;
+  const c = state.currencies.find(c=>c.member_id===memberId && c.currency_code===code);
+  return c ? parseFloat(c.exchange_rate) : 1;
 }
-
-// ─── App ───────────────────────────────────────────────────────────────────────
-export default function App() {
-  const [tab, setTab] = useState('home');
-  const [trip, setTrip] = useState(null);
-  const [members, setMembers] = useState([]);
-  const [currencies, setCurrencies] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [expenses, setExpenses] = useState([]);
-  const [splits, setSplits] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [toast, setToast] = useState(null);
-  const [showSetup, setShowSetup] = useState(false);
-  const [showAddExpense, setShowAddExpense] = useState(false);
-  const [editExpense, setEditExpense] = useState(null);
-
-  const showToast = (msg) => setToast(msg);
-
-  // Load data
-  const loadAll = useCallback(async () => {
-    setLoading(true);
-    try {
-      const { data: trips } = await sb.from('trips').select('*').order('created_at', { ascending: false }).limit(1);
-      if (!trips || trips.length === 0) { setLoading(false); setShowSetup(true); return; }
-      const t = trips[0];
-      setTrip(t);
-      const [mRes, cRes, catRes, eRes, sRes] = await Promise.all([
-        sb.from('members').select('*').eq('trip_id', t.id),
-        sb.from('currencies').select('*').eq('trip_id', t.id),
-        sb.from('categories').select('*').eq('trip_id', t.id),
-        sb.from('expenses').select('*').eq('trip_id', t.id).order('expense_date', { ascending: false }).order('created_at', { ascending: false }),
-        sb.from('expense_splits').select('*'),
-      ]);
-      setMembers(mRes.data || []);
-      setCurrencies(cRes.data || []);
-      setCategories(catRes.data || []);
-      setExpenses(eRes.data || []);
-      setSplits(sRes.data || []);
-    } catch(e) { showToast('加载失败，请刷新重试'); }
-    setLoading(false);
-  }, []);
-
-  useEffect(() => { loadAll(); }, [loadAll]);
-
-  // Realtime
-  useEffect(() => {
-    if (!trip) return;
-    const channel = sb.channel('realtime-all')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'expenses', filter: `trip_id=eq.${trip.id}` }, () => loadAll())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'expense_splits' }, () => loadAll())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'members', filter: `trip_id=eq.${trip.id}` }, () => loadAll())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'currencies', filter: `trip_id=eq.${trip.id}` }, () => loadAll())
-      .subscribe();
-    return () => sb.removeChannel(channel);
-  }, [trip, loadAll]);
-
-  if (loading) return <div className="loading"><div className="spinner"></div></div>;
-  if (showSetup) return <SetupScreen onDone={() => { setShowSetup(false); loadAll(); }} showToast={showToast} />;
-
-  return (
-    <div>
-      {tab === 'home' && <HomeTab trip={trip} members={members} currencies={currencies} categories={categories} expenses={expenses} splits={splits} showToast={showToast} onRefresh={loadAll} onAddExpense={() => setShowAddExpense(true)} onEditExpense={setEditExpense} />}
-      {tab === 'stats' && <StatsTab trip={trip} members={members} currencies={currencies} expenses={expenses} splits={splits} />}
-      {tab === 'settle' && <SettleTab trip={trip} members={members} expenses={expenses} splits={splits} />}
-      {tab === 'settings' && <SettingsTab trip={trip} members={members} currencies={currencies} categories={categories} showToast={showToast} onRefresh={loadAll} />}
-
-      <div className="tab-bar">
-        {[
-          { key: 'home', icon: '📋', label: '账单' },
-          { key: 'stats', icon: '📊', label: '统计' },
-          { key: 'settle', icon: '💸', label: '结算' },
-          { key: 'settings', icon: '⚙️', label: '设置' },
-        ].map(t => (
-          <div key={t.key} className={`tab-item ${tab === t.key ? 'active' : ''}`} onClick={() => setTab(t.key)}>
-            <span className="tab-icon">{t.icon}</span>
-            <span className="tab-label" style={tab === t.key ? {color:'var(--blue)'} : {}}>{t.label}</span>
-          </div>
-        ))}
-      </div>
-
-      {(showAddExpense || editExpense) && (
-        <AddExpenseModal
-          trip={trip} members={members} currencies={currencies} categories={categories}
-          expense={editExpense}
-          onClose={() => { setShowAddExpense(false); setEditExpense(null); }}
-          onSave={async () => { setShowAddExpense(false); setEditExpense(null); await loadAll(); showToast(editExpense ? '已更新' : '已记录 ✓'); }}
-          showToast={showToast}
-        />
-      )}
-      {toast && <Toast msg={toast} onDone={() => setToast(null)} />}
-    </div>
-  );
+function toCNY(e) {
+  if(e.amount_cny!=null) return parseFloat(e.amount_cny);
+  return parseFloat(e.amount)*getRate(e.paid_by, e.currency_code);
 }
-
-// ─── Setup Screen ──────────────────────────────────────────────────────────────
-function SetupScreen({ onDone, showToast }) {
-  const [tripName, setTripName] = useState('');
-  const [memberNames, setMemberNames] = useState(['', '', '']);
-  const [saving, setSaving] = useState(false);
-
-  const save = async () => {
-    if (!tripName.trim()) { showToast('请填写行程名称'); return; }
-    const names = memberNames.filter(n => n.trim());
-    if (names.length < 1) { showToast('至少添加一位成员'); return; }
-    setSaving(true);
-    try {
-      const { data: trip, error: te } = await sb.from('trips').insert({ name: tripName.trim(), base_currency: 'CNY' }).select().single();
-      if (te) throw te;
-      const memberRows = names.map((n, i) => ({ trip_id: trip.id, name: n.trim(), color: MEMBER_COLORS[i % MEMBER_COLORS.length] }));
-      const { data: mems, error: me } = await sb.from('members').insert(memberRows).select();
-      if (me) throw me;
-      const catRows = DEFAULT_CATEGORIES.map(c => ({ trip_id: trip.id, name: c.name, icon: c.icon }));
-      await sb.from('categories').insert(catRows);
-      // Default currencies (CNY for each member)
-      const curRows = mems.map(m => ({ trip_id: trip.id, member_id: m.id, currency_code: 'CNY', currency_name: '人民币', exchange_rate: 1 }));
-      await sb.from('currencies').insert(curRows);
-      onDone();
-    } catch(e) { showToast('创建失败：' + e.message); }
-    setSaving(false);
-  };
-
-  return (
-    <div style={{minHeight:'100vh', background:'var(--bg)', paddingTop: 'env(safe-area-inset-top)'}}>
-      <div style={{padding:'40px 16px 20px', textAlign:'center'}}>
-        <div style={{fontSize:64, marginBottom:12}}>✈️</div>
-        <h1 style={{fontSize:26, fontWeight:700, marginBottom:8}}>欢迎使用旅行记账</h1>
-        <p style={{color:'var(--gray)', fontSize:15}}>先创建你的行程</p>
-      </div>
-      <div className="form-group">
-        <label className="form-label">行程名称</label>
-        <input className="form-input" placeholder="例：日本旅行 2025" value={tripName} onChange={e => setTripName(e.target.value)} />
-      </div>
-      <div className="section-title">成员</div>
-      {memberNames.map((n, i) => (
-        <div key={i} className="form-group">
-          <div style={{display:'flex', gap:8}}>
-            <div className="avatar" style={{background: MEMBER_COLORS[i % MEMBER_COLORS.length]}}>{n.trim() ? n.trim()[0] : (i+1)}</div>
-            <input className="form-input" placeholder={`成员 ${i+1} 的名字`} value={n} onChange={e => { const a = [...memberNames]; a[i] = e.target.value; setMemberNames(a); }} style={{flex:1}} />
-            {i >= 1 && <button className="btn btn-ghost btn-sm" onClick={() => setMemberNames(memberNames.filter((_,j) => j !== i))}>删除</button>}
-          </div>
-        </div>
-      ))}
-      <div style={{padding:'0 16px 20px'}}>
-        <button className="btn btn-ghost btn-sm" onClick={() => setMemberNames([...memberNames, ''])}>+ 添加成员</button>
-      </div>
-      <div style={{padding:'0 16px'}}>
-        <button className="btn btn-primary btn-block" onClick={save} disabled={saving}>
-          {saving ? '创建中...' : '开始记账 🚀'}
-        </button>
-      </div>
-    </div>
-  );
+function showToast(msg) {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.style.display='block';
+  setTimeout(()=>t.style.display='none',2000);
 }
+function el(id){return document.getElementById(id)}
 
-// ─── Home Tab ─────────────────────────────────────────────────────────────────
-function HomeTab({ trip, members, currencies, categories, expenses, splits, showToast, onRefresh, onAddExpense, onEditExpense }) {
-  const [filter, setFilter] = useState('all'); // all | shared | personal
-
-  const getRate = (memberId, currencyCode) => {
-    if (currencyCode === 'CNY') return 1;
-    const c = currencies.find(c => c.member_id === memberId && c.currency_code === currencyCode);
-    return c ? parseFloat(c.exchange_rate) : 1;
-  };
-
-  const toCNY = (expense) => {
-    if (expense.amount_cny != null) return parseFloat(expense.amount_cny);
-    const rate = getRate(expense.paid_by, expense.currency_code);
-    return parseFloat(expense.amount) * rate;
-  };
-
-  const filtered = filter === 'all' ? expenses : expenses.filter(e => e.account_type === filter);
-  const grouped = groupBy(filtered, 'expense_date');
-  const dates = Object.keys(grouped).sort((a,b) => b.localeCompare(a));
-
-  const totalToday = expenses.filter(e => e.expense_date === today()).reduce((s, e) => s + toCNY(e), 0);
-  const totalAll = expenses.reduce((s, e) => s + toCNY(e), 0);
-
-  return (
-    <div style={{paddingBottom: 'calc(env(safe-area-inset-bottom) + 68px)'}}>
-      <div className="header safe-top">
-        <div className="header-row">
-          <div>
-            <div style={{fontSize:12, color:'var(--gray)'}}>当前行程</div>
-            <h1>{trip.name}</h1>
-          </div>
-          <div style={{textAlign:'right'}}>
-            <div style={{fontSize:12, color:'var(--gray)'}}>今日合计</div>
-            <div style={{fontSize:18, fontWeight:700, color:'var(--blue)'}}>{fmt(totalToday)}</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Summary */}
-      <div style={{height:12}} />
-      <div className="summary-grid">
-        <div className="summary-card">
-          <div className="summary-label">总支出</div>
-          <div className="summary-value">{fmt(totalAll)}</div>
-          <div className="summary-sub">{expenses.length} 笔账单</div>
-        </div>
-        <div className="summary-card">
-          <div className="summary-label">共同支出</div>
-          <div className="summary-value text-blue">{fmt(expenses.filter(e=>e.account_type==='shared').reduce((s,e)=>s+toCNY(e),0))}</div>
-          <div className="summary-sub">{expenses.filter(e=>e.account_type==='shared').length} 笔</div>
-        </div>
-      </div>
-
-      {/* Filter */}
-      <div className="segment">
-        <button className={`segment-btn ${filter==='all'?'active':''}`} onClick={() => setFilter('all')}>全部</button>
-        <button className={`segment-btn ${filter==='shared'?'active':''}`} onClick={() => setFilter('shared')}>共同</button>
-        <button className={`segment-btn ${filter==='personal'?'active':''}`} onClick={() => setFilter('personal')}>个人</button>
-      </div>
-
-      {/* List */}
-      {dates.length === 0 ? (
-        <div className="empty"><div className="empty-icon">📝</div><div className="empty-text">还没有账单，点 + 开始记录</div></div>
-      ) : dates.map(date => (
-        <div key={date}>
-          <div className="date-header">{fmtDate(date)} · {fmt(grouped[date].reduce((s,e)=>s+toCNY(e),0))}</div>
-          <div className="card-list">
-            {grouped[date].map(e => (
-              <ExpenseRow key={e.id} expense={e} members={members} categories={categories} toCNY={toCNY} onEdit={() => onEditExpense(e)} onDelete={async () => {
-                await sb.from('expense_splits').delete().eq('expense_id', e.id);
-                await sb.from('expenses').delete().eq('id', e.id);
-                onRefresh(); showToast('已删除');
-              }} />
-            ))}
-          </div>
-        </div>
-      ))}
-
-      <button className="fab" onClick={onAddExpense}>＋</button>
-    </div>
-  );
-}
-
-function ExpenseRow({ expense: e, members, categories, toCNY, onEdit, onDelete }) {
-  const [showMenu, setShowMenu] = useState(false);
-  const cat = categories.find(c => c.id === e.category_id);
-  const payer = members.find(m => m.id === e.paid_by);
-  const pm = PAYMENT_METHODS.find(p => p.value === e.payment_method);
-  const cny = toCNY(e);
-
-  return (
-    <>
-      <div className="expense-item" onClick={() => setShowMenu(true)}>
-        <div className="expense-icon" style={{background: e.account_type==='shared' ? '#EBF4FF' : '#F0FFF4'}}>
-          {cat ? cat.icon : '💰'}
-        </div>
-        <div className="expense-info">
-          <div className="expense-title">{e.title}</div>
-          <div className="expense-meta">
-            {payer && <span style={{color: payer.color}}>●</span>} {payer?.name} · {cat?.name} · {pm?.icon}{pm?.label}
-            {e.account_type === 'shared' && <span className="badge badge-shared" style={{marginLeft:4}}>共同</span>}
-            {e.account_type === 'personal' && e.needs_split && <span className="badge badge-split" style={{marginLeft:4}}>分摊</span>}
-          </div>
-        </div>
-        <div className="expense-amount">
-          <div className="expense-amount-main">{e.currency_code !== 'CNY' ? `${e.currency_code} ${Number(e.amount).toFixed(0)}` : fmt(cny)}</div>
-          {e.currency_code !== 'CNY' && <div className="expense-amount-sub">{fmt(cny)}</div>}
-        </div>
-      </div>
-      {showMenu && (
-        <div className="modal-overlay" onClick={() => setShowMenu(false)}>
-          <div className="modal" onClick={e => e.stopPropagation()}>
-            <div className="modal-handle" />
-            <div className="modal-header"><span className="modal-title">{e.title}</span></div>
-            <div style={{padding:'0 16px 16px', display:'flex', flexDirection:'column', gap:10}}>
-              <button className="btn btn-primary btn-block" onClick={() => { setShowMenu(false); onEdit(); }}>✏️ 编辑</button>
-              <button className="btn btn-danger btn-block" onClick={() => { setShowMenu(false); if(confirm('确定删除这笔账单？')) onDelete(); }}>🗑️ 删除</button>
-              <button className="btn btn-ghost btn-block" onClick={() => setShowMenu(false)}>取消</button>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
-  );
-}
-
-// ─── Add Expense Modal ─────────────────────────────────────────────────────────
-function AddExpenseModal({ trip, members, currencies, categories, expense, onClose, onSave, showToast }) {
-  const isEdit = !!expense;
-  const [title, setTitle] = useState(expense?.title || '');
-  const [amount, setAmount] = useState(expense ? String(expense.amount) : '');
-  const [currencyCode, setCurrencyCode] = useState(expense?.currency_code || 'CNY');
-  const [categoryId, setCategoryId] = useState(expense?.category_id || (categories[0]?.id || null));
-  const [accountType, setAccountType] = useState(expense?.account_type || 'shared');
-  const [paidBy, setPaidBy] = useState(expense?.paid_by || (members[0]?.id || null));
-  const [paymentMethod, setPaymentMethod] = useState(expense?.payment_method || 'cash');
-  const [expenseDate, setExpenseDate] = useState(expense?.expense_date || today());
-  const [notes, setNotes] = useState(expense?.notes || '');
-  const [needsSplit, setNeedsSplit] = useState(expense?.needs_split || false);
-  const [splitMode, setSplitMode] = useState('equal'); // equal | custom
-  const [customSplits, setCustomSplits] = useState({});
-  const [saving, setSaving] = useState(false);
-
-  // Get available currencies for selected payer
-  const payerCurrencies = useMemo(() => {
-    const cs = currencies.filter(c => c.member_id === paidBy);
-    const codes = [...new Set(cs.map(c => c.currency_code))];
-    if (!codes.includes('CNY')) codes.unshift('CNY');
-    return codes;
-  }, [currencies, paidBy]);
-
-  const getRate = (code) => {
-    if (code === 'CNY') return 1;
-    const c = currencies.find(c => c.member_id === paidBy && c.currency_code === code);
-    return c ? parseFloat(c.exchange_rate) : 1;
-  };
-
-  const amountCNY = parseFloat(amount || 0) * getRate(currencyCode);
-
-  const splitPerPerson = members.length > 0 ? amountCNY / members.length : 0;
-
-  const save = async () => {
-    if (!title.trim()) { showToast('请填写标题'); return; }
-    if (!amount || isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) { showToast('请填写正确金额'); return; }
-    if (!paidBy) { showToast('请选择付款人'); return; }
-    setSaving(true);
-    try {
-      const row = {
-        trip_id: trip.id, title: title.trim(),
-        amount: parseFloat(amount), currency_code: currencyCode,
-        amount_cny: amountCNY, exchange_rate_used: getRate(currencyCode),
-        category_id: categoryId, account_type: accountType,
-        paid_by: paidBy, payment_method: paymentMethod,
-        expense_date: expenseDate, notes: notes.trim() || null,
-        needs_split: needsSplit,
-      };
-      let expId;
-      if (isEdit) {
-        await sb.from('expenses').update(row).eq('id', expense.id);
-        expId = expense.id;
-        await sb.from('expense_splits').delete().eq('expense_id', expId);
-      } else {
-        const { data, error } = await sb.from('expenses').insert(row).select().single();
-        if (error) throw error;
-        expId = data.id;
-      }
-      // Insert splits
-      if (needsSplit && members.length > 0) {
-        let splitRows;
-        if (splitMode === 'equal') {
-          splitRows = members.map(m => ({ expense_id: expId, member_id: m.id, split_amount: Math.round(splitPerPerson * 100)/100, split_ratio: 1/members.length }));
-        } else {
-          splitRows = members.map(m => ({ expense_id: expId, member_id: m.id, split_amount: parseFloat(customSplits[m.id] || 0), split_ratio: null }));
-        }
-        await sb.from('expense_splits').insert(splitRows);
-      } else if (accountType === 'shared') {
-        // Auto-split shared expenses equally
-        const splitRows = members.map(m => ({ expense_id: expId, member_id: m.id, split_amount: Math.round(splitPerPerson * 100)/100, split_ratio: 1/members.length }));
-        await sb.from('expense_splits').insert(splitRows);
-      }
-      onSave();
-    } catch(e) { showToast('保存失败：' + e.message); }
-    setSaving(false);
-  };
-
-  return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-full" onClick={e => e.stopPropagation()}>
-        <div className="modal-handle" />
-        <div className="modal-header">
-          <button className="btn btn-ghost btn-sm" onClick={onClose}>取消</button>
-          <span className="modal-title">{isEdit ? '编辑账单' : '新增账单'}</span>
-          <button className="btn btn-primary btn-sm" onClick={save} disabled={saving}>{saving ? '保存中' : '保存'}</button>
-        </div>
-
-        {/* Account Type */}
-        <div className="segment">
-          <button className={`segment-btn ${accountType==='shared'?'active':''}`} onClick={() => setAccountType('shared')}>共同支出</button>
-          <button className={`segment-btn ${accountType==='personal'?'active':''}`} onClick={() => setAccountType('personal')}>个人支出</button>
-        </div>
-
-        {/* Title */}
-        <div className="form-group">
-          <label className="form-label">标题</label>
-          <input className="form-input" placeholder="这笔钱花在哪了？" value={title} onChange={e => setTitle(e.target.value)} />
-        </div>
-
-        {/* Amount + Currency */}
-        <div className="form-group">
-          <label className="form-label">金额</label>
-          <div style={{display:'flex', gap:8}}>
-            <input className="form-input" type="number" inputMode="decimal" placeholder="0.00" value={amount} onChange={e => setAmount(e.target.value)} style={{flex:2}} />
-            <select className="form-input form-select" value={currencyCode} onChange={e => setCurrencyCode(e.target.value)} style={{flex:1}}>
-              {payerCurrencies.map(code => {
-                const info = CURRENCIES.find(c => c.code === code);
-                return <option key={code} value={code}>{code}</option>;
-              })}
-            </select>
-          </div>
-          {currencyCode !== 'CNY' && <div style={{fontSize:12, color:'var(--gray)', marginTop:4}}>≈ {fmt(amountCNY)} (汇率 {getRate(currencyCode)})</div>}
-        </div>
-
-        {/* Paid By */}
-        <div className="form-group">
-          <label className="form-label">付款人</label>
-          <div className="pill-row" style={{padding:0, marginBottom:0}}>
-            {members.map(m => (
-              <div key={m.id} className={`pill ${paidBy === m.id ? 'selected' : ''}`} onClick={() => setPaidBy(m.id)} style={{display:'flex', alignItems:'center', gap:6}}>
-                <div className="avatar avatar-sm" style={{background: m.color}}>{m.name[0]}</div>
-                {m.name}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Category */}
-        <div className="form-group">
-          <label className="form-label">分类</label>
-          <div className="pill-row" style={{padding:0}}>
-            {categories.map(c => (
-              <div key={c.id} className={`pill ${categoryId === c.id ? 'selected' : ''}`} onClick={() => setCategoryId(c.id)}>{c.icon} {c.name}</div>
-            ))}
-          </div>
-        </div>
-
-        {/* Payment Method */}
-        <div className="form-group">
-          <label className="form-label">支付方式</label>
-          <div style={{display:'flex', gap:8}}>
-            {PAYMENT_METHODS.map(pm => (
-              <button key={pm.value} className={`tag ${paymentMethod === pm.value ? 'selected' : ''}`} style={{flex:1, justifyContent:'center'}} onClick={() => setPaymentMethod(pm.value)}>
-                {pm.icon} {pm.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Date */}
-        <div className="form-group">
-          <label className="form-label">日期</label>
-          <input className="form-input" type="date" value={expenseDate} onChange={e => setExpenseDate(e.target.value)} />
-        </div>
-
-        {/* Split (for personal expenses) */}
-        {accountType === 'personal' && (
-          <div className="form-group">
-            <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:8}}>
-              <label className="form-label" style={{margin:0}}>需要分摊给大家？</label>
-              <div onClick={() => setNeedsSplit(!needsSplit)} style={{width:44, height:26, borderRadius:13, background: needsSplit ? 'var(--blue)' : '#E5E5EA', cursor:'pointer', position:'relative', transition:'background 0.2s'}}>
-                <div style={{width:22, height:22, borderRadius:'50%', background:'white', position:'absolute', top:2, left: needsSplit ? 20 : 2, transition:'left 0.2s', boxShadow:'0 1px 4px rgba(0,0,0,0.2)'}} />
-              </div>
-            </div>
-            {needsSplit && (
-              <>
-                <div className="segment" style={{margin:'8px 0'}}>
-                  <button className={`segment-btn ${splitMode==='equal'?'active':''}`} onClick={() => setSplitMode('equal')}>平均分摊</button>
-                  <button className={`segment-btn ${splitMode==='custom'?'active':''}`} onClick={() => setSplitMode('custom')}>自定义</button>
-                </div>
-                {splitMode === 'equal' && (
-                  <div style={{fontSize:13, color:'var(--gray)'}}>每人 {fmt(splitPerPerson)} 元</div>
-                )}
-                {splitMode === 'custom' && members.map(m => (
-                  <div key={m.id} className="split-row" style={{padding:'6px 0'}}>
-                    <div className="avatar avatar-sm" style={{background: m.color}}>{m.name[0]}</div>
-                    <span className="split-name">{m.name}</span>
-                    <input className="split-input" type="number" inputMode="decimal" placeholder="0.00" value={customSplits[m.id] || ''} onChange={e => setCustomSplits({...customSplits, [m.id]: e.target.value})} />
-                    <span style={{fontSize:13, color:'var(--gray)'}}>元</span>
-                  </div>
-                ))}
-              </>
-            )}
-          </div>
-        )}
-
-        {/* Notes */}
-        <div className="form-group">
-          <label className="form-label">备注（可选）</label>
-          <textarea className="form-input form-textarea" placeholder="添加备注..." value={notes} onChange={e => setNotes(e.target.value)} />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── Stats Tab ─────────────────────────────────────────────────────────────────
-function StatsTab({ trip, members, currencies, expenses, splits }) {
-  const [displayMode, setDisplayMode] = useState('cny'); // cny | original
-
-  const getRate = (memberId, currencyCode) => {
-    if (currencyCode === 'CNY') return 1;
-    const c = currencies.find(c => c.member_id === memberId && c.currency_code === currencyCode);
-    return c ? parseFloat(c.exchange_rate) : 1;
-  };
-  const toCNY = (e) => e.amount_cny != null ? parseFloat(e.amount_cny) : parseFloat(e.amount) * getRate(e.paid_by, e.currency_code);
-
-  const totalAll = expenses.reduce((s, e) => s + toCNY(e), 0);
-  const totalShared = expenses.filter(e => e.account_type === 'shared').reduce((s, e) => s + toCNY(e), 0);
-  const totalPersonal = expenses.filter(e => e.account_type === 'personal').reduce((s, e) => s + toCNY(e), 0);
-
-  // By category
-  const byCat = {};
-  expenses.forEach(e => {
-    const k = e.category_id || 'other';
-    if (!byCat[k]) byCat[k] = 0;
-    byCat[k] += toCNY(e);
-  });
-
-  // By day
-  const byDay = groupBy(expenses, 'expense_date');
-  const days = Object.keys(byDay).sort();
-
-  // By member (how much each person spent)
-  const byMember = {};
-  members.forEach(m => { byMember[m.id] = 0; });
-  expenses.forEach(e => {
-    if (e.paid_by && byMember[e.paid_by] !== undefined) byMember[e.paid_by] += toCNY(e);
-  });
-
-  return (
-    <div style={{paddingBottom: 'calc(env(safe-area-inset-bottom) + 68px)'}}>
-      <div className="header safe-top"><div className="header-row"><h1>统计</h1></div></div>
-      <div style={{height:12}} />
-
-      {/* Total */}
-      <div className="card" style={{textAlign:'center', padding:'20px'}}>
-        <div style={{fontSize:13, color:'var(--gray)', marginBottom:6}}>旅行总支出</div>
-        <div style={{fontSize:36, fontWeight:700, color:'var(--blue)'}}>{fmt(totalAll)}</div>
-        <div style={{display:'flex', justifyContent:'center', gap:20, marginTop:12}}>
-          <div><div style={{fontSize:12, color:'var(--gray)'}}>共同</div><div style={{fontSize:16, fontWeight:600}}>{fmt(totalShared)}</div></div>
-          <div style={{width:1, background:'var(--border)'}}/>
-          <div><div style={{fontSize:12, color:'var(--gray)'}}>个人</div><div style={{fontSize:16, fontWeight:600}}>{fmt(totalPersonal)}</div></div>
-        </div>
-      </div>
-
-      {/* Per day */}
-      {days.length > 0 && <>
-        <div className="section-title">每日花费</div>
-        <div className="card-list">
-          {days.reverse().map(d => {
-            const dayAmt = byDay[d].reduce((s,e) => s+toCNY(e), 0);
-            const pct = totalAll > 0 ? dayAmt / totalAll : 0;
-            return (
-              <div key={d} className="card-item">
-                <div style={{flex:1}}>
-                  <div style={{fontSize:14, fontWeight:500}}>{fmtDate(d)}</div>
-                  <div style={{height:4, background:'var(--border)', borderRadius:2, marginTop:6, overflow:'hidden'}}>
-                    <div style={{height:'100%', width: `${pct*100}%`, background:'var(--blue)', borderRadius:2}} />
-                  </div>
-                </div>
-                <div style={{fontSize:15, fontWeight:600, marginLeft:12}}>{fmt(dayAmt)}</div>
-              </div>
-            );
-          })}
-        </div>
-      </>}
-
-      {/* Per member */}
-      {members.length > 0 && <>
-        <div className="section-title">成员支出（付款额）</div>
-        <div className="card-list">
-          {members.map(m => {
-            const amt = byMember[m.id] || 0;
-            return (
-              <div key={m.id} className="card-item">
-                <div className="avatar" style={{background: m.color}}>{m.name[0]}</div>
-                <div style={{flex:1}}>
-                  <div style={{fontSize:14, fontWeight:500}}>{m.name}</div>
-                  <div style={{height:4, background:'var(--border)', borderRadius:2, marginTop:6, overflow:'hidden'}}>
-                    <div style={{height:'100%', width: totalAll > 0 ? `${amt/totalAll*100}%` : '0%', background: m.color, borderRadius:2}} />
-                  </div>
-                </div>
-                <div style={{fontSize:15, fontWeight:600, marginLeft:12}}>{fmt(amt)}</div>
-              </div>
-            );
-          })}
-        </div>
-      </>}
-    </div>
-  );
-}
-
-// ─── Settle Tab ────────────────────────────────────────────────────────────────
-function SettleTab({ trip, members, expenses, splits }) {
-  // Calculate net balance for each member
-  // Positive = others owe them, Negative = they owe others
-  const balance = {};
-  members.forEach(m => { balance[m.id] = 0; });
-
-  expenses.forEach(e => {
-    const cny = e.amount_cny != null ? parseFloat(e.amount_cny) : parseFloat(e.amount);
-    const expSplits = splits.filter(s => s.expense_id === e.id);
-
-    if (expSplits.length > 0) {
-      // Payer paid full amount
-      if (e.paid_by && balance[e.paid_by] !== undefined) balance[e.paid_by] += cny;
-      // Each splitter owes their share
-      expSplits.forEach(s => {
-        if (balance[s.member_id] !== undefined) balance[s.member_id] -= parseFloat(s.split_amount);
-      });
-    } else if (e.account_type === 'personal') {
-      // Personal, not split — only payer is affected (net 0 for settlement purposes)
-      // Actually personal non-split doesn't affect others
-    }
-  });
-
-  // Compute transactions to settle
-  const transactions = computeSettlement(balance, members);
-
-  return (
-    <div style={{paddingBottom: 'calc(env(safe-area-inset-bottom) + 68px)'}}>
-      <div className="header safe-top"><div className="header-row"><h1>结算</h1></div></div>
-      <div style={{height:12}} />
-
-      {/* Balance overview */}
-      <div className="section-title">各人余额</div>
-      <div className="card-list">
-        {members.map(m => {
-          const b = balance[m.id] || 0;
-          return (
-            <div key={m.id} className="card-item">
-              <div className="avatar" style={{background: m.color}}>{m.name[0]}</div>
-              <div style={{flex:1}}>
-                <div style={{fontSize:15, fontWeight:500}}>{m.name}</div>
-                <div style={{fontSize:12, color:'var(--gray)'}}>
-                  {b > 0.01 ? `应收 ${fmt(b)}` : b < -0.01 ? `应付 ${fmt(-b)}` : '已结清'}
-                </div>
-              </div>
-              <div style={{fontSize:16, fontWeight:700, color: b > 0.01 ? 'var(--green)' : b < -0.01 ? 'var(--red)' : 'var(--gray)'}}>
-                {b > 0.01 ? '+' : ''}{fmt(b)}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Settlement transactions */}
-      {transactions.length > 0 ? <>
-        <div className="section-title">转账方案（最优路径）</div>
-        <div className="card-list">
-          {transactions.map((t, i) => {
-            const from = members.find(m => m.id === t.from);
-            const to = members.find(m => m.id === t.to);
-            return (
-              <div key={i} className="settlement-row" style={{padding:'14px 16px'}}>
-                <div className="avatar" style={{background: from?.color}}>{from?.name[0]}</div>
-                <div style={{flex:1}}>
-                  <span style={{fontWeight:600}}>{from?.name}</span>
-                  <span style={{color:'var(--gray)'}}> 转给 </span>
-                  <span style={{fontWeight:600}}>{to?.name}</span>
-                </div>
-                <div style={{fontSize:16, fontWeight:700, color:'var(--blue)'}}>{fmt(t.amount)}</div>
-                <div className="avatar" style={{background: to?.color, marginLeft:8}}>{to?.name[0]}</div>
-              </div>
-            );
-          })}
-        </div>
-      </> : (
-        <div className="empty"><div className="empty-icon">🎉</div><div className="empty-text">大家已经结清了！</div></div>
-      )}
-    </div>
-  );
-}
-
-function computeSettlement(balance, members) {
-  const transactions = [];
-  const pos = members.filter(m => (balance[m.id] || 0) > 0.01).map(m => ({ id: m.id, amt: balance[m.id] }));
-  const neg = members.filter(m => (balance[m.id] || 0) < -0.01).map(m => ({ id: m.id, amt: -balance[m.id] }));
-  pos.sort((a,b) => b.amt - a.amt);
-  neg.sort((a,b) => b.amt - a.amt);
-  let i = 0, j = 0;
-  while (i < pos.length && j < neg.length) {
-    const pay = Math.min(pos[i].amt, neg[j].amt);
-    if (pay > 0.01) transactions.push({ from: neg[j].id, to: pos[i].id, amount: Math.round(pay*100)/100 });
-    pos[i].amt -= pay;
-    neg[j].amt -= pay;
-    if (pos[i].amt < 0.01) i++;
-    if (neg[j].amt < 0.01) j++;
+// ─── Init ─────────────────────────────────────────────────────────
+async function init() {
+  try {
+    const {data:trips} = await sb.from('trips').select('*').order('created_at',{ascending:false}).limit(1);
+    if(!trips||!trips.length){ el('loading').style.display='none'; showSetup(); return; }
+    state.trip = trips[0];
+    await loadAll();
+    el('loading').style.display='none';
+    el('app').classList.remove('hidden');
+    renderHome(); renderStats(); renderSettle(); renderSettingsMain();
+    subscribeRealtime();
+  } catch(err) {
+    el('loading').style.display='none';
+    showToast('加载失败，请刷新重试');
   }
-  return transactions;
 }
 
-// ─── Settings Tab ─────────────────────────────────────────────────────────────
-function SettingsTab({ trip, members, currencies, categories, showToast, onRefresh }) {
-  const [section, setSection] = useState(null); // null | 'members' | 'currencies' | 'categories'
+async function loadAll() {
+  const tid = state.trip.id;
+  const [m,c,cat,e,s] = await Promise.all([
+    sb.from('members').select('*').eq('trip_id',tid),
+    sb.from('currencies').select('*').eq('trip_id',tid),
+    sb.from('categories').select('*').eq('trip_id',tid),
+    sb.from('expenses').select('*').eq('trip_id',tid).order('expense_date',{ascending:false}).order('created_at',{ascending:false}),
+    sb.from('expense_splits').select('*'),
+  ]);
+  state.members = m.data||[];
+  state.currencies = c.data||[];
+  state.categories = cat.data||[];
+  state.expenses = e.data||[];
+  state.splits = s.data||[];
+}
 
-  if (section === 'members') return <MembersSettings trip={trip} members={members} showToast={showToast} onRefresh={onRefresh} onBack={() => setSection(null)} />;
-  if (section === 'currencies') return <CurrenciesSettings trip={trip} members={members} currencies={currencies} showToast={showToast} onRefresh={onRefresh} onBack={() => setSection(null)} />;
-  if (section === 'categories') return <CategoriesSettings trip={trip} categories={categories} showToast={showToast} onRefresh={onRefresh} onBack={() => setSection(null)} />;
+function subscribeRealtime() {
+  sb.channel('rt').on('postgres_changes',{event:'*',schema:'public',table:'expenses'},async()=>{await loadAll();renderHome();renderStats();renderSettle();}).on('postgres_changes',{event:'*',schema:'public',table:'expense_splits'},async()=>{await loadAll();renderHome();renderStats();renderSettle();}).on('postgres_changes',{event:'*',schema:'public',table:'members'},async()=>{await loadAll();renderSettingsMain();}).on('postgres_changes',{event:'*',schema:'public',table:'currencies'},async()=>{await loadAll();}).subscribe();
+}
 
-  return (
-    <div style={{paddingBottom: 'calc(env(safe-area-inset-bottom) + 68px)'}}>
-      <div className="header safe-top"><div className="header-row"><h1>设置</h1></div></div>
-      <div style={{height:12}} />
+// ─── Setup ────────────────────────────────────────────────────────
+function showSetup() {
+  el('setup-screen').classList.remove('hidden');
+  renderSetupMembers();
+}
+function renderSetupMembers() {
+  const list = el('setup-members-list');
+  list.innerHTML='';
+  for(let i=0;i<setupMemberCount;i++){
+    const color=MEMBER_COLORS[i%MEMBER_COLORS.length];
+    list.innerHTML+=`<div style="padding:0 16px;margin-bottom:10px;display:flex;align-items:center;gap:8px">
+      <div class="av" style="background:${color};width:36px;height:36px;font-size:15px">${i+1}</div>
+      <input class="form-input" id="sm-${i}" placeholder="成员 ${i+1} 的名字" style="flex:1"/>
+      ${i>0?`<button class="btn btn-ghost btn-sm text-red" onclick="removeSetupMember(${i})">删除</button>`:''}
+    </div>`;
+  }
+}
+function addSetupMember(){setupMemberCount++;renderSetupMembers();}
+function removeSetupMember(i){setupMemberCount--;renderSetupMembers();}
+async function createTrip() {
+  const name = el('setup-trip-name').value.trim();
+  if(!name){showToast('请填写行程名称');return;}
+  const names=[];
+  for(let i=0;i<setupMemberCount;i++){const v=el(`sm-${i}`).value.trim();if(v)names.push(v);}
+  if(!names.length){showToast('至少添加一位成员');return;}
+  try {
+    const {data:trip,error:te}=await sb.from('trips').insert({name,base_currency:'CNY'}).select().single();
+    if(te)throw te;
+    state.trip=trip;
+    const memberRows=names.map((n,i)=>({trip_id:trip.id,name:n,color:MEMBER_COLORS[i%MEMBER_COLORS.length]}));
+    const {data:mems,error:me}=await sb.from('members').insert(memberRows).select();
+    if(me)throw me;
+    await sb.from('categories').insert(DEFAULT_CATS.map(c=>({trip_id:trip.id,...c})));
+    await sb.from('currencies').insert(mems.map(m=>({trip_id:trip.id,member_id:m.id,currency_code:'CNY',currency_name:'人民币',exchange_rate:1})));
+    await loadAll();
+    el('setup-screen').classList.add('hidden');
+    el('app').classList.remove('hidden');
+    renderHome();renderStats();renderSettle();renderSettingsMain();
+    subscribeRealtime();
+  } catch(e){showToast('创建失败：'+e.message);}
+}
 
-      <div className="card" style={{padding:'8px 0'}}>
-        <div style={{padding:'12px 16px'}}>
-          <div style={{fontSize:13, color:'var(--gray)'}}>当前行程</div>
-          <div style={{fontSize:17, fontWeight:600, marginTop:2}}>{trip.name}</div>
-        </div>
-      </div>
+// ─── Tab Navigation ───────────────────────────────────────────────
+function switchTab(name, btn) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-item').forEach(t=>t.classList.remove('active'));
+  el('page-'+name).classList.add('active');
+  btn.classList.add('active');
+  el('fab').style.display = name==='home'?'flex':'none';
+  if(name==='stats') renderStats();
+  if(name==='settle') renderSettle();
+  if(name==='settings') renderSettingsMain();
+}
 
-      <div className="section-title">管理</div>
-      <div className="card-list">
-        {[
-          { key: 'members', icon: '👥', label: '成员管理', sub: `${members.length} 位成员` },
-          { key: 'currencies', icon: '💱', label: '汇率设置', sub: '每人购汇汇率' },
-          { key: 'categories', icon: '🏷️', label: '消费分类', sub: `${categories.length} 个分类` },
-        ].map(item => (
-          <div key={item.key} className="card-item" style={{cursor:'pointer'}} onClick={() => setSection(item.key)}>
-            <div style={{fontSize:24}}>{item.icon}</div>
-            <div style={{flex:1}}>
-              <div style={{fontSize:15, fontWeight:500}}>{item.label}</div>
-              <div style={{fontSize:12, color:'var(--gray)'}}>{item.sub}</div>
-            </div>
-            <div style={{color:'var(--gray)', fontSize:18}}>›</div>
-          </div>
-        ))}
-      </div>
+// ─── Home / Expenses ──────────────────────────────────────────────
+function setFilter(f, btn) {
+  expFilter=f;
+  document.querySelectorAll('#page-home .seg-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderHome();
+}
 
-      <div className="section-title">危险操作</div>
-      <div className="card-list">
-        <div className="card-item" style={{cursor:'pointer', color:'var(--red)'}} onClick={async () => {
-          if (confirm('确定要清除所有账单数据吗？此操作不可恢复！')) {
-            await sb.from('expense_splits').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-            await sb.from('expenses').delete().eq('trip_id', trip.id);
-            onRefresh(); showToast('已清除所有账单');
-          }
-        }}>
-          <div style={{fontSize:24}}>🗑️</div>
-          <div style={{flex:1}}><div style={{fontSize:15, fontWeight:500}}>清除所有账单</div></div>
-        </div>
-      </div>
+function renderHome() {
+  if(!state.trip) return;
+  el('home-trip-name').textContent=state.trip.name;
+  const total=state.expenses.reduce((s,e)=>s+toCNY(e),0);
+  const todayAmt=state.expenses.filter(e=>e.expense_date===today()).reduce((s,e)=>s+toCNY(e),0);
+  const shared=state.expenses.filter(e=>e.account_type==='shared');
+  el('home-today-amt').textContent=fmt(todayAmt);
+  el('stat-total').textContent=fmt(total);
+  el('stat-count').textContent=state.expenses.length+' 笔账单';
+  el('stat-shared').textContent=fmt(shared.reduce((s,e)=>s+toCNY(e),0));
+  el('stat-shared-count').textContent=shared.length+' 笔';
+
+  const filtered = expFilter==='all'?state.expenses:state.expenses.filter(e=>e.account_type===expFilter);
+  // Group by date
+  const groups={};
+  filtered.forEach(e=>{if(!groups[e.expense_date])groups[e.expense_date]=[];groups[e.expense_date].push(e);});
+  const dates=Object.keys(groups).sort((a,b)=>b.localeCompare(a));
+
+  const list=el('expenses-list');
+  if(!dates.length){list.innerHTML='<div class="empty"><div class="empty-icon">📝</div><div class="empty-text">还没有账单，点 + 开始记录</div></div>';return;}
+
+  list.innerHTML=dates.map(date=>{
+    const dayTotal=groups[date].reduce((s,e)=>s+toCNY(e),0);
+    const rows=groups[date].map(e=>renderExpRow(e)).join('');
+    return `<div class="date-hdr">${fmtDate(date)} · ${fmt(dayTotal)}</div><div class="card-list">${rows}</div>`;
+  }).join('');
+}
+
+function renderExpRow(e) {
+  const cat=state.categories.find(c=>c.id===e.category_id);
+  const payer=state.members.find(m=>m.id===e.paid_by);
+  const pm=PAYMENT_METHODS.find(p=>p.value===e.payment_method);
+  const cny=toCNY(e);
+  const badge=e.account_type==='shared'?'<span class="badge badge-s">共同</span>':(e.needs_split?'<span class="badge badge-sp">分摊</span>':'<span class="badge badge-p">个人</span>');
+  const amtMain=e.currency_code!=='CNY'?`${e.currency_code} ${parseFloat(e.amount).toFixed(0)}`:fmt(cny);
+  const amtSub=e.currency_code!=='CNY'?`<div class="exp-amt-sub">${fmt(cny)}</div>`:'';
+  const bg=e.account_type==='shared'?'#EBF4FF':'#F0FFF4';
+  return `<div class="exp-row" onclick="openActionMenu('${e.id}')">
+    <div class="exp-icon" style="background:${bg}">${cat?cat.icon:'💰'}</div>
+    <div class="exp-info">
+      <div class="exp-title">${e.title}</div>
+      <div class="exp-meta">${payer?`<span style="color:${payer.color}">●</span> ${payer.name} · `:''}${cat?cat.name+' · ':''}${pm?pm.icon+pm.label:''}${badge}</div>
     </div>
-  );
+    <div class="exp-amt"><div class="exp-amt-main">${amtMain}</div>${amtSub}</div>
+  </div>`;
 }
 
-function MembersSettings({ trip, members, showToast, onRefresh, onBack }) {
-  const [newName, setNewName] = useState('');
-  const save = async () => {
-    if (!newName.trim()) return;
-    const color = MEMBER_COLORS[members.length % MEMBER_COLORS.length];
-    const { error } = await sb.from('members').insert({ trip_id: trip.id, name: newName.trim(), color });
-    if (error) { showToast('添加失败'); return; }
-    setNewName(''); onRefresh(); showToast('已添加');
+// ─── Action Menu ──────────────────────────────────────────────────
+function openActionMenu(id) {
+  actionExpenseId=id;
+  const e=state.expenses.find(x=>x.id===id);
+  el('action-modal-title').textContent=e?e.title:'账单';
+  el('action-modal').classList.remove('hidden');
+}
+function closeActionModal(){el('action-modal').classList.add('hidden');}
+function editExpenseFromMenu(){closeActionModal();openAddExpense(actionExpenseId);}
+async function deleteExpenseFromMenu(){
+  closeActionModal();
+  if(!confirm('确定删除这笔账单？'))return;
+  await sb.from('expense_splits').delete().eq('expense_id',actionExpenseId);
+  await sb.from('expenses').delete().eq('id',actionExpenseId);
+  await loadAll();renderHome();renderStats();renderSettle();
+  showToast('已删除');
+}
+
+// ─── Add/Edit Expense ─────────────────────────────────────────────
+function openAddExpense(editId=null) {
+  currentEditExpenseId=editId;
+  const e=editId?state.expenses.find(x=>x.id===editId):null;
+  el('expense-modal-title').textContent=e?'编辑账单':'新增账单';
+
+  // Reset form
+  expForm={accountType:e?e.account_type:'shared',payerId:e?e.paid_by:(state.members[0]?.id||null),categoryId:e?e.category_id:(state.categories[0]?.id||null),paymentMethod:e?e.payment_method:'cash',needsSplit:e?e.needs_split:false,splitMode:'equal'};
+  el('exp-title').value=e?e.title:'';
+  el('exp-amount').value=e?e.amount:'';
+  el('exp-date').value=e?e.expense_date:today();
+  el('exp-notes').value=e?e.notes:'';
+
+  // Account type
+  el('seg-shared').classList.toggle('active',expForm.accountType==='shared');
+  el('seg-personal').classList.toggle('active',expForm.accountType==='personal');
+  el('split-section').classList.toggle('hidden',expForm.accountType!=='personal');
+
+  // Split toggle
+  const tog=el('split-toggle');
+  tog.classList.toggle('on',expForm.needsSplit);
+  el('split-detail').classList.toggle('hidden',!expForm.needsSplit);
+
+  // Currency selector
+  buildCurrencySelect();
+  if(e) el('exp-currency').value=e.currency_code;
+
+  // Payer pills
+  renderPayerPills();
+  // Category pills
+  renderCategoryPills();
+  // Payment buttons
+  renderPaymentBtns();
+  updateAmountHint();
+  renderSplitRows();
+
+  el('expense-modal').classList.remove('hidden');
+  el('exp-title').focus();
+}
+
+function buildCurrencySelect() {
+  const sel=el('exp-currency');
+  sel.innerHTML='<option value="CNY">CNY 人民币</option>';
+  if(expForm.payerId) {
+    const cs=state.currencies.filter(c=>c.member_id===expForm.payerId&&c.currency_code!=='CNY');
+    cs.forEach(c=>{ sel.innerHTML+=`<option value="${c.currency_code}">${c.currency_code} ${c.currency_name}</option>`; });
+  }
+}
+
+function renderPayerPills() {
+  el('payer-pills').innerHTML=state.members.map(m=>`
+    <div class="pill ${expForm.payerId===m.id?'sel':''}" onclick="selectPayer('${m.id}')">
+      <div class="av av-sm" style="background:${m.color}">${m.name[0]}</div>${m.name}
+    </div>`).join('');
+}
+function selectPayer(id) {
+  expForm.payerId=id;
+  buildCurrencySelect();
+  renderPayerPills();
+  updateAmountHint();
+}
+
+function renderCategoryPills() {
+  el('category-pills').innerHTML=state.categories.map(c=>`
+    <div class="pill ${expForm.categoryId===c.id?'sel':''}" onclick="selectCat('${c.id}')">${c.icon} ${c.name}</div>`).join('');
+}
+function selectCat(id){expForm.categoryId=id;renderCategoryPills();}
+
+function renderPaymentBtns() {
+  el('payment-btns').innerHTML=PAYMENT_METHODS.map(pm=>`
+    <div class="pill ${expForm.paymentMethod===pm.value?'sel':''}" style="flex:1;justify-content:center" onclick="selectPM('${pm.value}')">${pm.icon} ${pm.label}</div>`).join('');
+}
+function selectPM(v){expForm.paymentMethod=v;renderPaymentBtns();}
+
+function setAccountType(type,btn) {
+  expForm.accountType=type;
+  document.querySelectorAll('#expense-modal .segment:first-of-type .seg-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  el('split-section').classList.toggle('hidden',type!=='personal');
+}
+
+function updateAmountHint() {
+  const amt=parseFloat(el('exp-amount').value)||0;
+  const code=el('exp-currency').value;
+  if(code==='CNY'){el('exp-rate-hint').textContent='';return;}
+  const rate=getRate(expForm.payerId,code);
+  const cny=amt*rate;
+  el('exp-rate-hint').textContent=`≈ ${fmt(cny)} (汇率 ${rate})`;
+  renderSplitRows();
+}
+
+function toggleSplit() {
+  expForm.needsSplit=!expForm.needsSplit;
+  el('split-toggle').classList.toggle('on',expForm.needsSplit);
+  el('split-detail').classList.toggle('hidden',!expForm.needsSplit);
+  renderSplitRows();
+}
+function setSplitMode(mode,btn) {
+  expForm.splitMode=mode;
+  el('seg-equal').classList.toggle('active',mode==='equal');
+  el('seg-custom').classList.toggle('active',mode==='custom');
+  el('split-equal-hint').classList.toggle('hidden',mode!=='equal');
+  el('split-custom-rows').classList.toggle('hidden',mode!=='custom');
+  renderSplitRows();
+}
+function renderSplitRows() {
+  const amt=parseFloat(el('exp-amount').value)||0;
+  const code=el('exp-currency').value;
+  const rate=getRate(expForm.payerId,code);
+  const cny=amt*rate;
+  const perPerson=state.members.length>0?cny/state.members.length:0;
+  el('split-equal-hint').textContent=`每人 ${fmt(perPerson)} 元`;
+  el('split-custom-rows').innerHTML=state.members.map(m=>`
+    <div class="split-row">
+      <div class="av av-sm" style="background:${m.color}">${m.name[0]}</div>
+      <span style="flex:1;font-size:15px">${m.name}</span>
+      <input class="split-input" type="number" inputmode="decimal" id="split-${m.id}" placeholder="0.00" value="${(perPerson).toFixed(2)}"/>
+      <span style="font-size:13px;color:var(--gray)">元</span>
+    </div>`).join('');
+}
+
+function closeExpenseModal(){el('expense-modal').classList.add('hidden');}
+
+async function saveExpense() {
+  const title=el('exp-title').value.trim();
+  if(!title){showToast('请填写标题');return;}
+  const amount=parseFloat(el('exp-amount').value);
+  if(!amount||amount<=0){showToast('请填写正确金额');return;}
+  if(!expForm.payerId){showToast('请选择付款人');return;}
+  const code=el('exp-currency').value;
+  const rate=getRate(expForm.payerId,code);
+  const cny=amount*rate;
+
+  const row={
+    trip_id:state.trip.id,title,amount,currency_code:code,
+    amount_cny:cny,exchange_rate_used:rate,
+    category_id:expForm.categoryId,account_type:expForm.accountType,
+    paid_by:expForm.payerId,payment_method:expForm.paymentMethod,
+    expense_date:el('exp-date').value,
+    notes:el('exp-notes').value.trim()||null,
+    needs_split:expForm.needsSplit,
   };
-  return (
-    <div style={{paddingBottom: 'calc(env(safe-area-inset-bottom) + 68px)'}}>
-      <div className="header safe-top">
-        <div className="header-row">
-          <button className="btn btn-ghost btn-sm" onClick={onBack}>‹ 返回</button>
-          <h1 style={{fontSize:17}}>成员管理</h1>
-          <div style={{width:60}} />
-        </div>
-      </div>
-      <div style={{height:12}} />
-      <div className="card-list">
-        {members.map(m => (
-          <div key={m.id} className="card-item">
-            <div className="avatar" style={{background: m.color}}>{m.name[0]}</div>
-            <div style={{flex:1, fontSize:15, fontWeight:500}}>{m.name}</div>
-          </div>
-        ))}
-      </div>
-      <div style={{padding:'16px'}}>
-        <div style={{display:'flex', gap:8}}>
-          <input className="form-input" placeholder="新成员名字" value={newName} onChange={e => setNewName(e.target.value)} style={{flex:1}} />
-          <button className="btn btn-primary" onClick={save}>添加</button>
-        </div>
-      </div>
-    </div>
-  );
-}
 
-function CurrenciesSettings({ trip, members, currencies, showToast, onRefresh, onBack }) {
-  const [selected, setSelected] = useState(members[0]?.id || null);
-  const [showAdd, setShowAdd] = useState(false);
-  const [newCode, setNewCode] = useState('JPY');
-  const [newRate, setNewRate] = useState('');
-  const [saving, setSaving] = useState(false);
-
-  const memberCurrencies = currencies.filter(c => c.member_id === selected);
-
-  const addCurrency = async () => {
-    if (!newRate || isNaN(parseFloat(newRate))) { showToast('请填写正确汇率'); return; }
-    const info = CURRENCIES.find(c => c.code === newCode);
-    setSaving(true);
-    const existing = currencies.find(c => c.member_id === selected && c.currency_code === newCode);
-    if (existing) {
-      await sb.from('currencies').update({ exchange_rate: parseFloat(newRate) }).eq('id', existing.id);
-      showToast('汇率已更新');
+  try {
+    let expId;
+    if(currentEditExpenseId){
+      await sb.from('expenses').update(row).eq('id',currentEditExpenseId);
+      expId=currentEditExpenseId;
+      await sb.from('expense_splits').delete().eq('expense_id',expId);
     } else {
-      await sb.from('currencies').insert({ trip_id: trip.id, member_id: selected, currency_code: newCode, currency_name: info?.name || newCode, exchange_rate: parseFloat(newRate) });
-      showToast('已添加币种');
+      const {data,error}=await sb.from('expenses').insert(row).select().single();
+      if(error)throw error;
+      expId=data.id;
     }
-    setSaving(false); setShowAdd(false); setNewRate(''); onRefresh();
-  };
 
-  const deleteCurrency = async (id) => {
-    await sb.from('currencies').delete().eq('id', id);
-    onRefresh(); showToast('已删除');
-  };
+    // Build splits
+    let splitRows=[];
+    if(expForm.accountType==='shared') {
+      const per=Math.round(cny/state.members.length*100)/100;
+      splitRows=state.members.map(m=>({expense_id:expId,member_id:m.id,split_amount:per,split_ratio:1/state.members.length}));
+    } else if(expForm.needsSplit) {
+      if(expForm.splitMode==='equal') {
+        const per=Math.round(cny/state.members.length*100)/100;
+        splitRows=state.members.map(m=>({expense_id:expId,member_id:m.id,split_amount:per,split_ratio:1/state.members.length}));
+      } else {
+        splitRows=state.members.map(m=>({expense_id:expId,member_id:m.id,split_amount:parseFloat(el('split-'+m.id)?.value||0),split_ratio:null}));
+      }
+    }
+    if(splitRows.length) await sb.from('expense_splits').insert(splitRows);
 
-  return (
-    <div style={{paddingBottom: 'calc(env(safe-area-inset-bottom) + 68px)'}}>
-      <div className="header safe-top">
-        <div className="header-row">
-          <button className="btn btn-ghost btn-sm" onClick={onBack}>‹ 返回</button>
-          <h1 style={{fontSize:17}}>汇率设置</h1>
-          <button className="btn btn-primary btn-sm" onClick={() => setShowAdd(true)}>+ 添加</button>
-        </div>
-      </div>
-      <div style={{height:12}} />
-
-      {/* Member selector */}
-      <div className="pill-row">
-        {members.map(m => (
-          <div key={m.id} className={`pill ${selected===m.id?'selected':''}`} onClick={() => setSelected(m.id)} style={{display:'flex', alignItems:'center', gap:6}}>
-            <div className="avatar avatar-sm" style={{background:m.color}}>{m.name[0]}</div>{m.name}
-          </div>
-        ))}
-      </div>
-
-      <div className="section-title">购汇汇率（1外币 = ? 人民币）</div>
-      <div className="card-list">
-        <div className="card-item">
-          <div style={{flex:1}}><div style={{fontSize:15}}>CNY 人民币</div><div style={{fontSize:12,color:'var(--gray)'}}>基准货币</div></div>
-          <div style={{fontWeight:600}}>1.000000</div>
-        </div>
-        {memberCurrencies.filter(c => c.currency_code !== 'CNY').map(c => (
-          <div key={c.id} className="card-item">
-            <div style={{flex:1}}>
-              <div style={{fontSize:15}}>{c.currency_code} {c.currency_name}</div>
-              <div style={{fontSize:12,color:'var(--gray)'}}>1 {c.currency_code} = {c.exchange_rate} CNY</div>
-            </div>
-            <button className="btn btn-ghost btn-sm text-red" onClick={() => deleteCurrency(c.id)}>删除</button>
-          </div>
-        ))}
-      </div>
-
-      {showAdd && (
-        <div className="modal-overlay" onClick={() => setShowAdd(false)}>
-          <div className="modal" onClick={e => e.stopPropagation()}>
-            <div className="modal-handle" />
-            <div className="modal-header"><span className="modal-title">添加/更新汇率</span></div>
-            <div className="form-group">
-              <label className="form-label">币种</label>
-              <select className="form-input form-select" value={newCode} onChange={e => setNewCode(e.target.value)}>
-                {CURRENCIES.filter(c => c.code !== 'CNY').map(c => <option key={c.code} value={c.code}>{c.code} {c.name}</option>)}
-              </select>
-            </div>
-            <div className="form-group">
-              <label className="form-label">购汇汇率（1 {newCode} = ? CNY）</label>
-              <input className="form-input" type="number" inputMode="decimal" placeholder="例：0.0485" value={newRate} onChange={e => setNewRate(e.target.value)} />
-            </div>
-            <div style={{padding:'0 16px 16px', display:'flex', gap:10}}>
-              <button className="btn btn-ghost btn-block" onClick={() => setShowAdd(false)}>取消</button>
-              <button className="btn btn-primary btn-block" onClick={addCurrency} disabled={saving}>{saving?'保存中':'保存'}</button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
+    closeExpenseModal();
+    await loadAll();
+    renderHome();renderStats();renderSettle();
+    showToast(currentEditExpenseId?'已更新 ✓':'已记录 ✓');
+  } catch(e){showToast('保存失败：'+e.message);}
 }
 
-function CategoriesSettings({ trip, categories, showToast, onRefresh, onBack }) {
-  const [newName, setNewName] = useState('');
-  const [newIcon, setNewIcon] = useState('💰');
-  const ICONS = ['🍜','🚇','🏨','🛍️','🎡','🎭','💊','💰','☕','🍺','🚕','⛽','📸','🎁','🏖️','💈'];
+// ─── Stats ────────────────────────────────────────────────────────
+function renderStats() {
+  if(!state.trip) return;
+  const total=state.expenses.reduce((s,e)=>s+toCNY(e),0);
+  const shared=state.expenses.filter(e=>e.account_type==='shared').reduce((s,e)=>s+toCNY(e),0);
+  const personal=total-shared;
+  el('stats-total').textContent=fmt(total);
+  el('stats-shared').textContent=fmt(shared);
+  el('stats-personal').textContent=fmt(personal);
 
-  const save = async () => {
-    if (!newName.trim()) return;
-    await sb.from('categories').insert({ trip_id: trip.id, name: newName.trim(), icon: newIcon });
-    setNewName(''); onRefresh(); showToast('已添加');
-  };
+  // Daily
+  const byDay={};
+  state.expenses.forEach(e=>{if(!byDay[e.expense_date])byDay[e.expense_date]=0;byDay[e.expense_date]+=toCNY(e);});
+  const days=Object.keys(byDay).sort((a,b)=>b.localeCompare(a));
+  el('stats-daily').innerHTML=days.length?days.map(d=>{
+    const amt=byDay[d];const pct=total>0?amt/total*100:0;
+    return `<div class="card-item"><div style="flex:1"><div style="font-size:14px;font-weight:500">${fmtDate(d)}</div><div class="prog-wrap"><div class="prog-bar" style="width:${pct}%;background:var(--blue)"></div></div></div><div style="font-size:15px;font-weight:600;margin-left:12px">${fmt(amt)}</div></div>`;
+  }).join(''):'<div class="empty"><div class="empty-text">暂无数据</div></div>';
 
-  return (
-    <div style={{paddingBottom: 'calc(env(safe-area-inset-bottom) + 68px)'}}>
-      <div className="header safe-top">
-        <div className="header-row">
-          <button className="btn btn-ghost btn-sm" onClick={onBack}>‹ 返回</button>
-          <h1 style={{fontSize:17}}>消费分类</h1>
-          <div style={{width:60}} />
-        </div>
-      </div>
-      <div style={{height:12}} />
-      <div className="card-list">
-        {categories.map(c => (
-          <div key={c.id} className="card-item">
-            <div style={{fontSize:24}}>{c.icon}</div>
-            <div style={{flex:1, fontSize:15, fontWeight:500}}>{c.name}</div>
-            <button className="btn btn-ghost btn-sm text-red" onClick={async () => { await sb.from('categories').delete().eq('id', c.id); onRefresh(); showToast('已删除'); }}>删除</button>
-          </div>
-        ))}
-      </div>
-      <div style={{padding:'16px'}}>
-        <label className="form-label">图标</label>
-        <div style={{display:'flex', flexWrap:'wrap', gap:8, marginBottom:12}}>
-          {ICONS.map(ic => <div key={ic} onClick={() => setNewIcon(ic)} style={{fontSize:24, padding:6, borderRadius:8, background: newIcon===ic ? '#EBF4FF' : 'transparent', border: newIcon===ic ? '2px solid var(--blue)' : '2px solid transparent', cursor:'pointer'}}>{ic}</div>)}
-        </div>
-        <div style={{display:'flex', gap:8}}>
-          <input className="form-input" placeholder="分类名称" value={newName} onChange={e => setNewName(e.target.value)} style={{flex:1}} />
-          <button className="btn btn-primary" onClick={save}>添加</button>
-        </div>
-      </div>
-    </div>
-  );
+  // Per member
+  const byMem={};
+  state.members.forEach(m=>{byMem[m.id]=0;});
+  state.expenses.forEach(e=>{if(e.paid_by&&byMem[e.paid_by]!==undefined)byMem[e.paid_by]+=toCNY(e);});
+  el('stats-member').innerHTML=state.members.length?state.members.map(m=>{
+    const amt=byMem[m.id]||0;const pct=total>0?amt/total*100:0;
+    return `<div class="card-item"><div class="av" style="background:${m.color}">${m.name[0]}</div><div style="flex:1"><div style="font-size:14px;font-weight:500">${m.name}</div><div class="prog-wrap"><div class="prog-bar" style="width:${pct}%;background:${m.color}"></div></div></div><div style="font-size:15px;font-weight:600;margin-left:12px">${fmt(amt)}</div></div>`;
+  }).join(''):'<div class="empty"><div class="empty-text">暂无成员</div></div>';
 }
 
-ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+// ─── Settle ───────────────────────────────────────────────────────
+function renderSettle() {
+  if(!state.trip) return;
+  const balance={};
+  state.members.forEach(m=>{balance[m.id]=0;});
+  state.expenses.forEach(e=>{
+    const cny=toCNY(e);
+    const expSplits=state.splits.filter(s=>s.expense_id===e.id);
+    if(expSplits.length>0){
+      if(e.paid_by&&balance[e.paid_by]!==undefined)balance[e.paid_by]+=cny;
+      expSplits.forEach(s=>{if(balance[s.member_id]!==undefined)balance[s.member_id]-=parseFloat(s.split_amount);});
+    }
+  });
+
+  el('settle-balance').innerHTML=state.members.map(m=>{
+    const b=balance[m.id]||0;
+    const statusText=b>0.01?`应收 ${fmt(b)}`:b<-0.01?`应付 ${fmt(-b)}`:'已结清';
+    const color=b>0.01?'var(--green)':b<-0.01?'var(--red)':'var(--gray)';
+    const sign=b>0.01?'+':'';
+    return `<div class="card-item"><div class="av" style="background:${m.color}">${m.name[0]}</div><div style="flex:1"><div style="font-size:15px;font-weight:500">${m.name}</div><div style="font-size:12px;color:var(--gray)">${statusText}</div></div><div style="font-size:16px;font-weight:700;color:${color}">${sign}${fmt(b)}</div></div>`;
+  }).join('');
+
+  const txns=computeSettlement(balance);
+  el('settle-txns').innerHTML=txns.length?txns.map(t=>{
+    const from=state.members.find(m=>m.id===t.from);
+    const to=state.members.find(m=>m.id===t.to);
+    return `<div class="settle-row"><div class="av" style="background:${from?.color}">${from?.name[0]}</div><div style="flex:1;font-size:14px"><b>${from?.name}</b><span style="color:var(--gray)"> 转给 </span><b>${to?.name}</b></div><div style="font-size:16px;font-weight:700;color:var(--blue)">${fmt(t.amount)}</div><div class="av" style="background:${to?.color};margin-left:8px">${to?.name[0]}</div></div>`;
+  }).join(''):'<div class="empty"><div class="empty-icon">🎉</div><div class="empty-text">大家已经结清了！</div></div>';
+}
+
+function computeSettlement(balance) {
+  const txns=[];
+  const pos=state.members.filter(m=>(balance[m.id]||0)>0.01).map(m=>({id:m.id,amt:balance[m.id]}));
+  const neg=state.members.filter(m=>(balance[m.id]||0)<-0.01).map(m=>({id:m.id,amt:-balance[m.id]}));
+  pos.sort((a,b)=>b.amt-a.amt); neg.sort((a,b)=>b.amt-a.amt);
+  let i=0,j=0;
+  while(i<pos.length&&j<neg.length){
+    const pay=Math.min(pos[i].amt,neg[j].amt);
+    if(pay>0.01)txns.push({from:neg[j].id,to:pos[i].id,amount:Math.round(pay*100)/100});
+    pos[i].amt-=pay; neg[j].amt-=pay;
+    if(pos[i].amt<0.01)i++; if(neg[j].amt<0.01)j++;
+  }
+  return txns;
+}
+
+// ─── Settings ─────────────────────────────────────────────────────
+function renderSettingsMain() {
+  if(!state.trip) return;
+  el('settings-trip-name').textContent=state.trip.name;
+  el('members-sub').textContent=state.members.length+' 位成员';
+  el('categories-sub').textContent=state.categories.length+' 个分类';
+}
+function showSubSettings(section) {
+  el('settings-main').classList.toggle('hidden',!!section);
+  document.querySelectorAll('.back-page').forEach(p=>{p.classList.add('hidden');p.classList.remove('active');});
+  if(section){
+    const p=el('settings-'+section);
+    p.classList.remove('hidden');
+    p.classList.add('active');
+    if(section==='members')renderMembersList();
+    if(section==='currencies'){renderCurrencyMemberPills();renderCurrenciesList();}
+    if(section==='categories')renderCategoriesList();
+  }
+}
+
+// Members
+function renderMembersList(){
+  el('members-list').innerHTML=state.members.map(m=>`<div class="card-item"><div class="av" style="background:${m.color}">${m.name[0]}</div><div style="flex:1;font-size:15px;font-weight:500">${m.name}</div></div>`).join('');
+}
+async function addMember() {
+  const name=el('new-member-name').value.trim();
+  if(!name)return;
+  const color=MEMBER_COLORS[state.members.length%MEMBER_COLORS.length];
+  await sb.from('members').insert({trip_id:state.trip.id,name,color});
+  await sb.from('currencies').insert({trip_id:state.trip.id,member_id:(await sb.from('members').select('id').eq('trip_id',state.trip.id).order('created_at',{ascending:false}).limit(1)).data[0].id,currency_code:'CNY',currency_name:'人民币',exchange_rate:1});
+  el('new-member-name').value='';
+  await loadAll();renderMembersList();renderSettingsMain();showToast('已添加');
+}
+
+// Currencies
+function renderCurrencyMemberPills(){
+  if(!selectedCurrencyMemberId&&state.members.length)selectedCurrencyMemberId=state.members[0].id;
+  el('currency-member-pills').innerHTML=state.members.map(m=>`<div class="pill ${selectedCurrencyMemberId===m.id?'sel':''}" onclick="selectCurrencyMember('${m.id}')"><div class="av av-sm" style="background:${m.color}">${m.name[0]}</div>${m.name}</div>`).join('');
+}
+function selectCurrencyMember(id){selectedCurrencyMemberId=id;renderCurrencyMemberPills();renderCurrenciesList();}
+function renderCurrenciesList(){
+  const cs=state.currencies.filter(c=>c.member_id===selectedCurrencyMemberId);
+  el('currencies-list').innerHTML=`<div class="card-item"><div style="flex:1"><div style="font-size:15px">CNY 人民币</div><div style="font-size:12px;color:var(--gray)">基准货币</div></div><div style="font-weight:600">1.000000</div></div>`
+    +cs.filter(c=>c.currency_code!=='CNY').map(c=>`<div class="card-item"><div style="flex:1"><div style="font-size:15px">${c.currency_code} ${c.currency_name}</div><div style="font-size:12px;color:var(--gray)">1 ${c.currency_code} = ${c.exchange_rate} CNY</div></div><button class="btn btn-ghost btn-sm text-red" onclick="deleteCurrency('${c.id}')">删除</button></div>`).join('');
+}
+function openAddCurrency(){
+  el('new-currency-code').value='JPY';
+  el('new-currency-rate').value='';
+  updateCurrencyRateLabel();
+  el('currency-modal').classList.remove('hidden');
+}
+function closeCurrencyModal(){el('currency-modal').classList.add('hidden');}
+function updateCurrencyRateLabel(){el('currency-rate-label').textContent=`购汇汇率（1 ${el('new-currency-code').value} = ? CNY）`;}
+async function saveCurrency(){
+  const code=el('new-currency-code').value;
+  const rate=parseFloat(el('new-currency-rate').value);
+  if(!rate||rate<=0){showToast('请填写正确汇率');return;}
+  const infoMap={'JPY':'日元','USD':'美元','EUR':'欧元','HKD':'港元','TWD':'台币','KRW':'韩元','THB':'泰铢','SGD':'新加坡元','GBP':'英镑'};
+  const existing=state.currencies.find(c=>c.member_id===selectedCurrencyMemberId&&c.currency_code===code);
+  if(existing){await sb.from('currencies').update({exchange_rate:rate}).eq('id',existing.id);showToast('汇率已更新');}
+  else{await sb.from('currencies').insert({trip_id:state.trip.id,member_id:selectedCurrencyMemberId,currency_code:code,currency_name:infoMap[code]||code,exchange_rate:rate});showToast('已添加币种');}
+  closeCurrencyModal();await loadAll();renderCurrenciesList();
+}
+async function deleteCurrency(id){
+  await sb.from('currencies').delete().eq('id',id);
+  await loadAll();renderCurrenciesList();showToast('已删除');
+}
+
+// Categories
+function renderCategoriesList(){
+  el('categories-list').innerHTML=state.categories.map(c=>`<div class="card-item"><div style="font-size:24px">${c.icon}</div><div style="flex:1;font-size:15px;font-weight:500">${c.name}</div><button class="btn btn-ghost btn-sm text-red" onclick="deleteCategory('${c.id}')">删除</button></div>`).join('');
+  el('cat-icon-picker').innerHTML=CAT_ICONS.map(ic=>`<div onclick="selectCatIcon('${ic}')" style="font-size:24px;padding:6px;border-radius:8px;cursor:pointer;background:${selectedCatIcon===ic?'#EBF4FF':'transparent'};border:2px solid ${selectedCatIcon===ic?'var(--blue)':'transparent'}">${ic}</div>`).join('');
+}
+function selectCatIcon(ic){selectedCatIcon=ic;renderCategoriesList();}
+async function addCategory(){
+  const name=el('new-cat-name').value.trim();
+  if(!name)return;
+  await sb.from('categories').insert({trip_id:state.trip.id,name,icon:selectedCatIcon});
+  el('new-cat-name').value='';
+  await loadAll();renderCategoriesList();renderSettingsMain();showToast('已添加');
+}
+async function deleteCategory(id){
+  await sb.from('categories').delete().eq('id',id);
+  await loadAll();renderCategoriesList();renderSettingsMain();showToast('已删除');
+}
+async function clearAllExpenses(){
+  if(!confirm('确定要清除所有账单？此操作不可恢复！'))return;
+  await sb.from('expense_splits').delete().neq('id','00000000-0000-0000-0000-000000000000');
+  await sb.from('expenses').delete().eq('trip_id',state.trip.id);
+  await loadAll();renderHome();renderStats();renderSettle();showToast('已清除所有账单');
+}
+
+// ─── Currency rate label update on change ────────────────────────
+document.getElementById('new-currency-code').addEventListener('change',updateCurrencyRateLabel);
+
+// ─── Start ────────────────────────────────────────────────────────
+init();
 </script>
 </body>
 </html>

@@ -597,7 +597,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','SF Pro Display'
     <div class="seg"><button class="seg-b active" id="tt-person" onclick="setTrType('person',this)">💸 人与人</button><button class="seg-b" id="tt-wallet" onclick="setTrType('wallet',this)">👛 账户互转</button></div>
     <div id="tr-person">
       <div class="fg"><label class="fl">付款方</label><div id="tr-from" class="pills"></div></div>
+      <div class="fg" id="tr-from-wallet-row"><label class="fl">从账户转出</label><div id="tr-from-wallet" class="pills"></div></div>
       <div class="fg"><label class="fl">收款方</label><div id="tr-to" class="pills"></div></div>
+      <div class="fg" id="tr-to-wallet-row"><label class="fl">转入账户</label><div id="tr-to-wallet" class="pills"></div></div>
     </div>
     <div id="tr-wallet" class="hidden">
       <div class="fg"><label class="fl">谁的账户</label><div id="tr-wmem" class="pills"></div></div>
@@ -665,7 +667,7 @@ let walIcon='💵';
 let pmIcon='💳';
 let wdetId=null;
 let trType='person';
-let trFrom=null,trTo=null,trWMem=null,trWFrom=null,trWTo=null;
+let trFrom=null,trTo=null,trWMem=null,trWFrom=null,trWTo=null,trFromWallet=null,trToWallet=null;
 let eForm={recordType:'expense',scope:'shared',payer:null,cat:null,pm:'cash',wallet:null,trTo:null,splitMode:'equal',personalSplit:false};
 let rateMem=null;
 function loadPM(){try{const s=localStorage.getItem('t_pms');if(s)return JSON.parse(s);}catch{}return [];}
@@ -1734,12 +1736,12 @@ async function quickSettleOrig(from,to,amt,cur){
 // TRANSFER SHEET
 // ══════════════════════════════════
 function openTransfer(){
-  trType='person';trFrom=D.members[0]?.id||null;trTo=D.members[1]?.id||null;
+  trType='person';trFrom=D.members[0]?.id||null;trTo=D.members[1]?.id||null;trFromWallet=null;trToWallet=null;
   trWMem=getMe()?.id||D.members[0]?.id||null;trWFrom=null;trWTo=null;
   el('tt-person').classList.add('active');el('tt-wallet').classList.remove('active');
   el('tr-person').classList.remove('hidden');el('tr-wallet').classList.add('hidden');
   el('tr-amt').value='';el('tr-date').value=today();el('tr-notes').value='';el('tr-cur').value='CNY';el('tr-hint').textContent='';
-  renderTrFromPills();renderTrToPills();renderTrWMem();
+  renderTrFromPills();renderTrToPills();renderTrPersonWallets();renderTrWMem();
   el('tr-modal').classList.remove('hidden');
 }
 function closeTr(){el('tr-modal').classList.add('hidden');}
@@ -1748,8 +1750,23 @@ function setTrType(t,btn){
   el('tr-person').classList.toggle('hidden',t!=='person');el('tr-wallet').classList.toggle('hidden',t!=='wallet');
   if(t==='wallet')renderTrWMem();
 }
-function renderTrFromPills(){const me=getMe();el('tr-from').innerHTML=D.members.map(m=>`<div class="pill ${trFrom===m.id?'sel':''}" onclick="trFrom='${m.id}';renderTrFromPills()">${memAv(m,"xs")}${m.name}${me&&m.id===me.id?'<span class="me-tag">我</span>':''}</div>`).join('');}
-function renderTrToPills(){const me=getMe();el('tr-to').innerHTML=D.members.map(m=>`<div class="pill ${trTo===m.id?'sel':''}" onclick="trTo='${m.id}';renderTrToPills()">${memAv(m,"xs")}${m.name}${me&&m.id===me.id?'<span class="me-tag">我</span>':''}</div>`).join('');}
+function renderTrFromPills(){const me=getMe();el('tr-from').innerHTML=D.members.map(m=>`<div class="pill ${trFrom===m.id?'sel':''}" onclick="trFrom='${m.id}';trFromWallet=null;renderTrFromPills();renderTrPersonWallets()">${memAv(m,"xs")}${m.name}${me&&m.id===me.id?'<span class="me-tag">我</span>':''}</div>`).join('');}
+function renderTrToPills(){const me=getMe();el('tr-to').innerHTML=D.members.map(m=>`<div class="pill ${trTo===m.id?'sel':''}" onclick="trTo='${m.id}';trToWallet=null;renderTrToPills();renderTrPersonWallets()">${memAv(m,"xs")}${m.name}${me&&m.id===me.id?'<span class="me-tag">我</span>':''}</div>`).join('');}
+function renderTrPersonWallets(){
+  // 付款方账户（个人账户 + 公共账户）
+  const fromWs=trFrom?[...D.wallets.filter(w=>w.member_id===trFrom),...D.wallets.filter(w=>w.is_shared||(!w.member_id&&!!w.id))]:[];
+  const toWs=trTo?[...D.wallets.filter(w=>w.member_id===trTo),...D.wallets.filter(w=>w.is_shared||(!w.member_id&&!!w.id))]:[];
+  const fPills=fromWs.length
+    ?`<div class="pill ${trFromWallet===null?'sel':''}" onclick="trFromWallet=null;renderTrPersonWallets()">不关联</div>`+
+      fromWs.map(w=>`<div class="pill ${trFromWallet===w.id?'sel':''}" onclick="trFromWallet='${w.id}';renderTrPersonWallets()">${w.icon||'💳'} ${w.name}${w.is_shared?'<span style="font-size:10px;color:var(--blue)"> 公</span>':''}${w.currency_code&&w.currency_code!=='CNY'?' ('+w.currency_code+')':''}</div>`).join('')
+    :'<span style="font-size:13px;color:var(--text3)">先选付款方</span>';
+  const tPills=toWs.length
+    ?`<div class="pill ${trToWallet===null?'sel':''}" onclick="trToWallet=null;renderTrPersonWallets()">不关联</div>`+
+      toWs.map(w=>`<div class="pill ${trToWallet===w.id?'sel':''}" onclick="trToWallet='${w.id}';renderTrPersonWallets()">${w.icon||'💳'} ${w.name}${w.is_shared?'<span style="font-size:10px;color:var(--blue)"> 公</span>':''}${w.currency_code&&w.currency_code!=='CNY'?' ('+w.currency_code+')':''}</div>`).join('')
+    :'<span style="font-size:13px;color:var(--text3)">先选收款方</span>';
+  if(el('tr-from-wallet'))el('tr-from-wallet').innerHTML=fPills;
+  if(el('tr-to-wallet'))el('tr-to-wallet').innerHTML=tPills;
+}
 function renderTrWMem(){
   if(!trWMem&&D.members.length)trWMem=D.members[0].id;
   el('tr-wmem').innerHTML=D.members.map(m=>`<div class="pill ${trWMem===m.id?'sel':''}" onclick="trWMem='${m.id}';trWFrom=null;trWTo=null;renderTrWMem()"><div class="av av-xs" style="background:${m.color}">${m.name[0]}</div>${m.name}</div>`).join('');
@@ -1761,7 +1778,7 @@ function updateTrHint(){const amt=parseFloat(el('tr-amt').value)||0;const code=e
 async function saveTr(){
   const amount=parseFloat(el('tr-amt').value);if(!amount||amount<=0){toast('请填写金额');return;}
   const code=el('tr-cur').value;const r=getRate(trFrom||trWMem,code)||1;const cny=code==='CNY'?amount:amount*r;
-  const row={trip_id:D.trip.id,transfer_type:trType,from_member_id:trType==='person'?trFrom:null,to_member_id:trType==='person'?trTo:null,from_wallet_id:trType==='wallet'?trWFrom:null,to_wallet_id:trType==='wallet'?trWTo:null,wallet_member_id:trType==='wallet'?trWMem:null,amount:cny,currency_code:'CNY',transfer_date:el('tr-date').value,notes:el('tr-notes').value.trim()||null};
+  const row={trip_id:D.trip.id,transfer_type:trType,from_member_id:trType==='person'?trFrom:null,to_member_id:trType==='person'?trTo:null,from_wallet_id:trType==='person'?trFromWallet:(trType==='wallet'?trWFrom:null),to_wallet_id:trType==='person'?trToWallet:(trType==='wallet'?trWTo:null),wallet_member_id:trType==='wallet'?trWMem:null,amount:cny,currency_code:'CNY',transfer_date:el('tr-date').value,notes:el('tr-notes').value.trim()||null};
   if(trType==='person'&&!row.from_member_id){toast('请选择付款方');return;}
   if(trType==='person'&&!row.to_member_id){toast('请选择收款方');return;}
   if(trType==='person'&&row.from_member_id===row.to_member_id){toast('不能转给自己');return;}

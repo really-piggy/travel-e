@@ -1182,7 +1182,7 @@ function renderMyAssets(me){
   },0);
   el('asset-summary').innerHTML=`<div class="card">
     <div style="display:flex;justify-content:space-between;align-items:flex-end">
-      <div><div style="font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.5px">总余额（人民币）</div><div style="font-size:36px;font-weight:800;color:${totBal>=0?'var(--green)':'var(--red)'];margin-top:4px">${fmt(totBal)}</div></div>
+      <div><div style="font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.5px">总余额（人民币）</div><div style="font-size:36px;font-weight:800;color:${totBal>=0?'var(--green)':'var(--red)'};margin-top:4px">${fmt(totBal)}</div></div>
       <div style="text-align:right"><div style="font-size:11px;color:var(--text3)">初始</div><div style="font-size:16px;font-weight:600">${fmt(totInit)}</div></div>
     </div>
   </div>`;

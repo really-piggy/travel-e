@@ -302,7 +302,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','SF Pro Display'
     <div class="sheet-handle"></div>
     <div class="sheet-hdr"><span class="sheet-title">充值到公共账本</span><button class="btn btn-ghost btn-sm" onclick="closeTopupModal()">取消</button></div>
     <div class="fg"><label class="fl">充值人</label><div id="topup-members" class="pills" style="flex-wrap:wrap;gap:7px"></div></div>
-    <div class="fg"><label class="fl">金额</label><input class="fi" id="topup-amount" type="number" inputmode="decimal" placeholder="0.00"/></div>
+    <div class="fg"><label class="fl">币种</label>
+      <select class="fi fi-sel" id="topup-cur" onchange="updateTopupHint()">
+        <option value="CNY">CNY 人民币</option><option value="JPY">JPY 日元</option><option value="USD">USD 美元</option>
+        <option value="EUR">EUR 欧元</option><option value="HKD">HKD 港元</option><option value="TWD">TWD 台币</option>
+        <option value="KRW">KRW 韩元</option><option value="THB">THB 泰铢</option><option value="SGD">SGD 新加坡元</option>
+        <option value="GBP">GBP 英镑</option>
+      </select>
+    </div>
+    <div class="fg"><label class="fl" id="topup-amt-lbl">金额（CNY）</label><input class="fi" id="topup-amount" type="number" inputmode="decimal" placeholder="0.00" oninput="updateTopupHint()"/><div id="topup-hint" style="font-size:12px;color:var(--text3);margin-top:4px"></div></div>
     <div class="fg"><label class="fl">日期</label><input class="fi" id="topup-date" type="date"/></div>
     <div class="fg"><label class="fl">备注（选填）</label><input class="fi" id="topup-notes" placeholder="如：旅行启动资金"/></div>
     <div style="padding:0 16px 16px;display:flex;gap:10px"><button class="btn btn-ghost btn-block" onclick="closeTopupModal()">取消</button><button class="btn btn-primary btn-block" onclick="saveTopup()">确认充值</button></div>
@@ -561,7 +569,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','SF Pro Display'
 <div id="wallet-modal" class="overlay hidden">
   <div class="sheet">
     <div class="sheet-handle"></div>
-    <div class="sheet-hdr"><span class="sheet-title">添加账户</span><button class="btn btn-ghost btn-sm" onclick="closeWalletModal()">取消</button></div>
+    <div class="sheet-hdr"><span id="wm-sheet-title" class="sheet-title">添加账户</span><button class="btn btn-ghost btn-sm" onclick="closeWalletModal()">取消</button></div>
+    <div id="wm-shared-hint" class="hidden" style="margin:0 16px 8px;padding:10px 14px;background:rgba(0,122,255,.08);border-radius:10px;font-size:13px;color:var(--blue)">📢 公共账户由全员共享，消费账单可选择从此账户扣款</div>
     <div class="fg"><label class="fl">名称</label><input class="fi" id="wm-name" placeholder="如：日元现金 / 建行信用卡"/></div>
     <div class="fg"><label class="fl">图标</label><div id="wm-icons" class="pills"></div></div>
     <div class="fg"><label class="fl">币种</label>
@@ -572,7 +581,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','SF Pro Display'
         <option value="GBP">GBP 英镑</option>
       </select>
     </div>
-    <div class="fg"><label class="fl" id="wm-init-lbl">初始金额（CNY）</label><input class="fi" id="wm-init" type="number" inputmode="decimal" placeholder="0.00" oninput="updateWalletHint()"/><div id="wm-hint" style="font-size:12px;color:var(--text3);margin-top:4px"></div></div>
+    <div id="wm-init-section"><div class="fg"><label class="fl" id="wm-init-lbl">初始金额（CNY）</label><input class="fi" id="wm-init" type="number" inputmode="decimal" placeholder="0.00" oninput="updateWalletHint()"/><div id="wm-hint" style="font-size:12px;color:var(--text3);margin-top:4px"></div></div></div>
+    <div id="wm-del-row" class="hidden" style="padding:0 16px 8px"><button class="btn btn-block" style="color:var(--red);border:1px solid rgba(255,59,48,.2);background:rgba(255,59,48,.05)" onclick="delWalletFromEdit()">删除此账户</button></div>
     <div style="padding:0 16px 16px;display:flex;gap:10px"><button class="btn btn-ghost btn-block" onclick="closeWalletModal()">取消</button><button class="btn btn-primary btn-block" onclick="saveWallet()">保存</button></div>
   </div>
 </div>
@@ -671,6 +681,12 @@ let PMs=loadPM();
 function getMeId(){return localStorage.getItem('me_'+(D.trip?.id||''));}
 function setMeId(id){localStorage.setItem('me_'+D.trip.id,id);}
 function getMe(){return D.members.find(m=>m.id===getMeId())||null;}
+// 统一头像渲染: size = 'xs'|'sm'|'md'
+function memAv(m,size='sm'){
+  if(!m)return `<div class="av av-${size}" style="background:#ccc">?</div>`;
+  if(m.icon)return `<div class="av av-${size}" style="background:transparent;font-size:${size==='xs'?14:size==='sm'?18:22}px;line-height:1">${m.icon}</div>`;
+  return `<div class="av av-${size}" style="background:${m.color}">${m.name?.[0]||'?'}</div>`;
+}
 
 // ══════════════════════════════════
 // HELPERS
@@ -923,7 +939,7 @@ function openExpDet(id){
         <div class="row"><span style="font-size:20px">${e.account_type==='shared'?'👥':'🙋'}</span><div style="flex:1;color:var(--text3);font-size:13px">类型</div><b>${e.account_type==='shared'?'共同支出':e.account_type==='income'?'收入':'个人支出'}</b></div>
         ${e.notes?`<div class="row"><span style="font-size:20px">📝</span><div style="flex:1;color:var(--text3);font-size:13px">备注</div><b>${e.notes}</b></div>`:''}
       </div>
-      ${sp.length?`<div class="sec" style="padding-left:0;margin-top:12px">分摊明细</div><div class="card-list" style="margin:0">${sp.map(s=>{const mem=D.members.find(m=>m.id===s.member_id);return `<div class="row"><div class="av av-xs" style="background:${mem?.color||'#999'}">${mem?.name?.[0]||'?'}</div><div style="flex:1;font-size:14px">${mem?.name||'未知'}</div><b>${fmt(s.split_amount)}</b></div>`;}).join('')}</div>`:''}
+      ${sp.length?`<div class="sec" style="padding-left:0;margin-top:12px">分摊明细</div><div class="card-list" style="margin:0">${sp.map(s=>{const mem=D.members.find(m=>m.id===s.member_id);return `<div class="row">${memAv(mem,"xs")}<div style="flex:1;font-size:14px">${mem?.name||'未知'}</div><b>${fmt(s.split_amount)}</b></div>`;}).join('')}</div>`:''}
     </div>`;
   el('exp-det-modal').classList.remove('hidden');
 }
@@ -991,7 +1007,7 @@ function setExpScope(s,btn){
 }
 function renderExpFormPills(){
   const me=getMe();
-  el('et-payers').innerHTML=D.members.map(m=>`<div class="pill ${eForm.payer===m.id?'sel':''}" onclick="selPayer('${m.id}')"><div class="av av-xs" style="background:${m.color}">${m.name[0]}</div>${m.name}${me&&m.id===me.id?'<span class="me-tag">我</span>':''}</div>`).join('');
+  el('et-payers').innerHTML=D.members.map(m=>`<div class="pill ${eForm.payer===m.id?'sel':''}" onclick="selPayer('${m.id}')">${memAv(m,"xs")}${m.name}${me&&m.id===me.id?'<span class="me-tag">我</span>':''}</div>`).join('');
   el('et-cats').innerHTML=D.categories.map(c=>`<div class="pill ${eForm.cat===c.id?'sel':''}" onclick="selCat('${c.id}')">${c.icon} ${c.name}</div>`).join('');
   renderWalletPills();
   renderTrToPillsInForm();
@@ -1197,7 +1213,7 @@ function renderStatChart(){
       return{m,cny};
     }).sort((a,b)=>b.cny-a.cny);
     const maxCNY=Math.max(...rows.map(r=>r.cny),1);
-    el('stat-chart').innerHTML=rows.map(({m,cny})=>{const pct=maxCNY>0?cny/maxCNY*100:0;const me=getMe();const isMe=me&&m.id===me.id;return `<div class="bar-row"><div class="av av-xs" style="background:${m.color}">${m.name[0]}</div><span class="bar-label">${m.name}${isMe?'<span class="me-tag">我</span>':''}</span><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${m.color}"></div></div><span class="bar-amt">${fmt(cny)}</span></div>`;}).join('');
+    el('stat-chart').innerHTML=rows.map(({m,cny})=>{const pct=maxCNY>0?cny/maxCNY*100:0;const me=getMe();const isMe=me&&m.id===me.id;return `<div class="bar-row">${memAv(m,"xs")}<span class="bar-label">${m.name}${isMe?'<span class="me-tag">我</span>':''}</span><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${m.color}"></div></div><span class="bar-amt">${fmt(cny)}</span></div>`;}).join('');
   }else{
     const byDay=groupBy(exps,e=>e.expense_date);
     const dates=Object.keys(byDay).sort((a,b)=>b.localeCompare(a));
@@ -1287,21 +1303,53 @@ function renderSharedAssets(me){
   },0);
   const totalBal=totalTopup-totalSpent;
   // 汇总卡
+  // 按币种分组充值
+  const topupByCur={};
+  topups.filter(t=>t.transfer_type==='topup').forEach(t=>{
+    const c=t.currency_code||'CNY';
+    topupByCur[c]=(topupByCur[c]||0)+parseFloat(t.amount||0);
+  });
+  const curSummaryRows=Object.entries(topupByCur).map(([c,a])=>{
+    const r=getRate(null,c)||1;
+    const spentInCur=Object.entries(sharedSpent).reduce((s,[wid,cny])=>{
+      const w=sharedWallets.find(x=>x.id===wid);
+      if(w&&(w.currency_code||'CNY')===c)s+=cny/(getRate(null,c)||1);
+      return s;
+    },0);
+    const bal=a-spentInCur;
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+      <div style="font-size:13px;font-weight:600">${c}</div>
+      <div style="display:flex;gap:16px;font-size:12px">
+        <span style="color:var(--blue)">充 ${c==='CNY'?fmt(a):fmtFx(a,c)}</span>
+        <span style="color:var(--red)">消费 ${c==='CNY'?fmt(sharedSpent[''+(sharedWallets.find(w=>(w.currency_code||'CNY')===c)?.id)]||0):fmtFx(spentInCur,c)}</span>
+        <span style="font-weight:700;color:${bal>=0?'var(--green)':'var(--red)'}">余 ${c==='CNY'?fmt(bal):fmtFx(bal,c)}</span>
+      </div>
+    </div>`;
+  }).join('');
   el('asset-summary').innerHTML=`<div class="card" style="margin:10px 18px">
-    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:14px">
-      <div><div style="font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.5px">公共账本余额</div><div style="font-size:36px;font-weight:800;color:${totalBal>=0?'var(--green)':'var(--red)'};margin-top:4px">${fmt(totalBal)}</div></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div style="font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.5px">公共账本余额</div>
       <button class="btn btn-ghost btn-sm" style="border:1px solid rgba(0,122,255,.25)" onclick="openAddWallet(true)">＋ 建账户</button>
     </div>
-    <div style="display:flex;gap:8px">
-      <div style="flex:1;background:#F2F2F7;border-radius:10px;padding:10px;text-align:center"><div style="font-size:11px;color:var(--text3)">总充值</div><div style="font-size:16px;font-weight:700;color:var(--blue);margin-top:3px">${fmt(totalTopup)}</div></div>
-      <div style="flex:1;background:#F2F2F7;border-radius:10px;padding:10px;text-align:center"><div style="font-size:11px;color:var(--text3)">总消费</div><div style="font-size:16px;font-weight:700;color:var(--red);margin-top:3px">${fmt(totalSpent)}</div></div>
+    ${Object.keys(topupByCur).length?curSummaryRows:'<div style="font-size:13px;color:var(--text3);text-align:center;padding:12px 0">暂无充值记录</div>'}
+    <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:flex;gap:8px">
+      <div style="flex:1;background:#F2F2F7;border-radius:10px;padding:10px;text-align:center"><div style="font-size:11px;color:var(--text3)">总充值(CNY)</div><div style="font-size:15px;font-weight:700;color:var(--blue);margin-top:3px">${fmt(totalTopup)}</div></div>
+      <div style="flex:1;background:#F2F2F7;border-radius:10px;padding:10px;text-align:center"><div style="font-size:11px;color:var(--text3)">总消费(CNY)</div><div style="font-size:15px;font-weight:700;color:var(--red);margin-top:3px">${fmt(totalSpent)}</div></div>
     </div>
   </div>`;
-  // 成员充值明细
+  // 成员充值明细（按原币显示）
+  const topupDetailByMem={};
+  topups.filter(t=>t.transfer_type==='topup').forEach(t=>{
+    const mid=t.from_member_id;const c=t.currency_code||'CNY';const a=parseFloat(t.amount||0);
+    if(!topupDetailByMem[mid])topupDetailByMem[mid]={};
+    topupDetailByMem[mid][c]=(topupDetailByMem[mid][c]||0)+a;
+  });
   const memRows=D.members.map(m=>{
-    const amt=topupByMem[m.id]||0;
-    const av=m.icon?`<span style="font-size:18px">${m.icon}</span>`:`<div class="av av-sm" style="background:${m.color}">${m.name[0]}</div>`;
-    return `<div class="row"><div style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">${av}</div><div style="flex:1;font-size:15px;font-weight:500">${m.name}${me&&m.id===me.id?' (我)':''}</div><div style="font-size:15px;font-weight:700;color:${amt>0?'var(--blue)':'var(--text3)'}">${amt>0?fmt(amt):'未充值'}</div></div>`;
+    const detail=topupDetailByMem[m.id]||{};
+    const lines=Object.entries(detail).map(([c,a])=>c==='CNY'?fmt(a):fmtFx(a,c));
+    const amtStr=lines.length?lines.join(' + '):'未充值';
+    const av=m.icon?`<span style="font-size:20px">${m.icon}</span>`:`<div class="av av-sm" style="background:${m.color}">${m.name[0]}</div>`;
+    return `<div class="row"><div style="width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">${av}</div><div style="flex:1;font-size:15px;font-weight:500">${m.name}${me&&m.id===me.id?' (我)':''}</div><div style="font-size:14px;font-weight:700;color:${lines.length?'var(--blue)':'var(--text3)'}">${amtStr}</div></div>`;
   }).join('');
   // 公共账户卡片
   const walletRows=sharedWallets.length?
@@ -1453,6 +1501,8 @@ function openTopupModal(){
   el('topup-date').value=today();
   el('topup-amount').value='';
   el('topup-notes').value='';
+  el('topup-cur').value='CNY';
+  updateTopupHint();
   renderTopupMembers();
   el('topup-modal').classList.remove('hidden');
 }
@@ -1462,19 +1512,30 @@ function renderTopupMembers(){
     `<div class="pill ${_topupMem===m.id?'sel':''}" onclick="_topupMem='${m.id}';renderTopupMembers()">${m.icon||''}${m.name}</div>`
   ).join('');
 }
+function updateTopupHint(){
+  const code=el('topup-cur').value;
+  el('topup-amt-lbl').textContent=`金额（${code}）`;
+  if(code==='CNY'){el('topup-hint').textContent='';return;}
+  const r=getRate(_topupMem,code)||1;
+  const amt=parseFloat(el('topup-amount').value)||0;
+  el('topup-hint').textContent=amt>0?`≈ ${fmt(amt*r)} 人民币`:`1 ${code} ≈ ${r} CNY`;
+}
 async function saveTopup(){
-  if(!_topupMem){toast('请选择充値人');return;}
+  if(!_topupMem){toast('请选择充值人');return;}
   const amt=parseFloat(el('topup-amount').value);
-  if(!amt||amt<=0){toast('请输入充値金额');return;}
-  const notes=el('topup-notes').value.trim()||'公共账本充値';
+  if(!amt||amt<=0){toast('请输入充值金额');return;}
+  const code=el('topup-cur').value;
+  const r=getRate(_topupMem,code)||1;
+  const amtCNY=code==='CNY'?amt:amt*r;
+  const notes=el('topup-notes').value.trim()||'公共账本充值';
   const {error}=await db.from('transfers').insert({
     trip_id:D.trip.id,transfer_type:'topup',
     from_member_id:_topupMem,to_member_id:null,
-    amount:amt,currency_code:'CNY',
+    amount:amt,currency_code:code,
     transfer_date:el('topup-date').value,notes
   });
-  if(error){toast('充値失败：'+error.message);return;}
-  closeTopupModal();await loadAll();renderAssets();toast('充値成功 '+fmt(amt));
+  if(error){toast('充值失败：'+error.message);return;}
+  closeTopupModal();await loadAll();renderAssets();toast('充值成功 '+(code==='CNY'?fmt(amtCNY):fmtFx(amt,code)));
 }
 
 // ══════════════════════════════════
@@ -1502,17 +1563,72 @@ function renderSettle(){
     if(t.from_member_id&&bal[t.from_member_id]!==undefined)bal[t.from_member_id]-=cny;
     if(t.to_member_id&&bal[t.to_member_id]!==undefined)bal[t.to_member_id]+=cny;
   });
+  if(settleCur==='ORIG'){
+    // 原币模式：按币种分组，不跨币种换算
+    const curGroups={};
+    D.expenses.forEach(e=>{
+      if(e.account_type==='income')return;
+      const c=e.currency_code||'CNY';const sp=D.splits.filter(s=>s.expense_id===e.id);
+      if(!sp.length)return;
+      if(!curGroups[c])curGroups[c]={};
+      const g=curGroups[c];
+      const paid=parseFloat(e.amount||0);
+      if(e.paid_by){if(g[e.paid_by]!==undefined)g[e.paid_by]+=paid;else g[e.paid_by]=paid;}
+      const total=sp.reduce((s2,s)=>s2+parseFloat(s.split_amount||0),0);
+      sp.forEach(s=>{
+        const ratio=total>0?parseFloat(s.split_amount)/total:1/sp.length;
+        const share=paid*ratio;
+        if(g[s.member_id]!==undefined)g[s.member_id]-=share;
+        else g[s.member_id]=-share;
+      });
+    });
+    (D.transfers||[]).filter(t=>t.transfer_type==='person').forEach(t=>{
+      const c=t.currency_code||'CNY';const amt=parseFloat(t.amount||0);
+      if(!curGroups[c])curGroups[c]={};
+      const g=curGroups[c];
+      if(t.from_member_id){if(g[t.from_member_id]!==undefined)g[t.from_member_id]-=amt;else g[t.from_member_id]=-amt;}
+      if(t.to_member_id){if(g[t.to_member_id]!==undefined)g[t.to_member_id]+=amt;else g[t.to_member_id]=amt;}
+    });
+    el('settle-bal').innerHTML=D.members.map(m=>{
+      const isMe=me&&m.id===me.id;
+      const parts=Object.entries(curGroups).map(([c,g])=>{
+        const b=g[m.id]||0;if(Math.abs(b)<0.01)return null;
+        const col=b>0?'var(--green)':b<0?'var(--red)':'var(--gray)';
+        return `<span style="color:${col};font-weight:600">${b>0?'+':'-'}${c==='CNY'?fmt(Math.abs(b)):fmtFx(Math.abs(b),c)}</span>`;
+      }).filter(Boolean);
+      const summary=parts.length?parts.join(' · '):'<span style="color:var(--gray)">已结清 ✓</span>';
+      return `<div class="row">${memAv(m,"md")}<div style="flex:1"><div style="font-size:15px;font-weight:600">${m.name}${isMe?'<span class="me-tag">我</span>':''}</div><div style="font-size:12px;margin-top:2px">${summary}</div></div></div>`;
+    }).join('');
+    const allSuggests=[];
+    Object.entries(curGroups).forEach(([c,g])=>{
+      const pos=D.members.filter(m=>(g[m.id]||0)>0.01).map(m=>({id:m.id,a:g[m.id]}));
+      const neg=D.members.filter(m=>(g[m.id]||0)<-0.01).map(m=>({id:m.id,a:-g[m.id]}));
+      pos.sort((a,b2)=>b2.a-a.a);neg.sort((a,b2)=>b2.a-a.a);
+      let i=0,j=0;
+      while(i<pos.length&&j<neg.length){
+        const pay=Math.min(pos[i].a,neg[j].a);
+        if(pay>0.01)allSuggests.push({from:neg[j].id,to:pos[i].id,amount:Math.round(pay*100)/100,cur:c});
+        pos[i].a-=pay;neg[j].a-=pay;if(pos[i].a<0.01)i++;if(neg[j].a<0.01)j++;
+      }
+    });
+    el('settle-suggest').innerHTML=allSuggests.length?allSuggests.map(t=>{
+      const f=D.members.find(m=>m.id===t.from),t2=D.members.find(m=>m.id===t.to);
+      const amtStr=t.cur==='CNY'?fmt(t.amount):fmtFx(t.amount,t.cur);
+      return `<div class="row">${memAv(f,"sm")}<div style="flex:1;font-size:14px;font-weight:500"><b>${f?.name}</b><span style="color:var(--text3)"> 转 </span><b>${t2?.name}</b></div><div style="font-size:15px;font-weight:700;color:var(--blue)">${amtStr}</div>${memAv(t2,"sm")}<button class="settle-tag" onclick="quickSettleOrig('${t.from}','${t.to}',${t.amount},'${t.cur}')">✓ 已转</button></div>`;
+    }).join(''):'<div class="empty" style="padding:22px"><div class="empty-ico">🎉</div><div style="font-weight:500">大家已结清！</div></div>';
+  } else {
   el('settle-bal').innerHTML=D.members.map(m=>{
     const b=bal[m.id]||0;const isMe=me&&m.id===me.id;
     const col=b>0.01?'var(--green)':b<-0.01?'var(--red)':'var(--gray)';
     const lbl=b>0.01?`被欠 ${fmt(b)}`:b<-0.01?`欠人 ${fmt(-b)}`:'已结清 ✓';
-    return `<div class="row"><div class="av av-md" style="background:${m.color}">${m.name[0]}</div><div style="flex:1"><div style="font-size:15px;font-weight:600">${m.name}${isMe?'<span class="me-tag">我</span>':''}</div><div style="font-size:12px;color:${col};font-weight:500;margin-top:1px">${lbl}</div></div><div style="font-size:17px;font-weight:700;color:${col}">${b>0.01?'+':b<-0.01?'-':''}${fmt(Math.abs(b))}</div></div>`;
+    return `<div class="row">${memAv(m,"md")}<div style="flex:1"><div style="font-size:15px;font-weight:600">${m.name}${isMe?'<span class="me-tag">我</span>':''}</div><div style="font-size:12px;color:${col};font-weight:500;margin-top:1px">${lbl}</div></div><div style="font-size:17px;font-weight:700;color:${col}">${b>0.01?'+':b<-0.01?'-':''}${fmt(Math.abs(b))}</div></div>`;
   }).join('');
   const suggests=computeSettle(bal);
   el('settle-suggest').innerHTML=suggests.length?suggests.map(t=>{
     const f=D.members.find(m=>m.id===t.from),t2=D.members.find(m=>m.id===t.to);
-    return `<div class="row"><div class="av av-sm" style="background:${f?.color}">${f?.name[0]}</div><div style="flex:1;font-size:14px;font-weight:500"><b>${f?.name}</b><span style="color:var(--text3)"> 转 </span><b>${t2?.name}</b></div><div style="font-size:15px;font-weight:700;color:var(--blue)">${fmt(t.amount)}</div><div class="av av-sm" style="background:${t2?.color};margin:0 6px">${t2?.name[0]}</div><button class="settle-tag" onclick="quickSettle('${t.from}','${t.to}',${t.amount})">✓ 已转</button></div>`;
+    return `<div class="row">${memAv(f,"sm")}<div style="flex:1;font-size:14px;font-weight:500"><b>${f?.name}</b><span style="color:var(--text3)"> 转 </span><b>${t2?.name}</b></div><div style="font-size:15px;font-weight:700;color:var(--blue)">${fmt(t.amount)}</div>${memAv(t2,"sm")}<button class="settle-tag" onclick="quickSettle('${t.from}','${t.to}',${t.amount})">✓ 已转</button></div>`;
   }).join(''):'<div class="empty" style="padding:22px"><div class="empty-ico">🎉</div><div style="font-weight:500">大家已结清！</div></div>';
+  }
   const settleTransfers=(D.transfers||[]).filter(t=>t.transfer_type!=='topup');
   el('settle-log').innerHTML=settleTransfers.length?settleTransfers.map(t=>{
     const amt=parseFloat(t.amount);const code=t.currency_code||'CNY';
@@ -1520,10 +1636,10 @@ function renderSettle(){
     const cnyHint=settleCur==='ORIG'&&code!=='CNY'?`<div style="font-size:11px;color:var(--text3)">≈${fmt(trToCNY(t))}</div>`:'';
     if(t.transfer_type==='person'){
       const f=D.members.find(m=>m.id===t.from_member_id),t2=D.members.find(m=>m.id===t.to_member_id);
-      return `<div class="row"><div class="av av-sm" style="background:${f?.color||'#999'}">${f?.name?.[0]||'?'}</div><div style="flex:1"><div style="font-size:14px;font-weight:500"><b>${f?.name||'?'}</b> → <b>${t2?.name||'?'}</b></div><div style="font-size:11px;color:var(--text3)">${fmtDate(t.transfer_date)}${t.notes?' · '+t.notes:''}</div></div><div style="text-align:right"><div style="font-size:14px;font-weight:600;color:var(--blue)">${dispAmt}</div>${cnyHint}</div><button class="btn btn-ghost btn-sm" style="color:var(--red);padding:4px 6px;margin-left:2px" onclick="delTr('${t.id}')">×</button></div>`;
+      return `<div class="row">${memAv(f,"sm")}<div style="flex:1"><div style="font-size:14px;font-weight:500"><b>${f?.name||'?'}</b> → <b>${t2?.name||'?'}</b></div><div style="font-size:11px;color:var(--text3)">${fmtDate(t.transfer_date)}${t.notes?' · '+t.notes:''}</div></div><div style="text-align:right"><div style="font-size:14px;font-weight:600;color:var(--blue)">${dispAmt}</div>${cnyHint}</div><button class="btn btn-ghost btn-sm" style="color:var(--red);padding:4px 6px;margin-left:2px" onclick="delTr('${t.id}')">×</button></div>`;
     }
     const fw=D.wallets.find(w=>w.id===t.from_wallet_id),tw=D.wallets.find(w=>w.id===t.to_wallet_id),wmem=D.members.find(m=>m.id===t.wallet_member_id);
-    return `<div class="row"><div class="av av-sm" style="background:${wmem?.color||'#999'}">${wmem?.name?.[0]||'?'}</div><div style="flex:1"><div style="font-size:14px;font-weight:500">${fw?.icon||''}${fw?.name||'?'} → ${tw?.icon||''}${tw?.name||'?'}</div><div style="font-size:11px;color:var(--text3)">${fmtDate(t.transfer_date)} · 账户互转${t.notes?' · '+t.notes:''}</div></div><div style="text-align:right"><div style="font-size:14px;font-weight:600;color:var(--orange)">${dispAmt}</div>${cnyHint}</div><button class="btn btn-ghost btn-sm" style="color:var(--red);padding:4px 6px;margin-left:2px" onclick="delTr('${t.id}')">×</button></div>`;
+    return `<div class="row">${memAv(wmem,"sm")}<div style="flex:1"><div style="font-size:14px;font-weight:500">${fw?.icon||''}${fw?.name||'?'} → ${tw?.icon||''}${tw?.name||'?'}</div><div style="font-size:11px;color:var(--text3)">${fmtDate(t.transfer_date)} · 账户互转${t.notes?' · '+t.notes:''}</div></div><div style="text-align:right"><div style="font-size:14px;font-weight:600;color:var(--orange)">${dispAmt}</div>${cnyHint}</div><button class="btn btn-ghost btn-sm" style="color:var(--red);padding:4px 6px;margin-left:2px" onclick="delTr('${t.id}')">×</button></div>`;
   }).join(''):'<div class="empty" style="padding:24px">暂无转账记录</div>';
 }
 function computeSettle(bal){
@@ -1534,6 +1650,11 @@ function computeSettle(bal){
 }
 async function quickSettle(from,to,amt){
   await db.from('transfers').insert({trip_id:D.trip.id,transfer_type:'person',from_member_id:from,to_member_id:to,amount:amt,currency_code:'CNY',transfer_date:today(),notes:'结算'});
+  await loadAll();renderSettle();renderBills();toast('已记录 ✓');
+}
+async function quickSettleOrig(from,to,amt,cur){
+  const r=getRate(from,cur)||1;const amtCNY=cur==='CNY'?amt:amt*r;
+  await db.from('transfers').insert({trip_id:D.trip.id,transfer_type:'person',from_member_id:from,to_member_id:to,amount:amt,currency_code:cur,transfer_date:today(),notes:'结算'});
   await loadAll();renderSettle();renderBills();toast('已记录 ✓');
 }
 
@@ -1555,8 +1676,8 @@ function setTrType(t,btn){
   el('tr-person').classList.toggle('hidden',t!=='person');el('tr-wallet').classList.toggle('hidden',t!=='wallet');
   if(t==='wallet')renderTrWMem();
 }
-function renderTrFromPills(){const me=getMe();el('tr-from').innerHTML=D.members.map(m=>`<div class="pill ${trFrom===m.id?'sel':''}" onclick="trFrom='${m.id}';renderTrFromPills()"><div class="av av-xs" style="background:${m.color}">${m.name[0]}</div>${m.name}${me&&m.id===me.id?'<span class="me-tag">我</span>':''}</div>`).join('');}
-function renderTrToPills(){const me=getMe();el('tr-to').innerHTML=D.members.map(m=>`<div class="pill ${trTo===m.id?'sel':''}" onclick="trTo='${m.id}';renderTrToPills()"><div class="av av-xs" style="background:${m.color}">${m.name[0]}</div>${m.name}${me&&m.id===me.id?'<span class="me-tag">我</span>':''}</div>`).join('');}
+function renderTrFromPills(){const me=getMe();el('tr-from').innerHTML=D.members.map(m=>`<div class="pill ${trFrom===m.id?'sel':''}" onclick="trFrom='${m.id}';renderTrFromPills()">${memAv(m,"xs")}${m.name}${me&&m.id===me.id?'<span class="me-tag">我</span>':''}</div>`).join('');}
+function renderTrToPills(){const me=getMe();el('tr-to').innerHTML=D.members.map(m=>`<div class="pill ${trTo===m.id?'sel':''}" onclick="trTo='${m.id}';renderTrToPills()">${memAv(m,"xs")}${m.name}${me&&m.id===me.id?'<span class="me-tag">我</span>':''}</div>`).join('');}
 function renderTrWMem(){
   if(!trWMem&&D.members.length)trWMem=D.members[0].id;
   el('tr-wmem').innerHTML=D.members.map(m=>`<div class="pill ${trWMem===m.id?'sel':''}" onclick="trWMem='${m.id}';trWFrom=null;trWTo=null;renderTrWMem()"><div class="av av-xs" style="background:${m.color}">${m.name[0]}</div>${m.name}</div>`).join('');
@@ -1601,7 +1722,7 @@ function gotoSub(s){
     if(s==='rates'){renderRateMems();renderRatesList();}if(s==='cats')renderCatsList();}
 }
 function gotoMeSetting(){switchTab('settings',document.querySelectorAll('.tab-item')[4]);gotoSub('me');}
-function renderMeList(){el('me-list').innerHTML=D.members.map(m=>`<div class="row row-tap" onclick="setMeId('${m.id}');renderMeList();renderSetMain();renderAll()"><div class="av av-md" style="background:${m.color}">${m.name[0]}</div><div style="flex:1;font-size:15px;font-weight:500">${m.name}</div>${getMeId()===m.id?'<span style="color:var(--blue);font-size:20px">✓</span>':''}</div>`).join('');}
+function renderMeList(){el('me-list').innerHTML=D.members.map(m=>`<div class="row row-tap" onclick="setMeId('${m.id}');renderMeList();renderSetMain();renderAll()">${memAv(m,"md")}<div style="flex:1;font-size:15px;font-weight:500">${m.name}</div>${getMeId()===m.id?'<span style="color:var(--blue);font-size:20px">✓</span>':''}</div>`).join('');}
 function renderMemList(){
   el('mem-list').innerHTML=D.members.map(m=>{
     const av=m.icon?`<span style="font-size:24px">${m.icon}</span>`:`<div class="av av-md" style="background:${m.color}">${m.name[0]}</div>`;

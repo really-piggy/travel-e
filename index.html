@@ -281,16 +281,32 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','SF Pro Display'
   <div class="plain-hdr">
     <div class="plain-hdr-row">
       <span class="plain-title">资产</span>
-      <button id="asset-add-btn" class="btn btn-ghost btn-sm" onclick="openAddWallet()">＋ 添加账户</button>
+      <div style="display:flex;gap:6px">
+        <button id="asset-add-btn" class="btn btn-ghost btn-sm" onclick="openAddWallet()">＋ 账户</button>
+        <button id="asset-topup-btn" class="btn btn-ghost btn-sm hidden" onclick="openTopupModal()">＋ 充值</button>
+      </div>
     </div>
     <div class="asset-seg" style="margin:10px 0 0">
       <button class="asset-seg-b active" id="atab-mine" onclick="switchAssetTab('mine',this)">我的账户</button>
-      <button class="asset-seg-b" id="atab-shared" onclick="switchAssetTab('shared',this)">各成员总览</button>
+      <button class="asset-seg-b" id="atab-shared" onclick="switchAssetTab('shared',this)">共同账本</button>
     </div>
   </div>
   <div style="height:8px"></div>
   <div id="asset-summary"></div>
   <div id="asset-list"></div>
+</div>
+
+<!-- ═══ Topup Modal (成员充值到公共账本) ═══ -->
+<div id="topup-modal" class="overlay hidden">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-hdr"><span class="sheet-title">充值到公共账本</span><button class="btn btn-ghost btn-sm" onclick="closeTopupModal()">取消</button></div>
+    <div class="fg"><label class="fl">充值人</label><div id="topup-members" class="pills" style="flex-wrap:wrap;gap:7px"></div></div>
+    <div class="fg"><label class="fl">金额</label><input class="fi" id="topup-amount" type="number" inputmode="decimal" placeholder="0.00"/></div>
+    <div class="fg"><label class="fl">日期</label><input class="fi" id="topup-date" type="date"/></div>
+    <div class="fg"><label class="fl">备注（选填）</label><input class="fi" id="topup-notes" placeholder="如：旅行启动资金"/></div>
+    <div style="padding:0 16px 16px;display:flex;gap:10px"><button class="btn btn-ghost btn-block" onclick="closeTopupModal()">取消</button><button class="btn btn-primary btn-block" onclick="saveTopup()">确认充值</button></div>
+  </div>
 </div>
 
 <!-- ████████████ 结算 ████████████ -->
@@ -984,7 +1000,9 @@ function selPayer(id){eForm.payer=id;eForm.wallet=null;renderExpFormPills();onCu
 function selCat(id){eForm.cat=id;renderExpFormPills();}
 function renderWalletPills(){
   const ws=D.wallets.filter(w=>w.member_id===eForm.payer);
-  el('et-wallets').innerHTML='<div class="pill '+(eForm.wallet===null?'sel':'')+'" onclick="selWallet(null)">不关联</div>'+ws.map(w=>`<div class="pill ${eForm.wallet===w.id?'sel':''}" onclick="selWallet('${w.id}')">${w.icon} ${w.name}${w.currency_code&&w.currency_code!=='CNY'?' ('+w.currency_code+')':''}</div>`).join('');
+  const sharedWs=D.wallets.filter(w=>w.is_shared||(!w.member_id&&!!w.id));
+  const allWs=[...ws,...sharedWs.filter(w=>!ws.find(x=>x.id===w.id))];
+  el('et-wallets').innerHTML='<div class="pill '+(eForm.wallet===null?'sel':'')+'" onclick="selWallet(null)">不关联</div>'+allWs.map(w=>`<div class="pill ${eForm.wallet===w.id?'sel':''}" onclick="selWallet('${w.id}')">${w.icon} ${w.name}${w.is_shared?' 📢':''}${w.currency_code&&w.currency_code!=='CNY'?' ('+w.currency_code+')':''}</div>`).join('');
 }
 function selWallet(id){eForm.wallet=id;renderWalletPills();}
 function renderTrToPillsInForm(){
@@ -1215,9 +1233,8 @@ function switchAssetTab(tab,btn){
   _assetTab=tab;
   el('atab-mine').classList.toggle('active',tab==='mine');
   el('atab-shared').classList.toggle('active',tab==='shared');
-  // 只有「我的账户」显示添加按钮
-  const addBtn=el('asset-add-btn');
-  if(addBtn)addBtn.style.display=tab==='mine'?'':'none';
+  el('asset-add-btn').classList.toggle('hidden',tab!=='mine');
+  el('asset-topup-btn').classList.toggle('hidden',tab!=='shared');
   renderAssets();
 }
 function renderAssets(){
@@ -1232,7 +1249,7 @@ function renderMyAssets(me){
     el('asset-list').innerHTML='<div class="empty"><div class="empty-ico">👤</div><div>请先在设置中设置本人</div></div>';
     return;
   }
-  const ws=D.wallets.filter(w=>w.member_id===me.id);
+  const ws=D.wallets.filter(w=>w.member_id===me.id&&!w.is_shared);
   const spentByCNY=computeWalletSpent(me.id);
   const totInit=ws.reduce((s,w)=>s+parseFloat(w.initial_amount||0)*getRate(me.id,w.currency_code||'CNY'),0);
   const totBal=ws.reduce((s,w)=>{
@@ -1251,38 +1268,60 @@ function renderMyAssets(me){
   el('asset-list').innerHTML='<div class="sec">账户（点击查看明细）</div>'+ws.map(w=>walletCard(w,spentByCNY,me.id)).join('');
 }
 function renderSharedAssets(me){
-  // 全员总资产概览
-  let totalBal=0;
-  D.members.forEach(m=>{
-    const ws=D.wallets.filter(w=>w.member_id===m.id);
-    const sp=computeWalletSpent(m.id);
-    ws.forEach(w=>{
-      const code=w.currency_code||'CNY';const r=getRate(m.id,code)||1;
-      const init=parseFloat(w.initial_amount||0);
-      const spCNY=sp[w.id]||0;const spFx=code==='CNY'?spCNY:spCNY/r;
-      totalBal+=(init-spFx)*r;
-    });
+  // 公共账户 = is_shared===true 或 member_id===null 的 wallet
+  const sharedWallets=D.wallets.filter(w=>w.is_shared||(!w.member_id&&!w.is_shared===false));
+  // 计算公共账户余额（充值 - 消费）
+  const sharedSpent=computeSharedWalletSpent();
+  // 各成员充值合计
+  const topups=D.transfers||[];
+  const topupByMem={};
+  topups.filter(t=>t.transfer_type==='topup').forEach(t=>{
+    topupByMem[t.from_member_id]=(topupByMem[t.from_member_id]||0)+parseFloat(t.amount||0);
   });
+  // 总余额
+  let totalTopup=Object.values(topupByMem).reduce((a,b)=>a+b,0);
+  let totalSpent=sharedWallets.reduce((s,w)=>{
+    const code=w.currency_code||'CNY';
+    const sp=sharedSpent[w.id]||0;
+    return s+sp;
+  },0);
+  const totalBal=totalTopup-totalSpent;
+  // 汇总卡
   el('asset-summary').innerHTML=`<div class="card" style="margin:10px 18px">
-    <div><div style="font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.5px">全员总余额（人民币）</div><div style="font-size:36px;font-weight:800;color:${totalBal>=0?'var(--green)':'var(--red)'};margin-top:4px">${fmt(totalBal)}</div></div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:14px">
+      <div><div style="font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.5px">公共账本余额</div><div style="font-size:36px;font-weight:800;color:${totalBal>=0?'var(--green)':'var(--red)'};margin-top:4px">${fmt(totalBal)}</div></div>
+      <button class="btn btn-ghost btn-sm" style="border:1px solid rgba(0,122,255,.25)" onclick="openAddWallet(true)">＋ 建账户</button>
+    </div>
+    <div style="display:flex;gap:8px">
+      <div style="flex:1;background:#F2F2F7;border-radius:10px;padding:10px;text-align:center"><div style="font-size:11px;color:var(--text3)">总充值</div><div style="font-size:16px;font-weight:700;color:var(--blue);margin-top:3px">${fmt(totalTopup)}</div></div>
+      <div style="flex:1;background:#F2F2F7;border-radius:10px;padding:10px;text-align:center"><div style="font-size:11px;color:var(--text3)">总消费</div><div style="font-size:16px;font-weight:700;color:var(--red);margin-top:3px">${fmt(totalSpent)}</div></div>
+    </div>
   </div>`;
-  // 按成员分组
-  const rows=D.members.map(m=>{
-    const ws=D.wallets.filter(w=>w.member_id===m.id);
-    const spentByCNY=computeWalletSpent(m.id);
-    const isMe=me&&m.id===me.id;
-    // 计算该成员总余额
-    const memBal=ws.reduce((s,w)=>{
-      const code=w.currency_code||'CNY';const r=getRate(m.id,code)||1;
-      const init=parseFloat(w.initial_amount||0);
-      const spCNY=spentByCNY[w.id]||0;const spFx=code==='CNY'?spCNY:spCNY/r;
-      return s+(init-spFx)*r;
-    },0);
-    const av=m.icon?`<span style="font-size:16px">${m.icon}</span>`:`<div style="width:24px;height:24px;border-radius:50%;background:${m.color};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff">${m.name[0]}</div>`;
-    const secHdr=`<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 22px 6px"><div style="display:flex;align-items:center;gap:8px">${av}<span style="font-size:12px;font-weight:700;color:#8E8E93;letter-spacing:.3px;text-transform:uppercase">${m.name}${isMe?' (我)':''}</span></div><span style="font-size:13px;font-weight:700;color:${memBal>=0?'var(--green)':'var(--red)'}">${fmt(memBal)}</span></div>`;
-    return secHdr+ws.map(w=>walletCard(w,spentByCNY,m.id)).join('')+(!ws.length?'<div style="padding:6px 22px 12px;font-size:13px;color:var(--text3)">暂无账户</div>':'');
+  // 成员充值明细
+  const memRows=D.members.map(m=>{
+    const amt=topupByMem[m.id]||0;
+    const av=m.icon?`<span style="font-size:18px">${m.icon}</span>`:`<div class="av av-sm" style="background:${m.color}">${m.name[0]}</div>`;
+    return `<div class="row"><div style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">${av}</div><div style="flex:1;font-size:15px;font-weight:500">${m.name}${me&&m.id===me.id?' (我)':''}</div><div style="font-size:15px;font-weight:700;color:${amt>0?'var(--blue)':'var(--text3)'}">${amt>0?fmt(amt):'未充值'}</div></div>`;
   }).join('');
-  el('asset-list').innerHTML=rows;
+  // 公共账户卡片
+  const walletRows=sharedWallets.length?
+    '<div class="sec">公共账户</div>'+sharedWallets.map(w=>{
+      const sp=sharedSpent[w.id]||0;
+      const init=parseFloat(w.initial_amount||0);
+      return walletCard(w,sharedSpent,null);
+    }).join(''):
+    '<div style="padding:12px 22px;font-size:13px;color:var(--text3)">还没有公共账户，点「建账户」创建</div>';
+  el('asset-list').innerHTML=`<div class="sec">成员充值</div><div class="card-list" style="margin:0 18px 10px">${memRows}</div>${walletRows}`;
+}
+function computeSharedWalletSpent(){
+  const spent={};
+  D.expenses.forEach(e=>{
+    if(e.wallet_id){
+      const w=D.wallets.find(x=>x.id===e.wallet_id);
+      if(w&&(w.is_shared||!w.member_id))spent[e.wallet_id]=(spent[e.wallet_id]||0)+toCNY(e);
+    }
+  });
+  return spent;
 }
 function computeWalletSpent(mid){
   const spent={};
@@ -1350,12 +1389,14 @@ function openWdet(wid){
 }
 function closeWdet(){el('wdet-modal').classList.add('hidden');wdetId=null;}
 async function delWallet(){if(!wdetId||!confirm('确定删除此账户？'))return;await db.from('wallets').delete().eq('id',wdetId);closeWdet();await loadAll();renderAssets();toast('已删除');}
-let _editWalletId=null;
-function openAddWallet(){
-  _editWalletId=null;
-  walIcon='💵';renderWalletIcons();el('wm-name').value='';el('wm-init').value='';el('wm-cur').value='CNY';updateWalletHint();
-  el('wm-sheet-title').textContent='添加账户';
+let _editWalletId=null,_addingSharedWallet=false;
+function openAddWallet(shared=false){
+  _editWalletId=null;_addingSharedWallet=shared;
+  walIcon=shared?'🏦':'💵';renderWalletIcons();
+  el('wm-name').value='';el('wm-init').value='';el('wm-cur').value='CNY';updateWalletHint();
+  el('wm-sheet-title').textContent=shared?'创建公共账户':'添加个人账户';
   el('wm-del-row').classList.add('hidden');
+  el('wm-shared-hint').classList.toggle('hidden',!shared);
   el('wallet-modal').classList.remove('hidden');
 }
 function openEditWallet(wid){
@@ -1391,11 +1432,49 @@ async function saveWallet(){
     const {error}=await db.from('wallets').update({name,icon:walIcon,currency_code:code,initial_amount:init}).eq('id',_editWalletId);
     if(error){toast('保存失败：'+error.message);return;}
     toast('已更新');
+  }else if(_addingSharedWallet){
+    // 公共账户：member_id=null，is_shared=true
+    const {error}=await db.from('wallets').insert({trip_id:D.trip.id,member_id:null,is_shared:true,name,icon:walIcon,currency_code:code,initial_amount:0});
+    if(error){toast('创建失败：'+error.message);return;}
+    toast('公共账户已创建');
   }else{
-    await db.from('wallets').insert({trip_id:D.trip.id,member_id:me.id,name,icon:walIcon,currency_code:code,initial_amount:init});
+    await db.from('wallets').insert({trip_id:D.trip.id,member_id:me.id,is_shared:false,name,icon:walIcon,currency_code:code,initial_amount:init});
     toast('已添加');
   }
   closeWalletModal();await loadAll();renderAssets();
+}
+
+// ══════════════════════════════════
+// SHARED TOPUP
+// ══════════════════════════════════
+let _topupMem=null;
+function openTopupModal(){
+  _topupMem=getMe()?.id||null;
+  el('topup-date').value=today();
+  el('topup-amount').value='';
+  el('topup-notes').value='';
+  renderTopupMembers();
+  el('topup-modal').classList.remove('hidden');
+}
+function closeTopupModal(){el('topup-modal').classList.add('hidden');}
+function renderTopupMembers(){
+  el('topup-members').innerHTML=D.members.map(m=>
+    `<div class="pill ${_topupMem===m.id?'sel':''}" onclick="_topupMem='${m.id}';renderTopupMembers()">${m.icon||''}${m.name}</div>`
+  ).join('');
+}
+async function saveTopup(){
+  if(!_topupMem){toast('请选择充値人');return;}
+  const amt=parseFloat(el('topup-amount').value);
+  if(!amt||amt<=0){toast('请输入充値金额');return;}
+  const notes=el('topup-notes').value.trim()||'公共账本充値';
+  const {error}=await db.from('transfers').insert({
+    trip_id:D.trip.id,transfer_type:'topup',
+    from_member_id:_topupMem,to_member_id:null,
+    amount:amt,currency_code:'CNY',
+    transfer_date:el('topup-date').value,notes
+  });
+  if(error){toast('充値失败：'+error.message);return;}
+  closeTopupModal();await loadAll();renderAssets();toast('充値成功 '+fmt(amt));
 }
 
 // ══════════════════════════════════

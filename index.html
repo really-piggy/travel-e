@@ -36,10 +36,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','SF Pro Display'
 .page.active{display:block}
 
 /* ═══ Hero Header (gradient) ═══ */
-.hero-hdr{background:linear-gradient(150deg,#1A3A8F 0%,#1D58C8 45%,#3478F6 100%);padding:calc(env(safe-area-inset-top)+16px) 24px 24px;position:sticky;top:0;z-index:50;border-radius:0 0 24px 24px}
+.hero-hdr{background:rgba(242,242,247,.95);backdrop-filter:blur(20px) saturate(1.6);-webkit-backdrop-filter:blur(20px) saturate(1.6);padding:calc(env(safe-area-inset-top)+14px) 24px 16px;position:sticky;top:0;z-index:50;border-radius:0 0 22px 22px;box-shadow:0 2px 16px rgba(0,0,0,.06),0 0 1px rgba(0,0,0,.04)}
 .hero-hdr-row{display:flex;justify-content:space-between;align-items:center}
-.hero-trip{font-size:12px;color:rgba(255,255,255,.65);margin-bottom:3px;font-weight:500;letter-spacing:.2px}
-.hero-name{font-size:22px;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px;cursor:pointer;letter-spacing:-.3px}
+.hero-trip{font-size:12px;color:var(--text3);margin-bottom:3px;font-weight:500;letter-spacing:.2px}
+.hero-name{font-size:22px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px;cursor:pointer;letter-spacing:-.4px}
 
 /* ═══ Plain Header ═══ */
 .plain-hdr{background:rgba(242,242,247,.95);backdrop-filter:blur(20px) saturate(1.6);-webkit-backdrop-filter:blur(20px) saturate(1.6);padding:calc(env(safe-area-inset-top)+14px) 24px 16px;position:sticky;top:0;z-index:50;border-radius:0 0 22px 22px;box-shadow:0 2px 16px rgba(0,0,0,.06),0 0 1px rgba(0,0,0,.04)}
@@ -216,15 +216,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','SF Pro Display'
         <div id="bill-trip-name" class="hero-name">-</div>
       </div>
       <div style="text-align:right;flex-shrink:0;margin-left:8px">
-        <div id="bill-day-tag" style="font-size:11px;color:rgba(255,255,255,.7)">今天</div>
-        <div id="bill-today-amt" style="font-size:18px;font-weight:700;color:#fff">¥0</div>
+        <div id="bill-day-tag" style="font-size:11px;color:var(--text3)">今天</div>
+        <div id="bill-today-amt" style="font-size:18px;font-weight:800;color:var(--blue);letter-spacing:-.3px">¥0</div>
       </div>
     </div>
     <!-- 汇总 3格 -->
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:16px;margin-bottom:2px;background:rgba(255,255,255,.16);border-radius:16px;overflow:hidden;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.12)">
-      <div style="padding:14px 8px;text-align:center"><div style="font-size:11px;color:rgba(255,255,255,.7);font-weight:500;letter-spacing:.2px">我付款的</div><div id="bs-paid" style="font-size:18px;font-weight:800;color:#fff;margin-top:4px;letter-spacing:-.3px">¥0</div></div>
-      <div style="padding:14px 8px;text-align:center;border-left:1px solid rgba(255,255,255,.15);border-right:1px solid rgba(255,255,255,.15)"><div style="font-size:11px;color:rgba(255,255,255,.7);font-weight:500;letter-spacing:.2px">我分摊的</div><div id="bs-share" style="font-size:18px;font-weight:800;color:#fff;margin-top:4px;letter-spacing:-.3px">¥0</div></div>
-      <div style="padding:14px 8px;text-align:center"><div style="font-size:11px;color:rgba(255,255,255,.7);font-weight:500;letter-spacing:.2px">净余额</div><div id="bs-balance" style="font-size:18px;font-weight:800;color:#fff;margin-top:4px;letter-spacing:-.3px">¥0</div></div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px;margin-bottom:2px">
+      <div style="background:#fff;border-radius:14px;padding:12px 8px;text-align:center;box-shadow:0 1px 6px rgba(0,0,0,.06)"><div style="font-size:10px;color:var(--text3);font-weight:500;letter-spacing:.2px">我付款的</div><div id="bs-paid" style="font-size:17px;font-weight:800;color:var(--blue);margin-top:4px;letter-spacing:-.3px">¥0</div></div>
+      <div style="background:#fff;border-radius:14px;padding:12px 8px;text-align:center;box-shadow:0 1px 6px rgba(0,0,0,.06)"><div style="font-size:10px;color:var(--text3);font-weight:500;letter-spacing:.2px">我分摊的</div><div id="bs-share" style="font-size:17px;font-weight:800;color:var(--orange);margin-top:4px;letter-spacing:-.3px">¥0</div></div>
+      <div style="background:#fff;border-radius:14px;padding:12px 8px;text-align:center;box-shadow:0 1px 6px rgba(0,0,0,.06)"><div style="font-size:10px;color:var(--text3);font-weight:500;letter-spacing:.2px">净余额</div><div id="bs-balance" style="font-size:17px;font-weight:800;color:var(--green);margin-top:4px;letter-spacing:-.3px">¥0</div></div>
     </div>
   </div>
 
@@ -1277,14 +1277,17 @@ function walletCard(w,spentByCNY,mid){
   const bc=pct>90?'var(--red)':pct>65?'var(--orange)':'var(--green)';
   const initStr=code!=='CNY'?fmtFx(init,code):fmt(init);
   const balStr=code!=='CNY'?fmtFx(balFx,code):fmt(balCNY);
-  return `<div class="wcard" onclick="openWdet('${w.id}')">
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+  return `<div class="wcard">
+    <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px">
       <span style="font-size:32px">${w.icon}</span>
-      <div style="flex:1"><div style="font-size:15px;font-weight:600">${w.name}</div><div style="font-size:11px;color:var(--text3)">${code!=='CNY'?code+' · ':''}初始 ${initStr}</div></div>
-      <div style="text-align:right">
-        <div style="font-size:10px;color:var(--text3)">剩余</div>
-        <div style="font-size:22px;font-weight:800;color:${balCNY>=0?'var(--green)':'var(--red)'};">${balStr}</div>
-        ${code!=='CNY'?`<div style="font-size:11px;color:var(--text3)">≈ ${fmt(balCNY)}</div>`:''}
+      <div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:600">${w.name}</div><div style="font-size:11px;color:var(--text3);margin-top:2px">${code!=='CNY'?code+' · ':''}初始 ${initStr}</div></div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0">
+        <div style="display:flex;gap:6px"><button class="btn btn-ghost btn-sm" style="padding:5px 10px;font-size:12px;border:1px solid rgba(0,122,255,.25);border-radius:8px" onclick="event.stopPropagation();openEditWallet('${w.id}')">编辑</button><button class="btn btn-ghost btn-sm" style="padding:5px 10px;font-size:12px;color:var(--text3);border:1px solid rgba(60,60,67,.15);border-radius:8px" onclick="event.stopPropagation();openWdet('${w.id}')">明细</button></div>
+        <div style="text-align:right">
+          <div style="font-size:10px;color:var(--text3)">剩余</div>
+          <div style="font-size:22px;font-weight:800;color:${balCNY>=0?'var(--green)':'var(--red)'}">${balStr}</div>
+          ${code!=='CNY'?`<div style="font-size:11px;color:var(--text3)">≈ ${fmt(balCNY)}</div>`:''}
+        </div>
       </div>
     </div>
     <div style="font-size:12px;color:var(--text3);margin-bottom:5px;display:flex;justify-content:space-between"><span>已消费</span><span>${code!=='CNY'?fmtFx(spFx,code):fmt(spCNY)}</span></div>
@@ -1321,11 +1324,27 @@ function openWdet(wid){
 }
 function closeWdet(){el('wdet-modal').classList.add('hidden');wdetId=null;}
 async function delWallet(){if(!wdetId||!confirm('确定删除此账户？'))return;await db.from('wallets').delete().eq('id',wdetId);closeWdet();await loadAll();renderAssets();toast('已删除');}
+let _editWalletId=null;
 function openAddWallet(){
+  _editWalletId=null;
   walIcon='💵';renderWalletIcons();el('wm-name').value='';el('wm-init').value='';el('wm-cur').value='CNY';updateWalletHint();
+  el('wm-sheet-title').textContent='添加账户';
+  el('wm-del-row').classList.add('hidden');
   el('wallet-modal').classList.remove('hidden');
 }
-function closeWalletModal(){el('wallet-modal').classList.add('hidden');}
+function openEditWallet(wid){
+  const w=D.wallets.find(x=>x.id===wid);if(!w)return;
+  _editWalletId=wid;
+  walIcon=w.icon||'💵';renderWalletIcons();
+  el('wm-name').value=w.name;
+  el('wm-init').value=w.initial_amount||0;
+  el('wm-cur').value=w.currency_code||'CNY';
+  updateWalletHint();
+  el('wm-sheet-title').textContent='编辑账户';
+  el('wm-del-row').classList.remove('hidden');
+  el('wallet-modal').classList.remove('hidden');
+}
+function closeWalletModal(){el('wallet-modal').classList.add('hidden');_editWalletId=null;}
 function renderWalletIcons(){el('wm-icons').innerHTML=WAL_ICONS.map(i=>`<div class="pill ${walIcon===i?'sel':''}" onclick="walIcon='${i}';renderWalletIcons()">${i}</div>`).join('');}
 function updateWalletHint(){
   const code=el('wm-cur').value;el('wm-init-lbl').textContent=`初始金额（${code}）`;
@@ -1333,12 +1352,24 @@ function updateWalletHint(){
   const me=getMe();const r=getRate(me?.id,code)||1;const amt=parseFloat(el('wm-init').value)||0;
   el('wm-hint').textContent=amt>0?`≈ ${fmt(amt*r)} 人民币`:`1 ${code} ≈ ${r} CNY`;
 }
+async function delWalletFromEdit(){
+  if(!_editWalletId||!confirm('确定删除此账户？'))return;
+  await db.from('wallets').delete().eq('id',_editWalletId);
+  closeWalletModal();await loadAll();renderAssets();toast('已删除');
+}
 async function saveWallet(){
   const name=el('wm-name').value.trim();if(!name){toast('请填写名称');return;}
   const me=getMe();if(!me){toast('请先设置本人');return;}
   const code=el('wm-cur').value;const init=parseFloat(el('wm-init').value)||0;
-  await db.from('wallets').insert({trip_id:D.trip.id,member_id:me.id,name,icon:walIcon,currency_code:code,initial_amount:init});
-  closeWalletModal();await loadAll();renderAssets();toast('已添加');
+  if(_editWalletId){
+    const {error}=await db.from('wallets').update({name,icon:walIcon,currency_code:code,initial_amount:init}).eq('id',_editWalletId);
+    if(error){toast('保存失败：'+error.message);return;}
+    toast('已更新');
+  }else{
+    await db.from('wallets').insert({trip_id:D.trip.id,member_id:me.id,name,icon:walIcon,currency_code:code,initial_amount:init});
+    toast('已添加');
+  }
+  closeWalletModal();await loadAll();renderAssets();
 }
 
 // ══════════════════════════════════

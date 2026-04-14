@@ -1324,8 +1324,72 @@ function renderMyAssets(me){
       <div style="text-align:right"><div style="font-size:11px;color:var(--text3)">初始</div><div style="font-size:16px;font-weight:600">${fmt(totInit)}</div></div>
     </div>
   </div>`;
-  if(!ws.length){el('asset-list').innerHTML='<div class="empty"><div class="empty-ico">👛</div><div>还没有账户，点右上角添加</div></div>';return;}
-  el('asset-list').innerHTML='<div class="sec">账户（点击查看明细）</div>'+ws.map(w=>walletCard(w,spentByCNY,me.id)).join('');
+  if(!ws.length){el('asset-list').innerHTML='<div class="empty"><div class="empty-ico">👛</div><div>还没有账户，点右上角添加</div></div>';}
+  else{el('asset-list').innerHTML='<div class="sec">账户（点击查看明细）</div>'+ws.map(w=>walletCard(w,spentByCNY,me.id)).join('');}
+  // 未关联账户的支出/收入汇总
+  const myWalletIds=new Set(ws.map(w=>w.id));
+  const sharedWalletIds=new Set(D.wallets.filter(w=>w.is_shared||(!w.member_id&&!!w.id)).map(w=>w.id));
+  // 我付款但未关联任何账户（或关联了公共账户）的支出（非收入）
+  const unlinkedExp=D.expenses.filter(e=>
+    e.paid_by===me.id &&
+    e.account_type!=='income' &&
+    (!e.wallet_id || !myWalletIds.has(e.wallet_id))
+  );
+  // 我收到的转账（to_member_id===me.id）且未关联我自己的账户
+  const incomingTr=(D.transfers||[]).filter(t=>
+    t.transfer_type==='person' &&
+    t.to_member_id===me.id &&
+    (!t.to_wallet_id || !myWalletIds.has(t.to_wallet_id))
+  );
+  // 我转出（from_member_id===me.id）且未关联我自己的账户
+  const outgoingTr=(D.transfers||[]).filter(t=>
+    t.transfer_type==='person' &&
+    t.from_member_id===me.id &&
+    (!t.from_wallet_id || !myWalletIds.has(t.from_wallet_id))
+  );
+  // 按币种聚合
+  const outByCur={};const inByCur={};
+  unlinkedExp.forEach(e=>{
+    const c=e.currency_code||'CNY';const a=parseFloat(e.amount||0);
+    outByCur[c]=(outByCur[c]||0)+a;
+  });
+  outgoingTr.forEach(t=>{
+    const c=t.currency_code||'CNY';const r=getRate(me.id,c)||1;
+    const a=c==='CNY'?parseFloat(t.amount||0):parseFloat(t.amount||0)/r;
+    // t.amount 已经是 CNY，先转回原币
+    // 其实 transfers.amount 存的是原始填入金额，currency_code 是填入时的币种
+    const orig=parseFloat(t.amount||0);
+    outByCur[c]=(outByCur[c]||0)+orig;
+  });
+  incomingTr.forEach(t=>{
+    const c=t.currency_code||'CNY';const orig=parseFloat(t.amount||0);
+    inByCur[c]=(inByCur[c]||0)+orig;
+  });
+  // 我的收入类账单（paid_by===me 且 account_type==='income'）
+  D.expenses.filter(e=>e.paid_by===me.id&&e.account_type==='income').forEach(e=>{
+    const c=e.currency_code||'CNY';inByCur[c]=(inByCur[c]||0)+parseFloat(e.amount||0);
+  });
+  const allCurs=new Set([...Object.keys(outByCur),...Object.keys(inByCur)]);
+  if(allCurs.size>0){
+    const rows=[...allCurs].map(c=>{
+      const out=outByCur[c]||0;const inc=inByCur[c]||0;
+      const outStr=c==='CNY'?fmt(out):fmtFx(out,c);
+      const inStr=c==='CNY'?fmt(inc):fmtFx(inc,c);
+      const hasOut=out>0.001;const hasIn=inc>0.001;
+      return `<div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid var(--border)">
+        <span style="font-size:13px;font-weight:700;min-width:36px">${c}</span>
+        <div style="flex:1;display:flex;gap:12px;flex-wrap:wrap">
+          ${hasOut?`<span style="font-size:12px;color:var(--red)">支出 ${outStr}</span>`:''}
+          ${hasIn?`<span style="font-size:12px;color:var(--green)">收入 ${inStr}</span>`:''}
+        </div>
+      </div>`;
+    }).join('');
+    const prev=el('asset-list').innerHTML;
+    el('asset-list').innerHTML=prev+`<div class="sec" style="margin-top:8px">其他（未关联账户）</div>
+    <div class="card" style="margin:0 18px 16px">
+      ${rows}
+    </div>`;
+  }
 }
 function renderSharedAssets(me){
   const sharedWallets=D.wallets.filter(w=>w.is_shared||(!w.member_id&&!!w.id));

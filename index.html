@@ -231,6 +231,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;backg
         <div class="card-item" onclick="showSubSettings('members')"><div style="font-size:24px">👥</div><div style="flex:1"><div style="font-size:15px;font-weight:500">成员管理</div><div id="members-sub" style="font-size:12px;color:var(--gray)">-</div></div><div style="color:var(--gray);font-size:20px">›</div></div>
         <div class="card-item" onclick="showSubSettings('currencies')"><div style="font-size:24px">💱</div><div style="flex:1"><div style="font-size:15px;font-weight:500">汇率设置</div><div style="font-size:12px;color:var(--gray)">每人购汇汇率</div></div><div style="color:var(--gray);font-size:20px">›</div></div>
         <div class="card-item" onclick="showSubSettings('categories')"><div style="font-size:24px">🏷️</div><div style="flex:1"><div style="font-size:15px;font-weight:500">消费分类</div><div id="categories-sub" style="font-size:12px;color:var(--gray)">-</div></div><div style="color:var(--gray);font-size:20px">›</div></div>
+        <div class="card-item" onclick="showSubSettings('payments')"><div style="font-size:24px">💰</div><div style="flex:1"><div style="font-size:15px;font-weight:500">支付方式</div><div id="payments-sub" style="font-size:12px;color:var(--gray)">-</div></div><div style="color:var(--gray);font-size:20px">›</div></div>
       </div>
       <div class="sec-title">危险操作</div>
       <div class="card-list">
@@ -271,7 +272,20 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;backg
     </div>
   </div>
 
-  <!-- Tab Bar -->
+    <!-- Sub: Payments -->
+    <div id="settings-payments" class="hidden back-page">
+      <div class="header"><div class="header-row"><button class="btn btn-ghost btn-sm" onclick="showSubSettings(null)">‹ 返回</button><h1 style="font-size:17px">支付方式</h1><div style="width:60px"></div></div></div>
+      <div style="height:12px"></div>
+      <div id="payments-list" class="card-list"></div>
+      <div style="padding:16px">
+        <div class="form-label">图标</div>
+        <div id="pm-icon-picker" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px"></div>
+        <div style="display:flex;gap:8px">
+          <input class="form-input" id="new-pm-label" placeholder="支付方式名称" style="flex:1"/>
+          <button class="btn btn-primary" onclick="addPaymentMethod()">添加</button>
+        </div>
+      </div>
+    </div>
   <div id="tab-bar">
     <div class="tab-item active" onclick="switchTab('home',this)"><span class="tab-icon">📋</span><span class="tab-label">账单</span></div>
     <div class="tab-item" onclick="switchTab('stats',this)"><span class="tab-icon">📊</span><span class="tab-label">统计</span></div>
@@ -397,7 +411,11 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
 const MEMBER_COLORS = ['#007AFF','#34C759','#FF9500','#FF2D55','#AF52DE','#5AC8FA','#FF3B30','#FFCC00'];
 const DEFAULT_CATS = [{name:'餐饮',icon:'🍜'},{name:'交通',icon:'🚇'},{name:'住宿',icon:'🏨'},{name:'购物',icon:'🛍️'},{name:'景点',icon:'🎡'},{name:'娱乐',icon:'🎭'},{name:'医疗',icon:'💊'},{name:'其他',icon:'💰'}];
-const PAYMENT_METHODS = [{value:'cash',label:'现金',icon:'💵'},{value:'card',label:'刷卡',icon:'💳'},{value:'mobile',label:'移动支付',icon:'📱'}];
+const DEFAULT_PAYMENT_METHODS = [{value:'cash',label:'现金',icon:'💵'},{value:'card',label:'刷卡',icon:'💳'},{value:'mobile',label:'移动支付',icon:'📱'}];
+function loadPaymentMethods() {
+  try { const s=localStorage.getItem('travel_payment_methods'); return s?JSON.parse(s):DEFAULT_PAYMENT_METHODS; } catch(e){ return DEFAULT_PAYMENT_METHODS; }
+}
+function savePaymentMethods(list) { localStorage.setItem('travel_payment_methods',JSON.stringify(list)); }
 const CAT_ICONS = ['🍜','🚇','🏨','🛍️','🎡','🎭','💊','💰','☕','🍺','🚕','⛽','📸','🎁','🏖️','💈'];
 const CURRENCIES_LIST = [{code:'CNY',name:'人民币',sym:'¥'},{code:'JPY',name:'日元',sym:'¥'},{code:'USD',name:'美元',sym:'$'},{code:'EUR',name:'欧元',sym:'€'},{code:'HKD',name:'港元',sym:'HK$'},{code:'TWD',name:'台币',sym:'NT$'},{code:'KRW',name:'韩元',sym:'₩'},{code:'THB',name:'泰铢',sym:'฿'},{code:'SGD',name:'新加坡元',sym:'S$'},{code:'GBP',name:'英镑',sym:'£'}];
 
@@ -407,6 +425,7 @@ let expFilter = 'all';
 let currentEditExpenseId = null;
 let actionExpenseId = null;
 let expForm = { accountType:'shared', payerId:null, categoryId:null, paymentMethod:'cash', needsSplit:false, splitMode:'equal' };
+let paymentMethods = loadPaymentMethods();
 let selectedCurrencyMemberId = null;
 let selectedCatIcon = '💰';
 let setupMemberCount = 3;
@@ -567,7 +586,7 @@ function renderHome() {
 function renderExpRow(e) {
   const cat=state.categories.find(c=>c.id===e.category_id);
   const payer=state.members.find(m=>m.id===e.paid_by);
-  const pm=PAYMENT_METHODS.find(p=>p.value===e.payment_method);
+  const pm=paymentMethods.find(p=>p.value===e.payment_method)||{icon:'💰',label:e.payment_method};
   const cny=toCNY(e);
   const badge=e.account_type==='shared'?'<span class="badge badge-s">共同</span>':(e.needs_split?'<span class="badge badge-sp">分摊</span>':'<span class="badge badge-p">个人</span>');
   const amtMain=e.currency_code!=='CNY'?`${e.currency_code} ${parseFloat(e.amount).toFixed(0)}`:fmt(cny);
@@ -643,11 +662,7 @@ function openAddExpense(editId=null) {
 
 function buildCurrencySelect() {
   const sel=el('exp-currency');
-  sel.innerHTML='<option value="CNY">CNY 人民币</option>';
-  if(expForm.payerId) {
-    const cs=state.currencies.filter(c=>c.member_id===expForm.payerId&&c.currency_code!=='CNY');
-    cs.forEach(c=>{ sel.innerHTML+=`<option value="${c.currency_code}">${c.currency_code} ${c.currency_name}</option>`; });
-  }
+  sel.innerHTML=CURRENCIES_LIST.map(c=>`<option value="${c.code}">${c.code} ${c.name}</option>`).join('');
 }
 
 function renderPayerPills() {
@@ -670,8 +685,8 @@ function renderCategoryPills() {
 function selectCat(id){expForm.categoryId=id;renderCategoryPills();}
 
 function renderPaymentBtns() {
-  el('payment-btns').innerHTML=PAYMENT_METHODS.map(pm=>`
-    <div class="pill ${expForm.paymentMethod===pm.value?'sel':''}" style="flex:1;justify-content:center" onclick="selectPM('${pm.value}')">${pm.icon} ${pm.label}</div>`).join('');
+  el('payment-btns').innerHTML=paymentMethods.map(pm=>`
+    <div class="pill ${expForm.paymentMethod===pm.value?'sel':''}" style="flex:1;justify-content:center;min-width:80px" onclick="selectPM('${pm.value}')">${pm.icon} ${pm.label}</div>`).join('');
 }
 function selectPM(v){expForm.paymentMethod=v;renderPaymentBtns();}
 
@@ -858,6 +873,7 @@ function renderSettingsMain() {
   el('settings-trip-name').textContent=state.trip.name;
   el('members-sub').textContent=state.members.length+' 位成员';
   el('categories-sub').textContent=state.categories.length+' 个分类';
+  el('payments-sub').textContent=paymentMethods.length+' 种方式';
 }
 function showSubSettings(section) {
   el('settings-main').classList.toggle('hidden',!!section);
@@ -869,6 +885,7 @@ function showSubSettings(section) {
     if(section==='members')renderMembersList();
     if(section==='currencies'){renderCurrencyMemberPills();renderCurrenciesList();}
     if(section==='categories')renderCategoriesList();
+    if(section==='payments')renderPaymentsList();
   }
 }
 
@@ -944,9 +961,34 @@ async function clearAllExpenses(){
   await loadAll();renderHome();renderStats();renderSettle();showToast('已清除所有账单');
 }
 
-// ─── Currency rate label update on change ────────────────────────
-document.getElementById('new-currency-code').addEventListener('change',updateCurrencyRateLabel);
+// Payment Methods settings
+const PM_ICONS=['💵','💳','📱','💶','💷','🏧','💴','💰','🪙','🎫'];
+let selectedPmIcon='💵';
+function renderPaymentsList(){
+  el('payments-list').innerHTML=paymentMethods.map((pm,i)=>`<div class="card-item"><div style="font-size:24px">${pm.icon}</div><div style="flex:1;font-size:15px;font-weight:500">${pm.label}</div>${i>=3?`<button class="btn btn-ghost btn-sm text-red" onclick="deletePaymentMethod(${i})">删除</button>`:''}</div>`).join('');
+  el('pm-icon-picker').innerHTML=PM_ICONS.map(ic=>`<div onclick="selectedPmIcon='${ic}';renderPaymentsList()" style="font-size:24px;padding:6px;border-radius:8px;cursor:pointer;background:${selectedPmIcon===ic?'#EBF4FF':'transparent'};border:2px solid ${selectedPmIcon===ic?'var(--blue)':'transparent'}">${ic}</div>`).join('');
+}
+function addPaymentMethod(){
+  const label=el('new-pm-label').value.trim();
+  if(!label){showToast('请填写支付方式名称');return;}
+  const val='pm_'+Date.now();
+  paymentMethods.push({value:val,label,icon:selectedPmIcon});
+  savePaymentMethods(paymentMethods);
+  el('new-pm-label').value='';
+  renderPaymentsList();
+  renderSettingsMain();
+  showToast('已添加');
+}
+function deletePaymentMethod(i){
+  if(paymentMethods.length<=1){showToast('至少保留一种支付方式');return;}
+  paymentMethods.splice(i,1);
+  savePaymentMethods(paymentMethods);
+  renderPaymentsList();
+  renderSettingsMain();
+  showToast('已删除');
+}
 
+document.getElementById('new-currency-code').addEventListener('change',updateCurrencyRateLabel);
 // ─── Start ────────────────────────────────────────────────────────
 init();
 </script>

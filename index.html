@@ -364,7 +364,32 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Helvetica Neue'
     <div class="plain-hdr"><div class="plain-hdr-row"><button class="btn btn-ghost btn-sm" onclick="gotoSub(null)">‹ 返回</button><span style="font-size:17px;font-weight:700">成员管理</span><div style="width:60px"></div></div></div>
     <div style="height:6px"></div>
     <div id="mem-list" class="card-list"></div>
-    <div style="padding:16px;display:flex;gap:8px"><input class="fi" id="nm-name" placeholder="新成员名字" style="flex:1"/><button class="btn btn-primary" onclick="addMember()">添加</button></div>
+    <div style="padding:16px;display:flex;gap:8px"><input class="fi" id="nm-name" placeholder="新成员名字" style="flex:1"/><button class="btn btn-primary" onclick="addMember()">＋ 添加</button></div>
+  </div>
+  <!-- Member Edit Modal -->
+  <div id="mem-edit-modal" class="modal-overlay hidden" onclick="if(event.target===this)closeMemEdit()">
+    <div class="modal-sheet" style="padding:20px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <span style="font-size:17px;font-weight:700">编辑成员</span>
+        <button class="btn btn-ghost btn-sm" onclick="closeMemEdit()">✕</button>
+      </div>
+      <!-- Avatar preview + name -->
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
+        <div id="mem-edit-av" style="width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0">😀</div>
+        <input class="fi" id="mem-edit-name" placeholder="成员名字" style="flex:1"/>
+      </div>
+      <!-- Color picker -->
+      <div style="margin-bottom:14px">
+        <div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:8px">颜色</div>
+        <div id="mem-color-row" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+      </div>
+      <!-- Icon / Emoji picker -->
+      <div style="margin-bottom:18px">
+        <div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:8px">头像图标</div>
+        <div id="mem-icon-row" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+      </div>
+      <button class="btn btn-primary btn-block" onclick="saveMemEdit()">保存</button>
+    </div>
   </div>
   <div id="sub-rates" class="back-pg">
     <div class="plain-hdr"><div class="plain-hdr-row"><button class="btn btn-ghost btn-sm" onclick="gotoSub(null)">‹ 返回</button><span style="font-size:17px;font-weight:700">汇率管理</span><button class="btn btn-primary btn-sm" onclick="openRateModal()">＋ 添加</button></div></div>
@@ -623,7 +648,7 @@ let trType='person';
 let trFrom=null,trTo=null,trWMem=null,trWFrom=null,trWTo=null;
 let eForm={recordType:'expense',scope:'shared',payer:null,cat:null,pm:'cash',wallet:null,trTo:null,splitMode:'equal',personalSplit:false};
 let rateMem=null;
-function loadPM(){try{const s=localStorage.getItem('t_pms');return s?JSON.parse(s):DEF_PM;}catch{return DEF_PM;}}
+function loadPM(){try{const s=localStorage.getItem('t_pms');if(s)return JSON.parse(s);}catch{}return [];}
 function savePM(a){localStorage.setItem('t_pms',JSON.stringify(a));}
 let PMs=loadPM();
 function getMeId(){return localStorage.getItem('me_'+(D.trip?.id||''));}
@@ -1430,13 +1455,67 @@ function gotoSub(s){
 }
 function gotoMeSetting(){switchTab('settings',document.querySelectorAll('.tab-item')[4]);gotoSub('me');}
 function renderMeList(){el('me-list').innerHTML=D.members.map(m=>`<div class="row row-tap" onclick="setMeId('${m.id}');renderMeList();renderSetMain();renderAll()"><div class="av av-md" style="background:${m.color}">${m.name[0]}</div><div style="flex:1;font-size:15px;font-weight:500">${m.name}</div>${getMeId()===m.id?'<span style="color:var(--blue);font-size:20px">✓</span>':''}</div>`).join('');}
-function renderMemList(){el('mem-list').innerHTML=D.members.map(m=>`<div class="row"><div class="av av-md" style="background:${m.color}">${m.name[0]}</div><div style="flex:1;font-size:15px;font-weight:500">${m.name}</div></div>`).join('');}
+function renderMemList(){
+  el('mem-list').innerHTML=D.members.map(m=>{
+    const av=m.icon?`<span style="font-size:24px">${m.icon}</span>`:`<div class="av av-md" style="background:${m.color}">${m.name[0]}</div>`;
+    return `<div class="row"><div style="width:40px;height:40px;border-radius:50%;background:${m.icon?'transparent':m.color};display:flex;align-items:center;justify-content:center;flex-shrink:0">${av}</div><div style="flex:1;font-size:15px;font-weight:500;margin-left:4px">${m.name}</div><button class="btn btn-ghost btn-sm" style="color:var(--blue)" onclick="openMemEdit('${m.id}')">编辑</button><button class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="delMember('${m.id}')">删除</button></div>`;
+  }).join('')||'<div style="padding:16px;text-align:center;color:var(--text3);font-size:14px">还没有成员</div>';
+}
 async function addMember(){
-  const name=el('nm-name').value.trim();if(!name)return;
+  const name=el('nm-name').value.trim();if(!name){toast('请填写名字');return;}
   const col=COLORS[D.members.length%COLORS.length];
   const {data:nm}=await db.from('members').insert({trip_id:D.trip.id,name,color:col}).select().single();
-  if(nm){await db.from('currencies').insert({trip_id:D.trip.id,member_id:nm.id,currency_code:'CNY',currency_name:'人民币',exchange_rate:1});await db.from('wallets').insert({trip_id:D.trip.id,member_id:nm.id,name:'现金',icon:'💵',currency_code:'CNY',initial_amount:0});}
-  el('nm-name').value='';await loadAll();renderMemList();renderSetMain();toast('已添加');
+  if(nm){
+    await db.from('currencies').insert({trip_id:D.trip.id,member_id:nm.id,currency_code:'CNY',currency_name:'人民币',exchange_rate:1});
+    await db.from('wallets').insert({trip_id:D.trip.id,member_id:nm.id,name:'现金',icon:'💵',currency_code:'CNY',initial_amount:0});
+  }
+  el('nm-name').value='';await loadAll();renderMemList();renderSetMain();toast('已添加 '+name);
+}
+// Member edit
+const MEM_ICONS=['😀','😎','🤩','🥳','👑','🦁','🐯','🐼','🐨','🦊','🐸','🐧','🦄','🐙','🦋','🌟','🔥','⚡','🎯','🎸'];
+let _editMemId=null,_editMemColor=null,_editMemIcon=null;
+function openMemEdit(mid){
+  const m=D.members.find(x=>x.id===mid);if(!m)return;
+  _editMemId=mid;_editMemColor=m.color;_editMemIcon=m.icon||null;
+  el('mem-edit-name').value=m.name;
+  updateMemEditAv();
+  // Color row
+  el('mem-color-row').innerHTML=COLORS.map(c=>`<div onclick="selMemColor('${c}')" style="width:30px;height:30px;border-radius:50%;background:${c};cursor:pointer;border:3px solid ${c===_editMemColor?'#111':'transparent'};box-sizing:border-box;flex-shrink:0"></div>`).join('');
+  // Icon row
+  el('mem-icon-row').innerHTML=`<div onclick="selMemIcon(null)" style="width:38px;height:38px;border-radius:50%;background:${!_editMemIcon?'var(--blue)':'var(--border)'};display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:${!_editMemIcon?'#fff':'var(--text3)'};cursor:pointer">${m.name[0]}</div>`+
+    MEM_ICONS.map(ic=>`<div onclick="selMemIcon('${ic}')" style="width:38px;height:38px;border-radius:50%;background:${ic===_editMemIcon?'var(--blue)':'#F3F4F6'};display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer">${ic}</div>`).join('');
+  el('mem-edit-modal').classList.remove('hidden');
+}
+function closeMemEdit(){el('mem-edit-modal').classList.add('hidden');_editMemId=null;}
+function selMemColor(c){
+  _editMemColor=c;
+  el('mem-color-row').querySelectorAll('div').forEach(d=>{d.style.border='3px solid '+(d.style.background===c||getComputedStyle(d).backgroundColor===hexToRgb(c)?'#111':'transparent');});
+  if(!_editMemIcon)updateMemEditAv();
+}
+function hexToRgb(hex){const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return `rgb(${r}, ${g}, ${b})`;}
+function selMemIcon(ic){
+  _editMemIcon=ic;
+  updateMemEditAv();
+  el('mem-icon-row').querySelectorAll('div').forEach((d,i)=>{
+    if(i===0)d.style.background=!ic?'var(--blue)':'var(--border)';
+    else{const thisIc=MEM_ICONS[i-1];d.style.background=thisIc===ic?'var(--blue)':'#F3F4F6';}
+  });
+}
+function updateMemEditAv(){
+  const avEl=el('mem-edit-av');
+  if(_editMemIcon){avEl.style.background='#F3F4F6';avEl.textContent=_editMemIcon;}
+  else{avEl.style.background=_editMemColor||'var(--blue)';avEl.textContent=el('mem-edit-name').value?.[0]||'?';}
+}
+async function saveMemEdit(){
+  const name=el('mem-edit-name').value.trim();if(!name){toast('请填写名字');return;}
+  await db.from('members').update({name,color:_editMemColor,icon:_editMemIcon||null}).eq('id',_editMemId);
+  await loadAll();renderMemList();renderSetMain();renderAll();closeMemEdit();toast('已保存');
+}
+async function delMember(mid){
+  const m=D.members.find(x=>x.id===mid);if(!m)return;
+  if(!confirm(`确定删除成员「${m.name}」？相关账单分摊记录也会受影响。`))return;
+  await db.from('members').delete().eq('id',mid);
+  await loadAll();renderMemList();renderSetMain();renderAll();toast('已删除');
 }
 function renderTripsList2(){el('trips-list').innerHTML=D.trips.map(t=>`<div class="row"><span style="font-size:22px">✈️</span><div style="flex:1"><div style="font-size:15px;font-weight:500">${t.name}</div><div style="font-size:12px;color:var(--text3)">${t.id===D.trip.id?'✓ 当前':t.start_date||''}</div></div></div>`).join('');}
 async function addTrip(){
@@ -1471,8 +1550,6 @@ function renderCatsList(){
 }
 async function addCat(){const name=el('nc-name').value.trim();if(!name)return;await db.from('categories').insert({trip_id:D.trip.id,name,icon:selCatIcon});el('nc-name').value='';await loadAll();renderCatsList();renderSetMain();}
 async function delCat(id){await db.from('categories').delete().eq('id',id);await loadAll();renderCatsList();renderSetMain();}
-function renderPMsList(){
-}
 async function clearExpenses(){if(!confirm('确定清除全部账单？操作不可恢复！'))return;await db.from('expense_splits').delete().neq('id','00000000-0000-0000-0000-000000000000');await db.from('expenses').delete().eq('trip_id',D.trip.id);await loadAll();renderAll();toast('已清除');}
 
 // ══════════════════════════════════

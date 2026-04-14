@@ -35,27 +35,27 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Helvetica Neue'
 .page.active{display:block}
 
 /* ═══ Hero Header (gradient) ═══ */
-.hero-hdr{background:linear-gradient(135deg,#1D4ED8 0%,#2563EB 60%,#3B82F6 100%);padding:calc(env(safe-area-inset-top)+14px) 20px 20px;position:sticky;top:0;z-index:50}
+.hero-hdr{background:linear-gradient(135deg,#1D4ED8 0%,#2563EB 60%,#3B82F6 100%);padding:calc(env(safe-area-inset-top)+14px) 18px 18px;position:sticky;top:0;z-index:50}
 .hero-hdr-row{display:flex;justify-content:space-between;align-items:center}
 .hero-trip{font-size:12px;color:rgba(255,255,255,.7);margin-bottom:1px}
 .hero-name{font-size:20px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;cursor:pointer}
 
 /* ═══ Plain Header ═══ */
-.plain-hdr{background:#fff;border-bottom:1px solid var(--border);padding:calc(env(safe-area-inset-top)+12px) 20px 12px;position:sticky;top:0;z-index:50}
+.plain-hdr{background:#fff;border-bottom:1px solid var(--border);padding:calc(env(safe-area-inset-top)+12px) 18px 12px;position:sticky;top:0;z-index:50}
 .plain-hdr-row{display:flex;align-items:center;justify-content:space-between;min-height:34px}
 .plain-title{font-size:20px;font-weight:700;color:var(--text)}
 
 /* ═══ Cards ═══ */
-.card{background:#fff;border-radius:16px;padding:16px;margin:10px 16px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
-.card-list{background:#fff;border-radius:16px;margin:10px 16px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.card{background:#fff;border-radius:16px;padding:16px;margin:10px 18px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.card-list{background:#fff;border-radius:16px;margin:10px 18px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06)}
 .row{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
 .row:last-child{border-bottom:none}
 .row-tap{cursor:pointer;transition:background .12s}
 .row-tap:active{background:#F9FAFB}
-.sec{font-size:11px;font-weight:600;color:var(--text3);padding:14px 20px 5px;letter-spacing:.8px;text-transform:uppercase}
+.sec{font-size:11px;font-weight:600;color:var(--text3);padding:14px 20px 6px;letter-spacing:.8px;text-transform:uppercase}
 
 /* ═══ Stat summary row ═══ */
-.stat-band{display:grid;grid-template-columns:repeat(3,1fr);background:#fff;margin:0 16px 10px;border-radius:16px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.stat-band{display:grid;grid-template-columns:repeat(2,1fr);background:#fff;margin:0 18px 10px;border-radius:16px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06)}
 .stat-cell{padding:14px 0;text-align:center}
 .stat-cell+.stat-cell{border-left:1px solid var(--border)}
 .s-lbl{font-size:10px;color:var(--text3);font-weight:500}
@@ -98,7 +98,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Helvetica Neue'
 
 /* ═══ Pills ═══ */
 .pills{display:flex;flex-wrap:wrap;gap:7px}
-.pill{padding:7px 12px;border-radius:20px;border:1.5px solid var(--border);font-size:13px;cursor:pointer;background:#fff;transition:all .15s;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;font-weight:500}
+.pill{padding:7px 13px;border-radius:20px;border:1.5px solid var(--border);font-size:13px;cursor:pointer;background:#fff;transition:all .15s;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;font-weight:500}
 .pill.sel{border-color:var(--blue);background:#EFF6FF;color:var(--blue);font-weight:600}
 .pill:active{opacity:.7}
 
@@ -138,7 +138,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Helvetica Neue'
 .exp-ico{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
 
 /* ═══ Bar chart ═══ */
-.bar-row{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border)}
+.bar-row{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--border)}
 .bar-row:last-child{border-bottom:none}
 .bar-label{font-size:13px;font-weight:500;width:66px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0}
 .bar-track{flex:1;height:7px;background:var(--border);border-radius:4px;overflow:hidden}
@@ -146,7 +146,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Helvetica Neue'
 .bar-amt{font-size:13px;font-weight:600;min-width:58px;text-align:right}
 
 /* ═══ Wallet card ═══ */
-.wcard{background:#fff;border-radius:16px;margin:0 16px 10px;padding:16px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.06);transition:box-shadow .15s}
+.wcard{background:#fff;border-radius:16px;margin:0 18px 10px;padding:16px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.06);transition:box-shadow .15s}
 .wcard:active{box-shadow:0 1px 2px rgba(0,0,0,.06);opacity:.9}
 
 /* ═══ Settle tag ═══ */
@@ -178,7 +178,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Helvetica Neue'
 .cur-sw-b.active{background:#fff;color:var(--blue);box-shadow:0 1px 3px rgba(0,0,0,.1)}
 
 /* ═══ Asset tab seg ═══ */
-.asset-seg{display:flex;background:#F3F4F6;border-radius:11px;padding:3px;margin:10px 16px 0}
+.asset-seg{display:flex;background:#F3F4F6;border-radius:11px;padding:3px;margin:10px 18px 0}
 .asset-seg-b{flex:1;padding:8px;border-radius:8px;border:none;background:transparent;font-size:13px;font-weight:500;color:var(--text3);cursor:pointer;transition:all .15s}
 .asset-seg-b.active{background:#fff;color:var(--text);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.1)}
 </style>
@@ -234,7 +234,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Helvetica Neue'
   </div>
 
   <!-- Filter bar -->
-  <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px 4px;gap:8px">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 18px 4px;gap:8px">
     <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:2px">
       <div id="f-all" class="pill" style="font-size:12px;padding:5px 11px" onclick="setFilter('all',this)">全部账单</div>
       <div id="f-paid" class="pill sel" style="font-size:12px;padding:5px 11px" onclick="setFilter('paid',this)">我付款的</div>
@@ -272,7 +272,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Helvetica Neue'
     <div id="st-mem" style="flex:1;padding:11px;text-align:center;font-size:14px;font-weight:500;color:var(--text3);border-bottom:2.5px solid transparent;cursor:pointer" onclick="switchStatSub('mem')">按成员</div>
     <div id="st-day" style="flex:1;padding:11px;text-align:center;font-size:14px;font-weight:500;color:var(--text3);border-bottom:2.5px solid transparent;cursor:pointer" onclick="switchStatSub('day')">按日期</div>
   </div>
-  <div id="stat-chart" class="card-list" style="margin:0 16px;border-radius:0 0 14px 14px"></div>
+  <div id="stat-chart" class="card-list" style="margin:0 18px;border-radius:0 0 14px 14px"></div>
 </div>
 
 <!-- ████████████ 资产 ████████████ -->
@@ -337,7 +337,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Helvetica Neue'
     <div class="card-list">
       <div class="row row-tap" onclick="gotoSub('rates')"><span style="font-size:22px">💱</span><div style="flex:1"><div style="font-size:15px;font-weight:500">汇率管理</div><div style="font-size:12px;color:var(--text3);margin-top:1px">每人独立购汇汇率</div></div><span style="color:var(--text3);font-size:18px">›</span></div>
       <div class="row row-tap" onclick="gotoSub('cats')"><span style="font-size:22px">🏷️</span><div style="flex:1"><div style="font-size:15px;font-weight:500">消费分类</div><div id="cats-sub-lbl" style="font-size:12px;color:var(--text3);margin-top:1px">-</div></div><span style="color:var(--text3);font-size:18px">›</span></div>
-      <div class="row row-tap" onclick="gotoSub('pms')"><span style="font-size:22px">💳</span><div style="flex:1"><div style="font-size:15px;font-weight:500">支付方式</div><div id="pms-sub-lbl" style="font-size:12px;color:var(--text3);margin-top:1px">-</div></div><span style="color:var(--text3);font-size:18px">›</span></div>
+
     </div>
     <div class="sec">危险操作</div>
     <div class="card-list">
@@ -379,11 +379,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Helvetica Neue'
     <div id="cats-list" class="card-list"></div>
     <div style="padding:16px"><div id="cat-icon-row" class="pills" style="margin-bottom:10px"></div><div style="display:flex;gap:8px"><input class="fi" id="nc-name" placeholder="分类名称" style="flex:1"/><button class="btn btn-primary" onclick="addCat()">添加</button></div></div>
   </div>
-  <div id="sub-pms" class="back-pg">
-    <div class="plain-hdr"><div class="plain-hdr-row"><button class="btn btn-ghost btn-sm" onclick="gotoSub(null)">‹ 返回</button><span style="font-size:17px;font-weight:700">支付方式</span><div style="width:60px"></div></div></div>
+  </div>
     <div style="height:6px"></div>
-    <div id="pms-list" class="card-list"></div>
-    <div style="padding:16px"><div id="pm-icon-row" class="pills" style="margin-bottom:10px"></div><div style="display:flex;gap:8px"><input class="fi" id="npm-name" placeholder="支付方式名称" style="flex:1"/><button class="btn btn-primary" onclick="addPM()">添加</button></div></div>
   </div>
 </div>
 
@@ -468,9 +465,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Helvetica Neue'
     </div>
     <!-- Advanced -->
     <div style="padding:0 16px;margin-bottom:10px">
-      <div class="adv-tog" onclick="toggleAdv()"><span id="adv-arrow">▾</span>&nbsp;更多（支付方式 · 日期 · 备注）</div>
+      <div class="adv-tog" onclick="toggleAdv()"><span id="adv-arrow">▾</span>&nbsp;更多（日期 · 备注）</div>
       <div id="adv-body" class="hidden" style="margin-top:10px">
-        <div style="margin-bottom:10px"><div class="fl">支付方式</div><div id="et-pms" class="pills"></div></div>
+        
         <div style="margin-bottom:10px"><div class="fl">日期</div><input class="fi" id="et-date" type="date"/></div>
         <div><div class="fl">备注</div><textarea class="fi fi-ta" id="et-notes" placeholder="可选..."></textarea></div>
       </div>
@@ -585,7 +582,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Helvetica Neue'
   <div class="sheet">
     <div class="sheet-handle"></div>
     <div class="sheet-hdr"><span class="sheet-title">切换行程</span><button class="btn btn-ghost btn-sm" onclick="closeTripPicker()">关闭</button></div>
-    <div id="trip-picker-list" class="card-list" style="margin:0 16px 12px"></div>
+    <div id="trip-picker-list" class="card-list" style="margin:0 18px 12px"></div>
     <div style="padding:0 16px 8px"><button class="btn btn-outline btn-block" onclick="closeTripPicker();gotoSub('trips');switchTab('settings',document.querySelectorAll('.tab-item')[4])">＋ 新建行程</button></div>
   </div>
 </div>
@@ -601,10 +598,8 @@ const COLORS=['#2563EB','#10B981','#F59E0B','#EF4444','#8B5CF6','#06B6D4','#EC48
 const DEF_CATS=[{name:'餐饮',icon:'🍜'},{name:'交通',icon:'🚇'},{name:'住宿',icon:'🏨'},{name:'购物',icon:'🛍️'},{name:'景点',icon:'🎡'},{name:'娱乐',icon:'🎭'},{name:'医疗',icon:'💊'},{name:'其他',icon:'💰'}];
 const CAT_ICONS=['🍜','🚇','🏨','🛍️','🎡','🎭','💊','💰','☕','🍺','🚕','⛽','📸','🎁','🏖️','💈'];
 const WAL_ICONS=['💵','💴','💶','💷','💳','🏦','👜','🧧','💰','🪙'];
-const PM_ICONS=['💵','💳','📱','💴','🏦','💸','🪙','💰'];
 const CUR_OPT=[{c:'CNY',n:'人民币'},{c:'JPY',n:'日元'},{c:'USD',n:'美元'},{c:'EUR',n:'欧元'},{c:'HKD',n:'港元'},{c:'TWD',n:'台币'},{c:'KRW',n:'韩元'},{c:'THB',n:'泰铢'},{c:'SGD',n:'新加坡元'},{c:'GBP',n:'英镑'}];
 const SYM={CNY:'¥',JPY:'¥',USD:'$',EUR:'€',HKD:'HK$',TWD:'NT$',KRW:'₩',THB:'฿',SGD:'S$',GBP:'£'};
-const DEF_PM=[{v:'cash',l:'现金',i:'💵'},{v:'card',l:'刷卡',i:'💳'},{v:'mobile',l:'移动支付',i:'📱'}];
 
 // ══════════════════════════════════
 // STATE
@@ -803,7 +798,12 @@ function renderBills(){
   // Filter
   let list=D.expenses;
   if(expFilter==='paid'&&me)list=D.expenses.filter(e=>e.paid_by===me.id);
-  else if(expFilter==='share'&&me)list=D.expenses.filter(e=>{const sp=D.splits.filter(s=>s.expense_id===e.id&&s.member_id===me.id);return sp.length>0;});
+  else if(expFilter==='share'&&me)list=D.expenses.filter(e=>{
+    // 我分摩的：展示别人付款且有我的分摩份额的账单（即我不是付款人）
+    if(e.paid_by===me.id)return false;
+    const sp=D.splits.filter(s=>s.expense_id===e.id&&s.member_id===me.id);
+    return sp.length>0;
+  });
   if(todayOnly)list=list.filter(e=>e.expense_date===td);
   // Group by date
   const grp=groupBy(list,e=>e.expense_date||'未知日期');
@@ -812,7 +812,7 @@ function renderBills(){
   if(!dates.length){cont.innerHTML=`<div class="empty"><div class="empty-ico">📝</div><div style="font-weight:500">${todayOnly?'今天还没记录':'没有账单，点 ＋ 开始记账'}</div></div>`;return;}
   cont.innerHTML=dates.map(d=>{
     const dayTotal=grp[d].reduce((s,e)=>s+(e.account_type==='income'?0:toCNY(e)),0);
-    return `<div class="date-sep"><span>${fmtDate(d)}</span><span style="font-size:12px">合计 ${fmt(dayTotal)}</span></div><div class="card-list">${grp[d].map(e=>expRow(e,me)).join('')}</div>`;
+    return `<div class="date-sep" style="padding:10px 20px 6px"><span>${fmtDate(d)}</span><span style="font-size:12px">合计 ${fmt(dayTotal)}</span></div><div class="card-list">${grp[d].map(e=>expRow(e,me)).join('')}</div>`;
   }).join('');
 }
 function expRow(e,me){
@@ -877,7 +877,7 @@ function openExpDet(id){
       <div class="card-list" style="margin:0">
         <div class="row"><span style="font-size:20px">👤</span><div style="flex:1;color:var(--text3);font-size:13px">付款人</div><b>${payer?payer.name:'未知'}</b></div>
         ${wallet?`<div class="row"><span style="font-size:20px">${wallet.icon}</span><div style="flex:1;color:var(--text3);font-size:13px">付款账户</div><b>${wallet.name}</b></div>`:''}
-        ${pm?`<div class="row"><span style="font-size:20px">${pm.i}</span><div style="flex:1;color:var(--text3);font-size:13px">支付方式</div><b>${pm.l}</b></div>`:''}
+        
         <div class="row"><span style="font-size:20px">${e.account_type==='shared'?'👥':'🙋'}</span><div style="flex:1;color:var(--text3);font-size:13px">类型</div><b>${e.account_type==='shared'?'共同支出':e.account_type==='income'?'收入':'个人支出'}</b></div>
         ${e.notes?`<div class="row"><span style="font-size:20px">📝</span><div style="flex:1;color:var(--text3);font-size:13px">备注</div><b>${e.notes}</b></div>`:''}
       </div>
@@ -898,7 +898,7 @@ function openExp(eid=null){
     scope:e?e.account_type:'shared',
     payer:e?e.paid_by:(me?.id||D.members[0]?.id||null),
     cat:e?e.category_id:(D.categories[0]?.id||null),
-    pm:e?e.payment_method:(PMs[0]?.v||'cash'),
+    pm:null,
     wallet:e?e.wallet_id:null,
     trTo:null,
     splitMode:'equal',
@@ -952,7 +952,6 @@ function renderExpFormPills(){
   el('et-payers').innerHTML=D.members.map(m=>`<div class="pill ${eForm.payer===m.id?'sel':''}" onclick="selPayer('${m.id}')"><div class="av av-xs" style="background:${m.color}">${m.name[0]}</div>${m.name}${me&&m.id===me.id?'<span class="me-tag">我</span>':''}</div>`).join('');
   el('et-cats').innerHTML=D.categories.map(c=>`<div class="pill ${eForm.cat===c.id?'sel':''}" onclick="selCat('${c.id}')">${c.icon} ${c.name}</div>`).join('');
   renderWalletPills();
-  renderPMPills();
   renderTrToPillsInForm();
 }
 function selPayer(id){eForm.payer=id;eForm.wallet=null;renderExpFormPills();onCur();updateSplitPreview();}
@@ -962,8 +961,6 @@ function renderWalletPills(){
   el('et-wallets').innerHTML='<div class="pill '+(eForm.wallet===null?'sel':'')+'" onclick="selWallet(null)">不关联</div>'+ws.map(w=>`<div class="pill ${eForm.wallet===w.id?'sel':''}" onclick="selWallet('${w.id}')">${w.icon} ${w.name}${w.currency_code&&w.currency_code!=='CNY'?' ('+w.currency_code+')':''}</div>`).join('');
 }
 function selWallet(id){eForm.wallet=id;renderWalletPills();}
-function renderPMPills(){el('et-pms').innerHTML=PMs.map(p=>`<div class="pill ${eForm.pm===p.v?'sel':''}" onclick="selPM('${p.v}')">${p.i} ${p.l}</div>`).join('');}
-function selPM(v){eForm.pm=v;renderPMPills();}
 function renderTrToPillsInForm(){
   const me=getMe();
   el('et-tr-to').innerHTML=D.members.map(m=>`<div class="pill ${eForm.trTo===m.id?'sel':''}" onclick="eForm.trTo='${m.id}';renderTrToPillsInForm()"><div class="av av-xs" style="background:${m.color}">${m.name[0]}</div>${m.name}${me&&m.id===me.id?'<span class="me-tag">我</span>':''}</div>`).join('');
@@ -1087,28 +1084,54 @@ function getStatCurLabel(e){
 }
 function renderStatNumbers(){
   const exps=getStatExps();
-  const total=exps.reduce((s,e)=>s+toCNY(e),0);
-  const days=tripDays();const daily=days&&days>0?total/days:0;
   const n=D.members.length;
+  let totalDisplay,totalLabel,perDisplay,perLabel;
+  if(statCur==='ORIG'){
+    const byCur={};
+    exps.forEach(e=>{const c=e.currency_code||'CNY';byCur[c]=(byCur[c]||0)+(parseFloat(e.amount)||0);});
+    const parts=Object.entries(byCur).map(([c,a])=>fmtFx(a,c));
+    totalDisplay=parts.join(' / ')||'0';
+    totalLabel='原币合计';
+    const totalCNY=exps.reduce((s,e)=>s+toCNY(e),0);
+    perDisplay=n?fmt(totalCNY/n):'-';
+    perLabel='人均（CNY）';
+  }else{
+    const totalCNY=exps.reduce((s,e)=>s+toCNY(e),0);
+    totalDisplay=fmt(totalCNY);
+    totalLabel='合计（CNY）';
+    perDisplay=n?fmt(totalCNY/n):'-';
+    perLabel='人均';
+  }
+  const smallFont=statCur==='ORIG'&&totalDisplay.includes(' / ');
   el('stat-numbers').innerHTML=`<div class="stat-band">
-    <div class="stat-cell"><div class="s-lbl">合计（CNY）</div><div class="s-val" style="color:var(--blue)">${fmt(total)}</div></div>
-    <div class="stat-cell"><div class="s-lbl">${days?`日均(${days}天)`:'日均'}</div><div class="s-val">${days?fmt(daily):'-'}</div></div>
-    <div class="stat-cell"><div class="s-lbl">人均</div><div class="s-val" style="color:var(--orange)">${n?fmt(total/n):'-'}</div></div>
+    <div class="stat-cell"><div class="s-lbl">${totalLabel}</div><div class="s-val" style="color:var(--blue);${smallFont?'font-size:13px':''}">${totalDisplay}</div></div>
+    <div class="stat-cell"><div class="s-lbl">${perLabel}</div><div class="s-val" style="color:var(--orange)">${perDisplay}</div></div>
   </div>`;
 }
 function renderStatChart(){
   const exps=getStatExps();
   if(!exps.length){el('stat-chart').innerHTML='<div class="empty"><div class="empty-ico">📊</div><div>暂无数据</div></div>';return;}
   const color=statView==='personal'?'var(--green)':statView==='shared'?'var(--blue)':'var(--purple)';
+  // 个人视角隐藏按成员tab
+  const showMem=statView!=='personal';
+  el('st-mem').style.display=showMem?'':'none';
+  if(statSub==='mem'&&!showMem){statSub='cat';switchStatSub('cat');}
   const totalCNY=exps.reduce((s,e)=>s+toCNY(e),0);
+  // 原币模式：图表bar用原币金额
+  const allSameCur=exps.length>0&&exps.every(e=>(e.currency_code||'CNY')===(exps[0].currency_code||'CNY'));
+  const useOrig=statCur==='ORIG'&&allSameCur&&(exps[0]?.currency_code||'CNY')!=='CNY';
+  const barBase=e=>useOrig?parseFloat(e.amount)||0:toCNY(e);
+  const barFmt=v=>useOrig?fmtFx(v,exps[0].currency_code):fmt(v);
+  const barTotal=exps.reduce((s,e)=>s+barBase(e),0);
   if(statSub==='cat'){
     const byCat=groupBy(exps,e=>e.category_id||'__none');
     const rows=Object.entries(byCat).map(([k,v])=>({
       cat:D.categories.find(c=>c.id===k),
       cny:v.reduce((s,e)=>s+toCNY(e),0),
+      bval:v.reduce((s,e)=>s+barBase(e),0),
       items:v
     })).sort((a,b)=>b.cny-a.cny);
-    el('stat-chart').innerHTML=rows.map(({cat,cny,items})=>{const pct=totalCNY>0?cny/totalCNY*100:0;return `<div class="bar-row" onclick="openStatDet(${JSON.stringify(items.map(e=>e.id))},'${cat?cat.name:'未分类'}')" style="cursor:pointer"><span style="font-size:18px;width:22px;flex-shrink:0">${cat?cat.icon:'💰'}</span><span class="bar-label">${cat?cat.name:'未分类'}</span><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${color}"></div></div><span class="bar-amt">${fmt(cny)}</span><span style="font-size:11px;color:var(--text3);min-width:30px;text-align:right">${pct.toFixed(0)}%</span></div>`;}).join('');
+    el('stat-chart').innerHTML=rows.map(({cat,cny,bval,items})=>{const pct=barTotal>0?bval/barTotal*100:0;return `<div class="bar-row" onclick="openStatDet(${JSON.stringify(items.map(e=>e.id))},'${cat?cat.name:'未分类'}')" style="cursor:pointer"><span style="font-size:18px;width:22px;flex-shrink:0">${cat?cat.icon:'💰'}</span><span class="bar-label">${cat?cat.name:'未分类'}</span><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${color}"></div></div><span class="bar-amt">${barFmt(bval)}</span><span style="font-size:11px;color:var(--text3);min-width:30px;text-align:right">${pct.toFixed(0)}%</span></div>`;}).join('');
   }else if(statSub==='mem'){
     const rows=D.members.map(m=>{
       const cny=exps.reduce((s,e)=>{
@@ -1125,14 +1148,14 @@ function renderStatChart(){
   }else{
     const byDay=groupBy(exps,e=>e.expense_date);
     const dates=Object.keys(byDay).sort((a,b)=>b.localeCompare(a));
-    el('stat-chart').innerHTML=dates.map(d=>{const cny=byDay[d].reduce((s,e)=>s+toCNY(e),0);const pct=totalCNY>0?cny/totalCNY*100:0;return `<div class="bar-row" onclick="openStatDet(${JSON.stringify(byDay[d].map(e=>e.id))},'${fmtDate(d)}')" style="cursor:pointer"><span class="bar-label">${fmtDate(d)}</span><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${color}"></div></div><span class="bar-amt">${fmt(cny)}</span><span style="font-size:11px;color:var(--text3);min-width:32px;text-align:right">${byDay[d].length}笔</span></div>`;}).join('');
+    el('stat-chart').innerHTML=dates.map(d=>{const cny=byDay[d].reduce((s,e)=>s+toCNY(e),0);const bval=byDay[d].reduce((s,e)=>s+barBase(e),0);const pct=barTotal>0?bval/barTotal*100:0;return `<div class="bar-row" onclick="openStatDet(${JSON.stringify(byDay[d].map(e=>e.id))},'${fmtDate(d)}')" style="cursor:pointer"><span class="bar-label">${fmtDate(d)}</span><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${color}"></div></div><span class="bar-amt">${barFmt(bval)}</span><span style="font-size:11px;color:var(--text3);min-width:32px;text-align:right">${byDay[d].length}笔</span></div>`;}).join('');
   }
 }
 function openStatDet(ids,label){
   const me=getMe();
   const exps=D.expenses.filter(e=>ids.includes(e.id));
   el('exp-det-title').textContent=label;
-  el('exp-det-body').innerHTML=`<div class="card-list" style="margin:10px 16px">${exps.map(e=>{
+  el('exp-det-body').innerHTML=`<div class="card-list" style="margin:10px 18px">${exps.map(e=>{
     const cat=D.categories.find(c=>c.id===e.category_id);
     const payer=D.members.find(m=>m.id===e.paid_by);
     const cny=toCNY(e);const orig=e.currency_code&&e.currency_code!=='CNY';
@@ -1180,7 +1203,7 @@ function renderMyAssets(me){
     const spCNY=spentByCNY[w.id]||0;const spFx=code==='CNY'?spCNY:spCNY/r;
     return s+(init-spFx)*r;
   },0);
-  el('asset-summary').innerHTML=`<div class="card">
+  el('asset-summary').innerHTML=`<div class="card" style="margin:10px 18px">
     <div style="display:flex;justify-content:space-between;align-items:flex-end">
       <div><div style="font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.5px">总余额（人民币）</div><div style="font-size:36px;font-weight:800;color:${totBal>=0?'var(--green)':'var(--red)'};margin-top:4px">${fmt(totBal)}</div></div>
       <div style="text-align:right"><div style="font-size:11px;color:var(--text3)">初始</div><div style="font-size:16px;font-weight:600">${fmt(totInit)}</div></div>
@@ -1392,7 +1415,7 @@ function renderSetMain(){
   el('set-trip-lbl').textContent=D.trip.name;
   el('mem-sub-lbl').textContent=D.members.length+' 位成员';
   el('cats-sub-lbl').textContent=D.categories.length+' 个分类';
-  el('pms-sub-lbl').textContent=PMs.length+' 种';
+  
   el('trips-sub-lbl').textContent=D.trips.length+' 个';
   const me=getMe();
   el('me-sub-lbl').textContent=me?'当前：'+me.name:'⚠️ 未设置（建议先设置）';
@@ -1403,7 +1426,7 @@ function gotoSub(s){
   document.querySelectorAll('.back-pg').forEach(p=>{p.classList.remove('show');p.style.display='none';});
   if(s){const p=el('sub-'+s);if(!p)return;p.classList.add('show');p.style.display='block';
     if(s==='me')renderMeList();if(s==='trips')renderTripsList2();if(s==='members')renderMemList();
-    if(s==='rates'){renderRateMems();renderRatesList();}if(s==='cats')renderCatsList();if(s==='pms')renderPMsList();}
+    if(s==='rates'){renderRateMems();renderRatesList();}if(s==='cats')renderCatsList();}
 }
 function gotoMeSetting(){switchTab('settings',document.querySelectorAll('.tab-item')[4]);gotoSub('me');}
 function renderMeList(){el('me-list').innerHTML=D.members.map(m=>`<div class="row row-tap" onclick="setMeId('${m.id}');renderMeList();renderSetMain();renderAll()"><div class="av av-md" style="background:${m.color}">${m.name[0]}</div><div style="flex:1;font-size:15px;font-weight:500">${m.name}</div>${getMeId()===m.id?'<span style="color:var(--blue);font-size:20px">✓</span>':''}</div>`).join('');}
@@ -1449,11 +1472,7 @@ function renderCatsList(){
 async function addCat(){const name=el('nc-name').value.trim();if(!name)return;await db.from('categories').insert({trip_id:D.trip.id,name,icon:selCatIcon});el('nc-name').value='';await loadAll();renderCatsList();renderSetMain();}
 async function delCat(id){await db.from('categories').delete().eq('id',id);await loadAll();renderCatsList();renderSetMain();}
 function renderPMsList(){
-  el('pms-list').innerHTML=PMs.map((p,i)=>`<div class="row"><span style="font-size:24px">${p.i}</span><div style="flex:1;font-size:15px;font-weight:500">${p.l}</div>${i>=3?`<button class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="delPM(${i})">删除</button>`:''}</div>`).join('');
-  el('pm-icon-row').innerHTML=PM_ICONS.map(i=>`<div class="pill ${pmIcon===i?'sel':''}" onclick="pmIcon='${i}';renderPMsList()">${i}</div>`).join('');
 }
-function addPM(){const label=el('npm-name').value.trim();if(!label){toast('请填写名称');return;}PMs.push({v:'pm_'+Date.now(),l:label,i:pmIcon});savePM(PMs);el('npm-name').value='';renderPMsList();renderSetMain();}
-function delPM(i){if(PMs.length<=1){toast('至少保留一种');return;}PMs.splice(i,1);savePM(PMs);renderPMsList();}
 async function clearExpenses(){if(!confirm('确定清除全部账单？操作不可恢复！'))return;await db.from('expense_splits').delete().neq('id','00000000-0000-0000-0000-000000000000');await db.from('expenses').delete().eq('trip_id',D.trip.id);await loadAll();renderAll();toast('已清除');}
 
 // ══════════════════════════════════

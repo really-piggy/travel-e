@@ -1011,7 +1011,13 @@ function renderWalletPills(){
   const ws=D.wallets.filter(w=>w.member_id===eForm.payer);
   const sharedWs=D.wallets.filter(w=>w.is_shared||(!w.member_id&&!!w.id));
   const allWs=[...ws,...sharedWs.filter(w=>!ws.find(x=>x.id===w.id))];
-  el('et-wallets').innerHTML='<div class="pill '+(eForm.wallet===null?'sel':'')+'" onclick="selWallet(null)">不关联</div>'+allWs.map(w=>`<div class="pill ${eForm.wallet===w.id?'sel':''}" onclick="selWallet('${w.id}')">${w.icon} ${w.name}${w.is_shared?' 📢':''}${w.currency_code&&w.currency_code!=='CNY'?' ('+w.currency_code+')':''}</div>`).join('');
+  const pills=allWs.map(w=>{
+    const ico=w.icon||'💳';
+    const tag=w.is_shared?'<span style="font-size:10px;color:var(--blue);margin-left:2px">公共</span>':'';
+    const cur=w.currency_code&&w.currency_code!=='CNY'?` (${w.currency_code})`:'';
+    return `<div class="pill ${eForm.wallet===w.id?'sel':''}" onclick="selWallet('${w.id}')">${ico} ${w.name}${cur}${tag}</div>`;
+  }).join('');
+  el('et-wallets').innerHTML='<div class="pill '+(eForm.wallet===null?'sel':'')+'" onclick="selWallet(null)">不关联</div>'+pills;
 }
 function selWallet(id){eForm.wallet=id;renderWalletPills();}
 function renderTrToPillsInForm(){
@@ -1816,7 +1822,10 @@ async function saveMemEdit(){
     await db.from('members').update({icon:_editMemIcon||null}).eq('id',_editMemId);
     // 忽略 icon 列不存在的报错
   }
-  await loadAll();renderMemList();renderSetMain();renderAll();closeMemEdit();toast('已保存');
+  await loadAll();renderMemList();renderSetMain();renderAll();
+  // 汇率管理里成员 pills 也刷新
+  if(typeof renderRateMems==='function')renderRateMems();
+  closeMemEdit();toast('已保存');
 }
 async function delMember(mid){
   const m=D.members.find(x=>x.id===mid);if(!m)return;
@@ -1833,7 +1842,7 @@ async function addTrip(){
 }
 function renderRateMems(){
   if(!rateMem&&D.members.length)rateMem=D.members[0].id;
-  el('rate-mem-pills').innerHTML=D.members.map(m=>`<div class="pill ${rateMem===m.id?'sel':''}" onclick="rateMem='${m.id}';renderRateMems();renderRatesList()"><div class="av av-xs" style="background:${m.color}">${m.name[0]}</div>${m.name}</div>`).join('');
+  el('rate-mem-pills').innerHTML=D.members.map(m=>`<div class="pill ${rateMem===m.id?'sel':''}" onclick="rateMem='${m.id}';renderRateMems();renderRatesList()">${memAv(m,'xs')}${m.name}</div>`).join('');
 }
 function renderRatesList(){
   const cs=D.currencies.filter(c=>c.member_id===rateMem);

@@ -1718,8 +1718,9 @@ function renderSettle(){
   });
   (D.transfers||[]).filter(t=>t.transfer_type==='person').forEach(t=>{
     const cny=trToCNY(t);
-    if(t.from_member_id&&bal[t.from_member_id]!==undefined)bal[t.from_member_id]-=cny;
-    if(t.to_member_id&&bal[t.to_member_id]!==undefined)bal[t.to_member_id]+=cny;
+    // from 偿还欠款（余额增加），to 收到钱（被欠减少）
+    if(t.from_member_id&&bal[t.from_member_id]!==undefined)bal[t.from_member_id]+=cny;
+    if(t.to_member_id&&bal[t.to_member_id]!==undefined)bal[t.to_member_id]-=cny;
   });
   if(settleCur==='ORIG'){
     // 原币模式：按币种分组，不跨币种换算
@@ -1744,8 +1745,9 @@ function renderSettle(){
       const c=t.currency_code||'CNY';const amt=parseFloat(t.amount||0);
       if(!curGroups[c])curGroups[c]={};
       const g=curGroups[c];
-      if(t.from_member_id){if(g[t.from_member_id]!==undefined)g[t.from_member_id]-=amt;else g[t.from_member_id]=-amt;}
-      if(t.to_member_id){if(g[t.to_member_id]!==undefined)g[t.to_member_id]+=amt;else g[t.to_member_id]=amt;}
+      // from 偿还欠款（余额增加），to 收到钱（被欠减少）
+      if(t.from_member_id){if(g[t.from_member_id]!==undefined)g[t.from_member_id]+=amt;else g[t.from_member_id]=amt;}
+      if(t.to_member_id){if(g[t.to_member_id]!==undefined)g[t.to_member_id]-=amt;else g[t.to_member_id]=-amt;}
     });
     el('settle-bal').innerHTML=D.members.map(m=>{
       const isMe=me&&m.id===me.id;
@@ -1895,8 +1897,9 @@ function computeDebt(fromId,toId){
   });
   (D.transfers||[]).filter(t=>t.transfer_type==='person').forEach(t=>{
     const cny=trToCNY(t);
-    if(t.from_member_id&&bal[t.from_member_id]!==undefined)bal[t.from_member_id]-=cny;
-    if(t.to_member_id&&bal[t.to_member_id]!==undefined)bal[t.to_member_id]+=cny;
+    // from 偿还欠款（余额增加），to 收到钱（被欠减少）
+    if(t.from_member_id&&bal[t.from_member_id]!==undefined)bal[t.from_member_id]+=cny;
+    if(t.to_member_id&&bal[t.to_member_id]!==undefined)bal[t.to_member_id]-=cny;
   });
   const suggestions=computeSettle(bal);
   const s=suggestions.find(x=>x.from===fromId&&x.to===toId);

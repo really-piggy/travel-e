@@ -336,6 +336,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','SF Pro Display'
   <div id="settle-suggest" class="card-list"></div>
   <div class="sec">转账记录</div>
   <div id="settle-log" class="card-list"></div>
+  <div class="sec" style="display:flex;align-items:center;justify-content:space-between">
+    <span>余额明细</span>
+    <button class="btn btn-ghost btn-sm" onclick="toggleSettleDetail()" id="settle-detail-btn">展开 ▾</button>
+  </div>
+  <div id="settle-detail" class="card-list hidden"></div>
 </div>
 
 <!-- ████████████ 设置 ████████████ -->
@@ -1801,6 +1806,49 @@ function renderSettle(){
     const fw=D.wallets.find(w=>w.id===t.from_wallet_id),tw=D.wallets.find(w=>w.id===t.to_wallet_id),wmem=D.members.find(m=>m.id===t.wallet_member_id);
     return `<div class="row">${memAv(wmem,"sm")}<div style="flex:1"><div style="font-size:14px;font-weight:500">${fw?.icon||''}${fw?.name||'?'} → ${tw?.icon||''}${tw?.name||'?'}</div><div style="font-size:11px;color:var(--text3)">${fmtDate(t.transfer_date)} · 账户互转${t.notes?' · '+t.notes:''}</div></div><div style="text-align:right"><div style="font-size:14px;font-weight:600;color:var(--orange)">${dispAmt}</div>${cnyHint}</div><button class="btn btn-ghost btn-sm" style="color:var(--red);padding:4px 6px;margin-left:2px" onclick="delTr('${t.id}')">×</button></div>`;
   }).join(''):'<div class="empty" style="padding:24px">暂无转账记录</div>';
+  // 渲染余额明细
+  renderSettleDetail(bal);
+}
+let settleDetailOpen=false;
+function toggleSettleDetail(){
+  settleDetailOpen=!settleDetailOpen;
+  el('settle-detail').classList.toggle('hidden',!settleDetailOpen);
+  el('settle-detail-btn').textContent=settleDetailOpen?'收起 ▴':'展开 ▾';
+}
+function renderSettleDetail(bal){
+  if(!el('settle-detail'))return;
+  const rows=D.members.map(m=>{
+    const b=bal[m.id]||0;
+    const col=b>0.01?'var(--green)':b<-0.01?'var(--red)':'var(--gray)';
+    // 找出该成员作为付款人的账单
+    const paidRows=D.expenses.filter(e=>e.paid_by===m.id&&e.account_type!=='income').map(e=>{
+      const cny=toCNY(e);
+      return `<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12px"><span style="color:var(--text3)">付: ${e.title}</span><span style="color:var(--blue);font-weight:600">+${fmt(cny)}</span></div>`;
+    }).join('');
+    // 找出该成员的分摊
+    const splitRows=D.splits.filter(s=>s.member_id===m.id).map(s=>{
+      const e=D.expenses.find(x=>x.id===s.expense_id);
+      if(!e)return '';
+      return `<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12px"><span style="color:var(--text3)">摊: ${e.title}</span><span style="color:var(--red);font-weight:600">-${fmt(parseFloat(s.split_amount))}</span></div>`;
+    }).join('');
+    // 找出该成员的转账（付出/收入）
+    const trOutRows=(D.transfers||[]).filter(t=>t.transfer_type==='person'&&t.from_member_id===m.id).map(t=>{
+      const to=D.members.find(x=>x.id===t.to_member_id);
+      return `<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12px"><span style="color:var(--text3)">转→${to?.name||'?'}: ${t.notes||''}</span><span style="color:var(--blue);font-weight:600">+${fmt(trToCNY(t))}</span></div>`;
+    }).join('');
+    const trInRows=(D.transfers||[]).filter(t=>t.transfer_type==='person'&&t.to_member_id===m.id).map(t=>{
+      const from=D.members.find(x=>x.id===t.from_member_id);
+      return `<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12px"><span style="color:var(--text3)">收←${from?.name||'?'}: ${t.notes||''}</span><span style="color:var(--red);font-weight:600">-${fmt(trToCNY(t))}</span></div>`;
+    }).join('');
+    return `<div style="padding:12px 16px;border-bottom:1px solid var(--border)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <div style="display:flex;align-items:center;gap:8px">${memAv(m,'sm')}<span style="font-size:14px;font-weight:600">${m.name}</span></div>
+        <span style="font-size:15px;font-weight:700;color:${col}">${b>0.01?'+':b<-0.01?'-':''}${fmt(Math.abs(b))}</span>
+      </div>
+      <div style="background:#F8F9FA;border-radius:8px;padding:8px 10px">${paidRows}${splitRows}${trOutRows}${trInRows}</div>
+    </div>`;
+  }).join('');
+  el('settle-detail').innerHTML=rows||'<div class="empty">无数据</div>';
 }
 function computeSettle(bal){
   const txns=[],pos=[...D.members.filter(m=>(bal[m.id]||0)>0.01).map(m=>({id:m.id,a:bal[m.id]}))],neg=[...D.members.filter(m=>(bal[m.id]||0)<-0.01).map(m=>({id:m.id,a:-bal[m.id]}))];

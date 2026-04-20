@@ -461,6 +461,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','SF Pro Display'
       <button class="seg-b active" id="et-expense" onclick="setRecordType('expense',this)">💸 支出</button>
       <button class="seg-b" id="et-income" onclick="setRecordType('income',this)">💰 收入</button>
       <button class="seg-b" id="et-transfer" onclick="setRecordType('transfer',this)">🔄 转账</button>
+      <button class="seg-b" id="et-advance" onclick="setRecordType('advance',this)">🤝 代付</button>
     </div>
     <!-- Shared/personal for expense -->
     <div id="et-scope-row" class="seg" style="margin-bottom:8px">
@@ -515,6 +516,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','SF Pro Display'
     <!-- Transfer (person-to-person) inside bills -->
     <div id="et-tr-row" class="hidden">
       <div class="fg"><label class="fl">转给谁</label><div id="et-tr-to" class="pills"></div></div>
+    </div>
+    <!-- Advance pay (代付) -->
+    <div id="et-adv-row" class="hidden">
+      <div class="fg" style="background:#F0FDF4;border-radius:12px;padding:12px 14px;margin-bottom:0">
+        <div style="font-size:12px;color:#16A34A;font-weight:600;margin-bottom:8px">🤝 代付说明：我替对方付款，对方欠我这笔钱，不涉及其他人</div>
+        <label class="fl">受益人（欠款方）</label>
+        <div id="et-adv-to" class="pills"></div>
+      </div>
     </div>
     <!-- Advanced -->
     <div style="padding:0 16px;margin-bottom:10px">
@@ -877,8 +886,8 @@ function renderBills(){
     return sp.length>0;
   });
   if(todayOnly)list=list.filter(e=>e.expense_date===td);
-  // 把 person 转账混入流水（仅当 showTransfers 开启时）
-  const personTrs=showTransfers?(D.transfers||[]).filter(t=>t.transfer_type==='person'):[];
+  // 代付记录始终显示；普通转账/结算仅当 showTransfers 开启时显示
+  const personTrs=(D.transfers||[]).filter(t=>t.transfer_type==='person'&&(showTransfers||(t.notes&&t.notes.startsWith('代付:'))));
   // 合并 expenses + transfers 按日期分组
   const allItems=[
     ...list.map(e=>({type:'exp',date:e.expense_date||'未知日期',data:e})),
@@ -907,19 +916,26 @@ function renderBills(){
 function trRow(t,me){
   const from=D.members.find(m=>m.id===t.from_member_id);
   const to=D.members.find(m=>m.id===t.to_member_id);
-  const isOut=me&&t.from_member_id===me.id;
-  const isIn=me&&t.to_member_id===me.id;
+  const isAdv=t.notes&&t.notes.startsWith('代付:');
+  // 代付：from=付款人(我)，to=受益人(A)，我多付出了，A欠我
+  // 对于账单展示：付款人是 from，受益人是 to
+  const isOut=me&&(isAdv?t.to_member_id===me.id:t.from_member_id===me.id);
+  const isIn=me&&(isAdv?t.from_member_id===me.id:t.to_member_id===me.id);
   const code=t.currency_code||'CNY';
   const amt=parseFloat(t.amount||0);
   const amtStr=code==='CNY'?fmt(amt):fmtFx(amt,code);
   const col=isOut?'var(--red)':isIn?'var(--green)':'var(--blue)';
   const sign=isOut?'-':isIn?'+':'';
-  const notesStr=t.notes&&t.notes!=='结算'?` · ${t.notes}`:'';
+  const notesStr=isAdv?(t.notes.replace('代付:','').trim()||'代付'):(t.notes&&t.notes!=='结算'?t.notes:'转账结算');
+  const ico=isAdv?'🤝':'💸';
+  const bgColor=isAdv?'#F0FDF4':'#F0F4FF';
+  const typeLabel=isAdv?`${from?.name||'?'} 替 ${to?.name||'?'} 代付`:`${from?.name||'?'} → ${to?.name||'?'}`;
+  const subLabel=isAdv?(me&&t.from_member_id===me.id?`${to?.name||'?'} 欠你`:me&&t.to_member_id===me.id?`你欠 ${from?.name||'?'}`:'代付'):'转账结算';
   return `<div class="row" style="opacity:0.92">
-    <div class="exp-ico" style="background:#F0F4FF;font-size:20px">💸</div>
+    <div class="exp-ico" style="background:${bgColor};font-size:20px">${ico}</div>
     <div style="flex:1;min-width:0;margin-left:2px">
-      <div style="font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${from?.name||'?'} → ${to?.name||'?'}${notesStr}</div>
-      <div style="font-size:12px;color:var(--text3);margin-top:1px">转账结算</div>
+      <div style="font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${typeLabel}</div>
+      <div style="font-size:12px;color:var(--text3);margin-top:1px">${subLabel}${notesStr&&notesStr!==subLabel?' · '+notesStr:''}</div>
     </div>
     <div style="text-align:right;flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:2px">
       <span style="font-size:16px;font-weight:700;color:${col}">${sign}${amtStr}</span>
@@ -1014,6 +1030,7 @@ function openExp(eid=null){
     pm:null,
     wallet:e?e.wallet_id:null,
     trTo:null,
+    advTo:null,
     splitMode:'equal',
     personalSplit:false
   };
@@ -1026,7 +1043,7 @@ function openExp(eid=null){
   el('et-cur').innerHTML=CUR_OPT.map(o=>`<option value="${o.c}">${o.c}</option>`).join('');
   el('et-cur').value=e?.currency_code||'CNY';
   // Set record type UI
-  ['expense','income','transfer'].forEach(t=>{el('et-'+t)?.classList.toggle('active',eForm.recordType===t);});
+  ['expense','income','transfer','advance'].forEach(t=>{el('et-'+t)?.classList.toggle('active',eForm.recordType===t);});
   renderExpScopeUI();
   renderExpFormPills();
   onCur();
@@ -1040,20 +1057,23 @@ function setRecordType(t,btn){
   if(t==='expense'&&eForm.scope!=='shared'&&eForm.scope!=='personal')eForm.scope='shared';
   if(t==='income')eForm.scope='income';
   if(t==='transfer')eForm.scope='personal';
-  ['expense','income','transfer'].forEach(x=>el('et-'+x)?.classList.toggle('active',x===t));
+  if(t==='advance')eForm.scope='personal';
+  ['expense','income','transfer','advance'].forEach(x=>el('et-'+x)?.classList.toggle('active',x===t));
   renderExpScopeUI();renderExpFormPills();onCur();
 }
 function renderExpScopeUI(){
   const isExp=eForm.recordType==='expense';
   const isTr=eForm.recordType==='transfer';
+  const isAdv=eForm.recordType==='advance';
   el('et-scope-row').classList.toggle('hidden',!isExp);
-  el('et-cat-row').classList.toggle('hidden',isTr);
-  el('et-split-preview-wrap').classList.toggle('hidden',eForm.scope!=='shared');
-  el('et-split-detail-row').classList.toggle('hidden',eForm.scope!=='shared');
-  el('et-personal-split').classList.toggle('hidden',eForm.scope!=='personal');
+  el('et-cat-row').classList.toggle('hidden',isTr||isAdv);
+  el('et-split-preview-wrap').classList.toggle('hidden',eForm.scope!=='shared'||isAdv);
+  el('et-split-detail-row').classList.toggle('hidden',eForm.scope!=='shared'||isAdv);
+  el('et-personal-split').classList.toggle('hidden',eForm.scope!=='personal'||isAdv);
   el('et-tr-row').classList.toggle('hidden',!isTr);
-  el('et-who-lbl').textContent=eForm.recordType==='income'?'收款人':'付款人';
-  el('et-wallet-row').classList.toggle('hidden',isTr||eForm.recordType==='income');
+  el('et-adv-row').classList.toggle('hidden',!isAdv);
+  el('et-who-lbl').textContent=eForm.recordType==='income'?'收款人':isAdv?'付款人（我）':'付款人';
+  el('et-wallet-row').classList.toggle('hidden',isTr||isAdv||eForm.recordType==='income');
 }
 function setExpScope(s,btn){
   eForm.scope=s;
@@ -1066,6 +1086,7 @@ function renderExpFormPills(){
   el('et-cats').innerHTML=D.categories.map(c=>`<div class="pill ${eForm.cat===c.id?'sel':''}" onclick="selCat('${c.id}')">${c.icon} ${c.name}</div>`).join('');
   renderWalletPills();
   renderTrToPillsInForm();
+  renderAdvToPillsInForm();
 }
 function selPayer(id){eForm.payer=id;eForm.wallet=null;renderExpFormPills();onCur();updateSplitPreview();}
 function selCat(id){eForm.cat=id;renderExpFormPills();}
@@ -1085,6 +1106,11 @@ function selWallet(id){eForm.wallet=id;renderWalletPills();}
 function renderTrToPillsInForm(){
   const me=getMe();
   el('et-tr-to').innerHTML=D.members.map(m=>`<div class="pill ${eForm.trTo===m.id?'sel':''}" onclick="eForm.trTo='${m.id}';renderTrToPillsInForm()"><div class="av av-xs" style="background:${m.color}">${m.name[0]}</div>${m.name}${me&&m.id===me.id?'<span class="me-tag">我</span>':''}</div>`).join('');
+}
+function renderAdvToPillsInForm(){
+  const me=getMe();
+  if(!el('et-adv-to'))return;
+  el('et-adv-to').innerHTML=D.members.filter(m=>m.id!==eForm.payer).map(m=>`<div class="pill ${eForm.advTo===m.id?'sel':''}" onclick="eForm.advTo='${m.id}';renderAdvToPillsInForm()"><div class="av av-xs" style="background:${m.color}">${m.name[0]}</div>${m.name}${me&&m.id===me.id?'<span class="me-tag">我</span>':''}</div>`).join('');
 }
 function toggleAdv(){advOn=!advOn;el('adv-arrow').textContent=advOn?'▴':'▾';el('adv-body').classList.toggle('hidden',!advOn);}
 function onAmt(){onCur();updateSplitPreview();renderSplitRows();}
@@ -1149,6 +1175,16 @@ async function saveExp(){if(_saving)return;_saving=true;setTimeout(()=>{_saving=
     const trRow={trip_id:D.trip.id,transfer_type:'person',from_member_id:eForm.payer,to_member_id:eForm.trTo,amount:cny,currency_code:'CNY',transfer_date:el('et-date').value,notes:el('et-notes').value.trim()||title};
     const {error}=await db.from('transfers').insert(trRow);if(error){toast('保存失败：'+error.message);return;}
     closeExp();await loadAll();renderAll();toast('转账已记录 ✓');return;
+  }
+  if(eForm.recordType==='advance'){
+    // 代付：付款人替受益人垫付，受益人欠付款人
+    if(!eForm.advTo){toast('请选择受益人');return;}
+    if(eForm.advTo===eForm.payer){toast('受益人不能是自己');return;}
+    // 代付：from=付款人(我)，to=受益人(A)
+    // 余额逻辑：bal[from]+=（我多付出了），bal[to]-=（A受益了，更欠钱）
+    const advRow={trip_id:D.trip.id,transfer_type:'person',from_member_id:eForm.payer,to_member_id:eForm.advTo,amount:cny,currency_code:'CNY',transfer_date:el('et-date').value,notes:el('et-notes').value.trim()||('代付: '+title)};
+    const {error}=await db.from('transfers').insert(advRow);if(error){toast('保存失败：'+error.message);return;}
+    closeExp();await loadAll();renderAll();toast('代付已记录 ✓');return;
   }
   const row={trip_id:D.trip.id,title,amount,currency_code:code,amount_cny:cny,exchange_rate_used:r,category_id:eForm.cat,account_type:accountType,paid_by:eForm.payer,payment_method:eForm.pm,wallet_id:eForm.wallet,expense_date:el('et-date').value,notes:el('et-notes').value.trim()||null,needs_split:eForm.personalSplit};
   try{
@@ -1727,6 +1763,10 @@ function renderSettle(){
     if(t.from_member_id&&bal[t.from_member_id]!==undefined)bal[t.from_member_id]+=cny;
     if(t.to_member_id&&bal[t.to_member_id]!==undefined)bal[t.to_member_id]-=cny;
   });
+  // 调试：打印 bal
+  console.log('[settle debug] expenses:', D.expenses.map(e=>({title:e.title,paid_by:D.members.find(m=>m.id===e.paid_by)?.name,cny:toCNY(e),splits:D.splits.filter(s=>s.expense_id===e.id).map(s=>({m:D.members.find(m=>m.id===s.member_id)?.name,amt:s.split_amount}))})));
+  console.log('[settle debug] transfers:', (D.transfers||[]).filter(t=>t.transfer_type==='person').map(t=>({from:D.members.find(m=>m.id===t.from_member_id)?.name,to:D.members.find(m=>m.id===t.to_member_id)?.name,cny:trToCNY(t),notes:t.notes})));
+  console.log('[settle debug] bal:', Object.fromEntries(Object.entries(bal).map(([k,v])=>[D.members.find(m=>m.id===k)?.name||k, Math.round(v*100)/100])));
   if(settleCur==='ORIG'){
     // 原币模式：按币种分组，不跨币种换算
     const curGroups={};

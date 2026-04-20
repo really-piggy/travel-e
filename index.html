@@ -241,9 +241,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','SF Pro Display'
       <div id="f-paid" class="pill sel" style="font-size:12px;padding:5px 11px" onclick="setFilter('paid',this)">我付款的</div>
       <div id="f-share" class="pill" style="font-size:12px;padding:5px 11px" onclick="setFilter('share',this)">我分摊的</div>
     </div>
-    <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:12px;color:var(--text3);flex-shrink:0">
-      <div class="tog" id="today-sw" onclick="toggleToday()"><div class="tog-k"></div></div>今日
-    </label>
+    <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+      <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;color:var(--text3)">
+        <div class="tog" id="tr-sw" onclick="toggleShowTransfers()"><div class="tog-k"></div></div>转账
+      </label>
+      <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;color:var(--text3)">
+        <div class="tog" id="today-sw" onclick="toggleToday()"><div class="tog-k"></div></div>今日
+      </label>
+    </div>
   </div>
 
   <div id="bill-list"></div>
@@ -656,6 +661,7 @@ let _saving=false;
 function withSave(fn){return async function(...args){if(_saving)return;_saving=true;try{await fn(...args);}finally{_saving=false;}};}
 let expFilter='paid';
 let todayOnly=false;
+let showTransfers=false;
 let editId=null;
 let actId=null;
 let advOn=false;
@@ -809,6 +815,12 @@ function toggleToday(){
   sw.querySelector('.tog-k').style.left=todayOnly?'20px':'2px';
   renderBills();
 }
+function toggleShowTransfers(){
+  showTransfers=!showTransfers;
+  const sw=el('tr-sw');sw.classList.toggle('on',showTransfers);
+  sw.querySelector('.tog-k').style.left=showTransfers?'20px':'2px';
+  renderBills();
+}
 function setFilter(f,btn){
   expFilter=f;
   ['all','paid','share'].forEach(x=>{el('f-'+x)?.classList.remove('sel');});
@@ -860,8 +872,8 @@ function renderBills(){
     return sp.length>0;
   });
   if(todayOnly)list=list.filter(e=>e.expense_date===td);
-  // 把 person 转账也混入流水（结算记录）
-  const personTrs=(D.transfers||[]).filter(t=>t.transfer_type==='person');
+  // 把 person 转账混入流水（仅当 showTransfers 开启时）
+  const personTrs=showTransfers?(D.transfers||[]).filter(t=>t.transfer_type==='person'):[];
   // 合并 expenses + transfers 按日期分组
   const allItems=[
     ...list.map(e=>({type:'exp',date:e.expense_date||'未知日期',data:e})),
@@ -1814,6 +1826,12 @@ function openTransfer(){
   el('tr-person').classList.remove('hidden');el('tr-wallet').classList.add('hidden');
   el('tr-amt').value='';el('tr-date').value=today();el('tr-notes').value='';el('tr-cur').value='CNY';el('tr-hint').textContent='';
   renderTrFromPills();renderTrToPills();renderTrPersonWallets();renderTrWMem();
+  // 默认自动计算并填入欠款金额
+  if(trFrom&&trTo&&trFrom!==trTo){
+    const debt=computeDebt(trFrom,trTo);
+    if(debt>0.01){el('tr-amt').value=debt.toFixed(2);}
+  }
+  setTimeout(()=>updateTrHint(),50);
   el('tr-modal').classList.remove('hidden');
 }
 function closeTr(){el('tr-modal').classList.add('hidden');}
@@ -1846,7 +1864,47 @@ function renderTrWMem(){
 }
 function renderTrWFrom(){const ws=D.wallets.filter(w=>w.member_id===trWMem);el('tr-wfrom').innerHTML=ws.map(w=>`<div class="pill ${trWFrom===w.id?'sel':''}" onclick="trWFrom='${w.id}';renderTrWFrom()">${w.icon} ${w.name}</div>`).join('')||'<span style="font-size:13px;color:var(--text3)">无账户</span>';}
 function renderTrWTo(){const ws=D.wallets.filter(w=>w.member_id===trWMem);el('tr-wto').innerHTML=ws.map(w=>`<div class="pill ${trWTo===w.id?'sel':''}" onclick="trWTo='${w.id}';renderTrWTo()">${w.icon} ${w.name}</div>`).join('')||'<span style="font-size:13px;color:var(--text3)">无账户</span>';}
-function updateTrHint(){const amt=parseFloat(el('tr-amt').value)||0;const code=el('tr-cur').value;if(code==='CNY'||!amt){el('tr-hint').textContent='';return;}const r=getRate(trFrom||trWMem,code)||1;el('tr-hint').textContent=`≈ ${fmt(amt*r)} 人民币`;}
+function updateTrHint(){
+  const amt=parseFloat(el('tr-amt').value)||0;
+  const code=el('tr-cur').value;
+  let hint='';
+  if(code!=='CNY'&&amt>0){
+    const r=getRate(trFrom||trWMem,code)||1;
+    hint=`≈ ${fmt(amt*r)} 人民币`;
+  }
+  if(trType==='person'&&trFrom&&trTo&&trFrom!==trTo){
+    const debt=computeDebt(trFrom,trTo);
+    const fn=D.members.find(m=>m.id===trFrom)?.name||'?';
+    const tn=D.members.find(m=>m.id===trTo)?.name||'?';
+    if(debt>0.01)hint=(hint?hint+' · ':'')+`${fn}欠${tn} ${fmt(debt)}`;
+    else if(debt<-0.01)hint=(hint?hint+' · ':'')+`${tn}欠${fn} ${fmt(-debt)}`;
+    else hint=(hint?hint+' · ':'')+'二人无欠款';
+  }
+  el('tr-hint').textContent=hint;
+}
+function computeDebt(fromId,toId){
+  const bal={};
+  D.members.forEach(m=>{bal[m.id]=0;});
+  D.expenses.forEach(e=>{
+    if(e.account_type==='income')return;
+    const cny=toCNY(e);const sp=D.splits.filter(s=>s.expense_id===e.id);
+    if(sp.length){
+      if(e.paid_by&&bal[e.paid_by]!==undefined)bal[e.paid_by]+=cny;
+      sp.forEach(s=>{if(bal[s.member_id]!==undefined)bal[s.member_id]-=parseFloat(s.split_amount);});
+    }
+  });
+  (D.transfers||[]).filter(t=>t.transfer_type==='person').forEach(t=>{
+    const cny=trToCNY(t);
+    if(t.from_member_id&&bal[t.from_member_id]!==undefined)bal[t.from_member_id]-=cny;
+    if(t.to_member_id&&bal[t.to_member_id]!==undefined)bal[t.to_member_id]+=cny;
+  });
+  const suggestions=computeSettle(bal);
+  const s=suggestions.find(x=>x.from===fromId&&x.to===toId);
+  const s2=suggestions.find(x=>x.from===toId&&x.to===fromId);
+  if(s)return s.amount;
+  if(s2)return -s2.amount;
+  return 0;
+}
 async function saveTr(){if(_saving)return;_saving=true;setTimeout(()=>{_saving=false;},2500);
   const amount=parseFloat(el('tr-amt').value);if(!amount||amount<=0){toast('请填写金额');return;}
   const code=el('tr-cur').value;const r=getRate(trFrom||trWMem,code)||1;const cny=code==='CNY'?amount:amount*r;

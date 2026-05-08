@@ -1220,7 +1220,6 @@ async function saveExp(){
     trip_id:tripId(),title,amount:amt,amount_cny:amtCny,currency_code:eForm.currency,
     paid_by:eForm.payerId,account_type:eForm.scope,record_type:eForm.recordType,
     date:el('et-date').value||today(),notes:el('et-notes').value||null,
-    advance_to:eForm.recordType==='advance'?eForm.advanceTo:null,
     category_id:eForm.catId||null,
   };
   let expId;
